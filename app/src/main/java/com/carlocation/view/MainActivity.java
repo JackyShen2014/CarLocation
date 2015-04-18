@@ -49,7 +49,12 @@ public class MainActivity extends ActionBarActivity implements
 		// Set up the drawer.
 		mNavigationDrawerFragment.setUp(R.id.navigation_drawer,
 				(DrawerLayout) findViewById(R.id.drawer_layout));
-		Intent serviceIntent = new Intent("com.carlocation.comm.message.service");
+        /**
+         * An example to bind service and using service to send MSG.
+         * Temporary cancel to stop crash.
+         */
+
+		/*Intent serviceIntent = new Intent("com.carlocation.comm.message.service");
 		this.bindService(serviceIntent, new ServiceConnection() {
 
 			@Override
@@ -63,7 +68,7 @@ public class MainActivity extends ActionBarActivity implements
 				
 			}
 			
-		}, Context.BIND_AUTO_CREATE);
+		}, Context.BIND_AUTO_CREATE);*/
 	}
 	
 	private IMessageService ms;

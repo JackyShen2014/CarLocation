@@ -97,7 +97,12 @@ public class MessageService extends Service {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
-			if (ConnectivityManager.CONNECTIVITY_ACTION.equals(action)) {
+
+            /**
+             * Temporary cancel to stop crash.
+             */
+
+			/*if (ConnectivityManager.CONNECTIVITY_ACTION.equals(action)) {
 				ConnectivityManager connMgr = (ConnectivityManager) context
 						.getSystemService(Context.CONNECTIVITY_SERVICE);
 
@@ -108,7 +113,7 @@ public class MessageService extends Service {
 						.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
 				
 				//TODO if network changed need to re connect to server
-			}
+			}*/
 		}
 		
 	};

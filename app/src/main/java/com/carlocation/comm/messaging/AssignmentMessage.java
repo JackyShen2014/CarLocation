@@ -20,7 +20,7 @@ public class AssignmentMessage extends Message {
 		this.mAssignId = mAssignId;
 		this.mCarId = mCarId;
 		this.mOpt = mOpt;
-		this.mMessageType = MessageType.ASSIGNMENT_MESSAGE;
+		this.mMessageType = MessageType.TASK_MESSAGE;
 	}
 	
 	

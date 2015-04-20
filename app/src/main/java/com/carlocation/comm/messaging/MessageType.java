@@ -2,46 +2,38 @@ package com.carlocation.comm.messaging;
 
 /**
  * <ul>Define message type for communications.</uL>
- * <ul>
- * <li>AUTH_MESSAGE     : For login or logout</li>
- * <li>LOCATION_MESSAGE : For report location or receive location update</li>
- * <li>TAXI_MESSAGE     : For car taxi</li>
- * <li>TEXT_MESSAGE     : For text message</li>
- * </ul>
- * @author 28851274
  *
  */
 public enum MessageType {
 
 	/**
-	 * Use to authentication 
+	 * Used for authentication
 	 */
 	AUTH_MESSAGE,
 	
 	/**
-	 * Use to location update 
+	 * Used for location update
 	 */
 	LOCATION_MESSAGE,
-	
+
+    /**
+     * Used for Instant Message
+     */
+	IM_MESSAGE,
+
 	/**
-	 * Use to car taxing 
+	 * Used to assign task to car
 	 */
-	TAXI_MESSAGE,
-	
+	TASK_MESSAGE,
+
+    /**
+     * Used for gliding path as Server asked
+     */
+	GLIDE_MESSAGE,
+
 	/**
-	 * Use to text message
+	 * Used for restrict areas for car
 	 */
-	TEXT_MESSAGE,
-	
-	/**
-	 * Use to voice message
-	 */
-	VOICE_MESSAGE,
-	
-	/**
-	 * Use to assignment
-	 */
-	ASSIGNMENT_MESSAGE,
-	
-	
+	WARN_MESSAGE,
+
 }

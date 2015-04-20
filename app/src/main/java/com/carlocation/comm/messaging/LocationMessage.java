@@ -1,9 +1,5 @@
 package com.carlocation.comm.messaging;
 
-import java.util.ArrayList;
-import java.util.List;
-
-
 /**
  * Location message.<br>
  * Maybe contain one location or multi locations.
@@ -12,37 +8,48 @@ import java.util.List;
  */
 public class LocationMessage extends Message {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -1427264506745698504L;
-	private List<Location> mLocations;
-	
-	
-	public LocationMessage(List<Location> mLocations) {
-		super(System.currentTimeMillis());
-		this.mLocations = mLocations;
-		this.mMessageType = MessageType.LOCATION_MESSAGE;
+
+    private long mTerminalId;
+    private TerminalType mTerminalType;
+    private Location mLocation;
+    private float mSpeed;
+
+    public LocationMessage(){
+        super(System.currentTimeMillis());
+        this.mMessageType = MessageType.LOCATION_MESSAGE;
+    }
+
+	public LocationMessage(long terminalId, TerminalType terminalType, double longitude,
+                           double latitude, float speed) {
+        super(System.currentTimeMillis());
+        this.mTerminalId = terminalId;
+        this.mTerminalType = terminalType;
+        this.mLocation.mLng = longitude;
+        this.mLocation.mLat = latitude;
+        this.mSpeed = speed;
+        this.mMessageType = MessageType.LOCATION_MESSAGE;
 	}
 
 
-
-	public LocationMessage(Location location) {
-		this(new ArrayList<Location>());
-		this.mLocations.add(location);
-	}
-	
-	public List<Location> getLocations() {
-		return this.mLocations;
-	}
-	
-	public void addLocation(Location loc) {
-		this.mLocations.add(loc);
-	}
 
 	@Override
 	public String translate() {
 		return null;
 	}
+
+    /**
+     * Used for logging
+     * @return
+     */
+    @Override
+    public String toString() {
+        return "LocationMessage [mVehicleId=" + mTerminalId
+                + ", mVehicleType=" + mTerminalType
+                + ", mLng=" + mLocation.mLng
+                + ", mLat=" + mLocation.mLat
+                + ", mSpeed=" + mSpeed
+                + "]";
+    }
 
 }

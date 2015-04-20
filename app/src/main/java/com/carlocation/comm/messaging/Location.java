@@ -1,22 +1,19 @@
 package com.carlocation.comm.messaging;
 
+/**
+ * This class is used for LocationMsg, GlidingPathMsg as well as RestrictedAreaMsg
+ */
+
 public class Location {
 
-	public String id;
-	
-	public double lat;
-	
-	public double lng;
-	
-	public LocationTerminalType type;
+    public double mLng;
 
-	public Location(String id, LocationTerminalType type, double lat, double lng) {
+    public double mLat;
+
+	public Location(double lng, double lat) {
 		super();
-		this.id = id;
-		this.lat = lat;
-		this.lng = lng;
-		this.type = type;
+		this.mLng = lng;
+        this.mLat = lat;
 	}
-	
 	
 }

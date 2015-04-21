@@ -20,10 +20,29 @@ import android.view.ViewGroup;
 
 import com.carlocation.R;
 import com.carlocation.comm.IMessageService;
-import com.carlocation.comm.messaging.AuthMessage;
 
 public class MainActivity extends ActionBarActivity implements
 		NavigationDrawerFragment.NavigationDrawerCallbacks {
+
+    /**
+     *User Service
+     */
+    private UserService mUserService;
+
+    /**
+     * Native Service
+     */
+    private IMessageService mNativeService;
+
+    /**
+     * Used for connect native service
+     */
+    private ServiceConnection mServiceConnection;
+
+    /**
+     * Flag used for indicate if service is still on
+     */
+    private boolean mBound;
 
 	/**
 	 * Fragment managing the behaviors, interactions and presentation of the
@@ -31,7 +50,7 @@ public class MainActivity extends ActionBarActivity implements
 	 */
 	private NavigationDrawerFragment mNavigationDrawerFragment;
 
-	/**
+    /**
 	 * Used to store the last screen title. For use in
 	 * {@link #restoreActionBar()}.
 	 */
@@ -50,31 +69,45 @@ public class MainActivity extends ActionBarActivity implements
 		mNavigationDrawerFragment.setUp(R.id.navigation_drawer,
 				(DrawerLayout) findViewById(R.id.drawer_layout));
         /**
-         * An example to bind service and using service to send MSG.
-         * Temporary cancel to stop crash.
+         * Bind service and retrieve native service handler.
          */
 
-		/*Intent serviceIntent = new Intent("com.carlocation.comm.message.service");
-		this.bindService(serviceIntent, new ServiceConnection() {
+        //mUserService = new UserService(((CarLocationApplication)getApplicationContext().getservice()));
 
-			@Override
-			public void onServiceConnected(ComponentName name, IBinder service) {
-				ms = (IMessageService)service;
-				ms.sendMessage(new AuthMessage("test", "test"));
-			} 
+		Intent serviceIntent = new Intent("com.carlocation.comm.message.service");
+        mServiceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                mNativeService = (IMessageService)service;
+                mBound = true;
+            }
 
-			@Override
-			public void onServiceDisconnected(ComponentName name) {
-				
-			}
-			
-		}, Context.BIND_AUTO_CREATE);*/
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                mBound = false;
+            }
+        };
+
+		this.bindService(serviceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
+
+        mUserService = new UserService(mNativeService);
+
+        /**
+         * An example for how to use UserService to send MSG to Server
+         */
+        mUserService.logIn("username", "pwd");
 	}
-	
-	private IMessageService ms;
-	
 
-	@Override
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(mBound){
+            unbindService(mServiceConnection);
+            mBound = false;
+        }
+    }
+
+    @Override
 	public void onNavigationDrawerItemSelected(int position) {
 		// update the main content by replacing fragments
 		FragmentManager fragmentManager = getSupportFragmentManager();

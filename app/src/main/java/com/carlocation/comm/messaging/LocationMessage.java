@@ -35,7 +35,14 @@ public class LocationMessage extends Message {
 
 	@Override
 	public String translate() {
-		return null;
+		return "{\n" +
+                "  terminalId : '"+mTerminalId+"',\n" +
+                "  terminalType: '"+mTerminalType+"',\n" +
+                "  location : {\n" +
+                "      lat: '"+mLocation.mLng+"',\n" +
+                "      lng: '"+mLocation.mLat+"'\n" +
+                "  }\n" +
+                "}";
 	}
 
     /**

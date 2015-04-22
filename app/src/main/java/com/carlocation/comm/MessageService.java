@@ -19,11 +19,18 @@ import android.util.Log;
 
 import com.carlocation.comm.messaging.AuthMessage;
 import com.carlocation.comm.messaging.Message;
+import com.carlocation.comm.messaging.MessageFactory;
 import com.carlocation.comm.messaging.MessageType;
 import com.carlocation.comm.messaging.Notification;
+import com.carlocation.comm.messaging.Notification.Result;
+import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.ConsumerCancelledException;
+import com.rabbitmq.client.QueueingConsumer;
+import com.rabbitmq.client.QueueingConsumer.Delivery;
+import com.rabbitmq.client.ShutdownSignalException;
 
 /**
  * Communication service.<br>
@@ -50,6 +57,14 @@ public class MessageService extends Service {
 
 	private static final String TAG = "CarMessageService";
 
+	private static final String EXCHANGE_NAME_DIRECT = "carlocation.client.direct";
+	private static final String EXCHANGE_NAME_FANOUT = "carlocation.client.fanout";
+	private static final String EXCHANGE_NAME_TOPIC = "carlocation.client.topic";
+
+	private static final String EXCHANGE_NAME_CONTROLLER = "carlocation.reply.fanout";
+
+	private static final int TIME_OUT = 3;
+
 	/**
 	 * 
 	 */
@@ -69,9 +84,13 @@ public class MessageService extends Service {
 
 	private ConnectionFactory connectionFactory;
 
-	private Connection mConnection;
+	private Connection mSenderConnection;
 
-	private Channel mSendChannel;
+	private Channel mSenderChannel;
+
+	private Connection mReciverConnection;
+
+	private Channel mReceiverChannel;
 
 	private List<NotificationListener> notificationListeners = new ArrayList<NotificationListener>();
 
@@ -79,7 +98,9 @@ public class MessageService extends Service {
 
 	private NativeService mService;
 
-	private boolean mIsConnected;
+	private boolean mIsAuthed;
+
+	private ConsumerThread mConsumer;
 
 	@Override
 	public void onCreate() {
@@ -166,29 +187,32 @@ public class MessageService extends Service {
 
 		@Override
 		public void sendMessage(Message message) {
+			// TODO should send message operation under other thread?
 			Log.e(TAG, "get message:" + message);
 			if (message.getMessageType() == MessageType.AUTH_MESSAGE) {
 				AuthMessage am = (AuthMessage) message;
-				mSendChannel = getChannel(mServer, mPort, am.getUserName(),
-						am.getPassword());
-				TimeStamp ts = mPendingResponse.get(message);
-				if (mSendChannel != null && mSendChannel.isOpen()) {
+				mSenderChannel = getSenderChannel(mServer, mPort,
+						am.getUserName(), am.getPassword());
+				Notification.Result nt = Notification.Result.FAILED;
+				if (mSenderChannel != null && mSenderChannel.isOpen()) {
 					mUserName = am.getUserName();
 					mPassword = am.getPassword();
-					if (ts != null) {
-						ts.listener.onResponse(new Notification(message,
-								Notification.NotificationType.RESPONSE,
-								Notification.Result.SUCCESS));
-					}
-				} else {
-					if (ts != null) {
-						ts.listener.onResponse(new Notification(message,
-								Notification.NotificationType.RESPONSE,
-								Notification.Result.FAILED));
-					}
+					nt = Notification.Result.SUCCESS;
+				}
+				fireBackMessage(message, nt);
+
+				if (mIsAuthed && mConsumer != null) {
+					mConsumer = new ConsumerThread(getReceiverChannel());
+					mConsumer.start();
 				}
 			} else {
-
+				try {
+					getSenderChannel().basicPublish(EXCHANGE_NAME_CONTROLLER,
+							"", null, message.translate().getBytes());
+				} catch (IOException e) {
+					e.printStackTrace();
+					fireBackMessage(message, Notification.Result.FAILED);
+				}
 			}
 		}
 
@@ -223,11 +247,7 @@ public class MessageService extends Service {
 
 	}
 
-	private Channel getChannel() {
-		return getChannel(mServer, mPort, mUserName, mPassword);
-	}
-
-	private Channel getChannel(String server, int port, String username,
+	private Connection newConnection(String server, int port, String username,
 			String password) {
 		if (connectionFactory == null) {
 			connectionFactory = new ConnectionFactory();
@@ -236,51 +256,235 @@ public class MessageService extends Service {
 			connectionFactory.setPassword(password);
 			connectionFactory.setPort(port);
 		}
+
+		Connection conn = null;
 		try {
-			if (mConnection == null || !mConnection.isOpen()) {
-				mConnection = connectionFactory.newConnection();
-				mSendChannel = mConnection.createChannel();
-			}
+			conn = connectionFactory.newConnection();
 		} catch (IOException e) {
-			if (mConnection != null) {
-				try {
-					mConnection.close();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-			}
+			e.printStackTrace();
 			Log.e(TAG, "Connection close failed", e);
+		}
+		return conn;
+	}
+
+	private Channel getReceiverChannel() {
+		if (!mIsAuthed) {
+			Log.e(TAG, "Doesn't auth yet!");
 			return null;
 		}
+		if (mReceiverChannel != null || mReceiverChannel.isOpen()) {
+			return mReceiverChannel;
+		}
 
-		if (mSendChannel == null || !mSendChannel.isOpen()) {
+		boolean opened = false;
+		int count = 1;
+		while ((mReciverConnection == null || !mReciverConnection.isOpen())
+				&& count++ < 5) {
+			mReciverConnection = newConnection(mServer, mPort, mUserName,
+					mPassword);
+			Log.e(TAG, "Try to open new connection for receiver : "
+					+ mReciverConnection);
+			if (mReciverConnection != null && mReciverConnection.isOpen()) {
+				opened = true;
+				break;
+			}
 			try {
-				mSendChannel = mConnection.createChannel();
+				Thread.sleep(150);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
+		count = 1;
+		while (opened && count++ < 5) {
+			try {
+				mReceiverChannel = mReciverConnection.createChannel();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			Log.e(TAG, "Try to open new channel for receiver : "
+					+ mReceiverChannel);
+			if (mReceiverChannel != null && mReceiverChannel.isOpen()) {
+				break;
+			}
+			try {
+				Thread.sleep(150);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return mReceiverChannel;
+
+	}
+
+	private Channel getSenderChannel() {
+		return getSenderChannel(mServer, mPort, mUserName, mPassword);
+	}
+
+	private Channel getSenderChannel(String server, int port, String username,
+			String password) {
+		boolean opened = true;
+
+		int count = 1;
+		while ((mSenderConnection == null || !mSenderConnection.isOpen())
+				&& count++ < 5) {
+			Log.e(TAG, "Try to open new connection for receiver : "
+					+ mSenderConnection);
+			mSenderConnection = newConnection(server, port, username, password);
+			if (mSenderConnection != null && mSenderConnection.isOpen()) {
+				opened = true;
+				break;
+			}
+			try {
+				Thread.sleep(150);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
+		while (opened && count++ < 5) {
+			try {
+				mSenderChannel = mSenderConnection.createChannel();
+				if (mSenderChannel != null && mSenderChannel.isOpen()) {
+					mIsAuthed = true;
+					break;
+				}
 			} catch (IOException e) {
 				Log.e(TAG, "Create channel failed", e);
 			}
+			try {
+				Thread.sleep(150);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
-		return mSendChannel;
+
+
+		return mSenderChannel;
+	}
+
+	/**
+	 * Send message back to listener
+	 * 
+	 * @param msg
+	 */
+	private boolean fireBackMessage(Message msg, Notification.Result res) {
+		TimeStamp ts = mPendingResponse.get(msg);
+		if (ts != null) {
+			ts.listener.onResponse(new Notification(msg,
+					Notification.NotificationType.RESPONSE, res));
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Send message back to listener
+	 * 
+	 * @param msg
+	 */
+	private void fireMessage(Message msg) {
+		TimeStamp ts = mPendingResponse.get(msg);
+
+		if (ts != null) {
+			ts.listener.onResponse(new Notification(msg,
+					Notification.NotificationType.RESPONSE, Result.SUCCESS));
+		}
+
+		Notification notif = new Notification(msg,
+				Notification.NotificationType.UNSOLICITED, Result.SUCCESS);
+
+		for (NotificationListener listener : notificationListeners) {
+			listener.onNotify(notif);
+		}
+
 	}
 
 	private void dispose() {
 
-		// TODO notify consumer thread
+		mConsumer.stopListener();
 
-		if (mSendChannel != null && mSendChannel.isOpen()) {
+		if (mSenderChannel != null && mSenderChannel.isOpen()) {
 			try {
-				mSendChannel.close();
+				mSenderChannel.queueUnbind(mUserName, EXCHANGE_NAME_DIRECT,
+						mUserName);
+				mSenderChannel.close();
 			} catch (IOException e) {
 				Log.e(TAG, "Send Channel close failed", e);
 			}
 		}
 
-		if (mConnection != null && mConnection.isOpen()) {
+		if (mSenderConnection != null && mSenderConnection.isOpen()) {
 			try {
-				mConnection.close();
+				mSenderConnection.close();
 			} catch (IOException e) {
 				Log.e(TAG, "Connection close failed", e);
 			}
+		}
+
+	}
+
+	class ConsumerThread extends Thread {
+		private Channel ch;
+		private QueueingConsumer consumer;
+		private boolean isLooping = true;;
+
+		public ConsumerThread(Channel ch) {
+			super();
+			this.ch = ch;
+			consumer = new QueueingConsumer(ch);
+		}
+
+		@Override
+		public void run() {
+			try {
+				AMQP.Queue.DeclareOk deok = ch.queueDeclare(mUserName, false,
+						false, false, null);
+				Log.i(TAG, "Declare queue:" + deok.getQueue()
+						+ "  consume count:" + deok.getConsumerCount()
+						+ "  msg count:" + deok.getMessageCount());
+
+				AMQP.Queue.BindOk blok = ch.queueBind(mUserName,
+						EXCHANGE_NAME_DIRECT, mUserName);
+				Log.i(TAG, "Bound direct queue  to:" + blok);
+				blok = ch.queueBind(mUserName, EXCHANGE_NAME_TOPIC, "");
+				Log.i(TAG, "Bound fanout queue  to:" + blok);
+				blok = ch.queueBind(mUserName, EXCHANGE_NAME_FANOUT, "");
+				Log.i(TAG, "Bound topic queue  to:" + blok);
+				ch.basicConsume(mUserName, consumer);
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			while (isLooping) {
+				Log.i(TAG, "Start to waiting....");
+				try {
+					Delivery d = consumer.nextDelivery(TIME_OUT);
+					if (d == null) {
+						continue;
+					}
+					Message msg = MessageFactory.parseFromJSON(new String(d
+							.getBody()));
+					fireMessage(msg);
+				} catch (ShutdownSignalException e) {
+					e.printStackTrace();
+				} catch (ConsumerCancelledException e) {
+					e.printStackTrace();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+
+			Log.i(TAG, "Message Service listener exit!");
+
+		}
+
+		public void stopListener() {
+			isLooping = false;
+			this.interrupt();
 		}
 
 	}

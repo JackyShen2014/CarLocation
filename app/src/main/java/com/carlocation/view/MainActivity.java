@@ -29,21 +29,6 @@ public class MainActivity extends ActionBarActivity implements
      */
     private UserService mUserService;
 
-    /**
-     * Native Service
-     */
-    private IMessageService mNativeService;
-
-    /**
-     * Used for connect native service
-     */
-    private ServiceConnection mServiceConnection;
-
-    /**
-     * Flag used for indicate if service is still on
-     */
-    private boolean mBound;
-
 	/**
 	 * Fragment managing the behaviors, interactions and presentation of the
 	 * navigation drawer.
@@ -69,28 +54,9 @@ public class MainActivity extends ActionBarActivity implements
 		mNavigationDrawerFragment.setUp(R.id.navigation_drawer,
 				(DrawerLayout) findViewById(R.id.drawer_layout));
         /**
-         * Bind service and retrieve native service handler.
+         * Retrieve native service.
          */
-
-        //mUserService = new UserService(((CarLocationApplication)getApplicationContext().getservice()));
-
-		Intent serviceIntent = new Intent("com.carlocation.comm.message.service");
-        mServiceConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                mNativeService = (IMessageService)service;
-                mBound = true;
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                mBound = false;
-            }
-        };
-
-		this.bindService(serviceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
-
-        mUserService = new UserService(mNativeService);
+        mUserService = new UserService(((CarLocationApplication)getApplicationContext()).getService());
 
         /**
          * An example for how to use UserService to send MSG to Server
@@ -101,10 +67,6 @@ public class MainActivity extends ActionBarActivity implements
     @Override
     protected void onStop() {
         super.onStop();
-        if(mBound){
-            unbindService(mServiceConnection);
-            mBound = false;
-        }
     }
 
     @Override

@@ -5,7 +5,7 @@ package com.carlocation.comm.messaging;
  */
 public class IMVoiceMessage extends IMMessage{
 
-    private byte[] mVoiceData;
+    public byte[] mVoiceData;
 
     public IMVoiceMessage(long mTransactionID) {
         super(mTransactionID);

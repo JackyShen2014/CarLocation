@@ -12,11 +12,12 @@ public class AuthMessage extends Message {
 
     private String LOG_TAG = "AuthMessage";
 
-    private String mUserName;
-    private String mPassword;
-    private AuthMsgType mAuthType;
+    public long mTerminalId;
+    public String mUserName;
+    public String mPassword;
+    public AuthMsgType mAuthType;
 
-    public enum AuthMsgType {
+    public static enum AuthMsgType {
         AUTH_LOGIN_MSG,
         AUTH_LOGOUT_MSG,
     }
@@ -25,12 +26,18 @@ public class AuthMessage extends Message {
         super(System.currentTimeMillis());
     }
 
-
     public AuthMessage(String mUserName, String mPassword) {
-        super(System.currentTimeMillis());
+        super();
         this.mUserName = mUserName;
         this.mPassword = mPassword;
-        super.mMessageType = MessageType.AUTH_MESSAGE;
+    }
+
+    public AuthMessage(long mTransactionID,long mTerminalId, String mUserName, String mPassword, AuthMsgType mAuthType) {
+        super(mTransactionID);
+        this.mTerminalId = mTerminalId;
+        this.mUserName = mUserName;
+        this.mPassword = mPassword;
+        this.mAuthType = mAuthType;
     }
 
 
@@ -57,6 +64,7 @@ public class AuthMessage extends Message {
     public void setAuthType(AuthMsgType authType) {
         this.mAuthType = authType;
     }
+
 
     public void onResponseHandler(Notification notify) {
         if (null == notify) {

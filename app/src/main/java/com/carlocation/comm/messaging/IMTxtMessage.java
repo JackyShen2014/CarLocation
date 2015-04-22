@@ -5,8 +5,8 @@ package com.carlocation.comm.messaging;
  */
 public class IMTxtMessage extends IMMessage {
 
-    private byte mrank;
-    private char[] mtxtCont;
+    public byte mrank;
+    public char[] mtxtCont;
 
     public IMTxtMessage(long mTransactionID) {
         super(mTransactionID);

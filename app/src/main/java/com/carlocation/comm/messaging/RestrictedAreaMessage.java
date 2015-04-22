@@ -5,7 +5,7 @@ package com.carlocation.comm.messaging;
  */
 public class RestrictedAreaMessage extends Message {
 
-    private Location[] mLocationArea;
+    public Location[] mLocationArea;
 
     public RestrictedAreaMessage(long mTransactionID, Location[] mLocationArea) {
         super(mTransactionID);

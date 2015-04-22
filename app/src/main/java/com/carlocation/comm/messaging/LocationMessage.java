@@ -10,10 +10,10 @@ public class LocationMessage extends Message {
 
 	private static final long serialVersionUID = -1427264506745698504L;
 
-    private long mTerminalId;
-    private TerminalType mTerminalType;
-    private Location mLocation;
-    private float mSpeed;
+    public long mTerminalId;
+    public TerminalType mTerminalType;
+    public Location mLocation;
+    public float mSpeed;
 
     public LocationMessage(){
         super(System.currentTimeMillis());

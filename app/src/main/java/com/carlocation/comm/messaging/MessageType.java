@@ -36,4 +36,9 @@ public enum MessageType {
 	 */
 	WARN_MESSAGE,
 
+    /**
+     *Used for mobile pad or control pc to send for status notification
+     */
+    STATUS_MESSAGE,
+
 }

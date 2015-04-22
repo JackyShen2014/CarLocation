@@ -4,10 +4,10 @@ package com.carlocation.comm.messaging;
  * Created by Jacky on 2015/4/21.
  */
 public class GlidingPathMessage extends Message {
-    private long mTerminalId;
-    private String mTitle;
-    private int mGlidPathId;
-    private Location[] mLocationArray;
+    public long mTerminalId;
+    public String mTitle;
+    public int mGlidPathId;
+    public Location[] mLocationArray;
 
 
     public GlidingPathMessage(long mTransactionID, long mTerminalId, String mTitle, int mGlidPathId,

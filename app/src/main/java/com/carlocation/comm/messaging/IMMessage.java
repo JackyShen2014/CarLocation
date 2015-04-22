@@ -5,10 +5,11 @@ package com.carlocation.comm.messaging;
  */
 public class IMMessage extends Message{
 
-    private long mFromTerminalId;
-    private long mToTerminalId;
+    public long mFromTerminalId;
+    public long mToTerminalId;
+    public IMMsgType mImMsgType;
 
-    public enum IMMsgType{
+    public static enum IMMsgType{
         IM_TXT_MSG,
         IM_VOICE_MSG,
     }

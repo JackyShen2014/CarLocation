@@ -24,14 +24,14 @@ public class UserService {
      */
     public void logIn(String username, String pwd) {
         //Construct a new AUTH LOGIN MSG
-        final AuthMessage authMsg = new AuthMessage(username, pwd);
-        authMsg.setAuthType(AuthMessage.AuthMsgType.AUTH_LOGIN_MSG);
+        final AuthMessage authMsg = new AuthMessage(username,pwd);
+        authMsg.mAuthType = AuthMessage.AuthMsgType.AUTH_LOGIN_MSG;
 
         // Invoke native service to send message
         mNativeService.sendMessage(authMsg,new ResponseListener() {
             @Override
             public void onResponse(Notification noti) {
-                //TODO add call back for handling　Rsp
+                //TODO add call back for handling LOGIN Rsp
                 authMsg.onResponseHandler(noti);
 
             }
@@ -42,7 +42,7 @@ public class UserService {
     public void logOut(String username, String pwd){
         //Construct a new AUTH LOGOUT MSG
         final AuthMessage authMsg = new AuthMessage(username, pwd);
-        authMsg.setAuthType(AuthMessage.AuthMsgType.AUTH_LOGOUT_MSG);
+        authMsg.mAuthType = AuthMessage.AuthMsgType.AUTH_LOGOUT_MSG;
 
         // Invoke native service to send message
         mNativeService.sendMessage(authMsg,new ResponseListener() {

@@ -24,13 +24,15 @@ public abstract class Message implements Serializable{
 	
 	protected MessageType mMessageType;
 
+    protected Message() {
+        super();
+    }
 
-	public Message(long mTransactionID) {
+    public Message(long mTransactionID) {
 		super();
 		this.mTransactionID = mTransactionID;
 	}
 
-	
 	
 	/**
 	 * Use to translate to network format

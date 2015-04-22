@@ -12,7 +12,7 @@ public class TaskAssignmentMessage extends Message {
     private short mTaskId;
     private TaskMsgType mTaskType;
 
-    public enum TaskMsgType{
+    public static enum TaskMsgType{
         TASK_INITIAL_MSG,
         TASK_BEGIN_MSG,
         TASK_FINISH_MSG,

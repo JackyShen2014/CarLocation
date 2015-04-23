@@ -152,19 +152,19 @@ public class MessageService extends Service {
 			 * Temporary cancel to stop crash.
 			 */
 
-			/*
-			 * if (ConnectivityManager.CONNECTIVITY_ACTION.equals(action)) {
-			 * ConnectivityManager connMgr = (ConnectivityManager) context
-			 * .getSystemService(Context.CONNECTIVITY_SERVICE);
-			 * 
-			 * android.net.NetworkInfo wifi = connMgr
-			 * .getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-			 * 
-			 * android.net.NetworkInfo mobile = connMgr
-			 * .getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-			 * 
-			 * //TODO if network changed need to re connect to server }
-			 */
+
+
+			if (ConnectivityManager.CONNECTIVITY_ACTION.equals(action)) {
+				ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(
+						Context.CONNECTIVITY_SERVICE);
+				android.net.NetworkInfo wifi = connMgr.getNetworkInfo(
+						ConnectivityManager.TYPE_WIFI);
+
+				android.net.NetworkInfo mobile = connMgr.getNetworkInfo(
+						ConnectivityManager.TYPE_MOBILE);
+			}
+
+			  //TODO if network changed need to re connect to server
 		}
 
 	};

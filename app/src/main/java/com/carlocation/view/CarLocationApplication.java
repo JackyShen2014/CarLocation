@@ -1,5 +1,6 @@
 package com.carlocation.view;
 
+import com.carlocation.R;
 import com.carlocation.comm.IMessageService;
 import com.carlocation.comm.NotificationListener;
 import com.carlocation.comm.messaging.AuthMessage;
@@ -11,6 +12,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.util.Log;
+import android.widget.Toast;
 
 public class CarLocationApplication extends Application {
     /**
@@ -48,12 +51,30 @@ public class CarLocationApplication extends Application {
         };
 
         boolean bindOK;
+        byte bindTimes = 3;
         do {
             bindOK = this.bindService(serviceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
+            bindTimes--;
             if (!bindOK){
-                //TODO pop up toast to indicate User and try again
+                Log.e("CarLocationApplication",":onCreate():bind Native service failed!");
+                //Pop up toast to indicate User and try again
+                //If failed to bind service, then pop up left try times and sleep 3s for another bind.
+                String strBindFail = getResources().getText(R.string.info_bindServiceFail).toString();
+                Toast.makeText(CarLocationApplication.this,strBindFail + bindTimes , Toast.LENGTH_SHORT)
+                        .show();
+                try {
+                    Thread.sleep(3000);
+                }catch(InterruptedException e){
+                    Log.d("CarLocationApplication",":onCreate():Sleep is interrupted!");
+                    e.printStackTrace();
+                }
+            }else{
+                //Pop up toast to indicate User bind native service successfully
+                Log.d("CarLocationApplication",":onCreate():bind Native service successfully !");
+                Toast.makeText(CarLocationApplication.this, R.string.info_bindServiceOK, Toast.LENGTH_SHORT)
+                        .show();
             }
-        }while (!bindOK);
+        }while (!bindOK && (bindTimes != 0));
 	}
 
 	@Override

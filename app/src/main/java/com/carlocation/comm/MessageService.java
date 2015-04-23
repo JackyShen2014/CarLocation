@@ -192,11 +192,11 @@ public class MessageService extends Service {
 			if (message.getMessageType() == MessageType.AUTH_MESSAGE) {
 				AuthMessage am = (AuthMessage) message;
 				mSenderChannel = getSenderChannel(mServer, mPort,
-						am.getUserName(), am.getPassword());
+						am.mUserName, am.mPassword);
 				Notification.Result nt = Notification.Result.FAILED;
 				if (mSenderChannel != null && mSenderChannel.isOpen()) {
-					mUserName = am.getUserName();
-					mPassword = am.getPassword();
+					mUserName = am.mUserName;
+					mPassword = am.mPassword;
 					nt = Notification.Result.SUCCESS;
 				}
 				fireBackMessage(message, nt);

@@ -10,7 +10,7 @@ import android.util.Log;
 public class AuthMessage extends Message {
     private static final long serialVersionUID = -7313293501889870528L;
 
-    private String LOG_TAG = "AuthMessage";
+    private final String LOG_TAG = "AuthMessage";
 
     public long mTerminalId;
     public String mUserName;
@@ -39,32 +39,6 @@ public class AuthMessage extends Message {
         this.mPassword = mPassword;
         this.mAuthType = mAuthType;
     }
-
-
-    public String getUserName() {
-        return mUserName;
-    }
-
-    public String getPassword() {
-        return mPassword;
-    }
-
-    public AuthMsgType getAuthType() {
-        return mAuthType;
-    }
-
-    public void setUserName(String userName) {
-        this.mUserName = userName;
-    }
-
-    public void setPassword(String password) {
-        this.mPassword = password;
-    }
-
-    public void setAuthType(AuthMsgType authType) {
-        this.mAuthType = authType;
-    }
-
 
     public void onResponseHandler(Notification notify) {
         if (null == notify) {

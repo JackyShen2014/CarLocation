@@ -12,6 +12,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,6 +21,8 @@ import android.view.ViewGroup;
 
 import com.carlocation.R;
 import com.carlocation.comm.IMessageService;
+import com.carlocation.comm.messaging.LocationMessage;
+import com.carlocation.comm.messaging.TerminalType;
 
 public class MainActivity extends ActionBarActivity implements
 		NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -62,6 +65,15 @@ public class MainActivity extends ActionBarActivity implements
          * An example for how to use UserService to send MSG to Server
          */
         mUserService.logIn("username", "pwd");
+
+        /**
+         * An example to check translate() method
+         */
+        /*Log.d("Jacky","Test LocationMessge.translate() begin!");
+        LocationMessage examplLM = new LocationMessage(123L, TerminalType.TERMINAL_CAR,10.01,10.02,9.01f);
+        examplLM.translate();
+        Log.d("Jacky","Test LocationMessge.translate() end!");*/
+
 	}
 
     @Override

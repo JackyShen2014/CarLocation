@@ -10,4 +10,8 @@
     <string name="action_example">Example action</string>
     <string name="action_settings">Settings</string>
 
+    <string name="info_bindServiceOK">Bind Service Successfully</string>
+    <string name="info_bindServiceFail">Bind Service failed! Left bind times: </string>
+
+
 </resources>

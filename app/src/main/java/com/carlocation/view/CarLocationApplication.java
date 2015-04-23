@@ -16,6 +16,9 @@ import android.util.Log;
 import android.widget.Toast;
 
 public class CarLocationApplication extends Application {
+
+    private final String LOG_TAG = "CarLocationApplication";
+
     /**
      * Native Service
      */
@@ -41,6 +44,7 @@ public class CarLocationApplication extends Application {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 mNativeService = (IMessageService)service;
+                Log.d(LOG_TAG,"onCreate(): Native Service has been retrieved!");
                 mBound = true;
             }
 
@@ -56,7 +60,7 @@ public class CarLocationApplication extends Application {
             bindOK = this.bindService(serviceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
             bindTimes--;
             if (!bindOK){
-                Log.e("CarLocationApplication",":onCreate():bind Native service failed!");
+                Log.e(LOG_TAG,"onCreate():bind Native service failed!");
                 //Pop up toast to indicate User and try again
                 //If failed to bind service, then pop up left try times and sleep 3s for another bind.
                 String strBindFail = getResources().getText(R.string.info_bindServiceFail).toString();
@@ -65,12 +69,12 @@ public class CarLocationApplication extends Application {
                 try {
                     Thread.sleep(3000);
                 }catch(InterruptedException e){
-                    Log.d("CarLocationApplication",":onCreate():Sleep is interrupted!");
+                    Log.d(LOG_TAG,"onCreate():Sleep is interrupted!");
                     e.printStackTrace();
                 }
             }else{
                 //Pop up toast to indicate User bind native service successfully
-                Log.d("CarLocationApplication",":onCreate():bind Native service successfully !");
+                Log.d(LOG_TAG,"onCreate():bind Native service successfully !");
                 Toast.makeText(CarLocationApplication.this, R.string.info_bindServiceOK, Toast.LENGTH_SHORT)
                         .show();
             }
@@ -96,6 +100,7 @@ public class CarLocationApplication extends Application {
 
 
     public IMessageService getService(){
+        Log.d(LOG_TAG,"getService()...");
         return mNativeService;
     }
 

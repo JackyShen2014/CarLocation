@@ -2,6 +2,8 @@ package com.carlocation.comm.messaging;
 
 import android.util.Log;
 
+import java.util.Random;
+
 /**
  * Use to authentication
  *
@@ -26,14 +28,24 @@ public class AuthMessage extends Message {
         super(System.currentTimeMillis());
     }
 
-    public AuthMessage(String mUserName, String mPassword) {
+    public AuthMessage(String mUserName, String mPassword, AuthMsgType mAuthType) {
         super();
+        Random rand = new Random();
+        //FIXME how to implement mTransactionID?
+        this.mTransactionID = rand.nextLong();
+
+        //FIXME how to get Terminal ID?
+        this.mTerminalId = rand.nextLong();
+
+        this.mMessageType = MessageType.AUTH_MESSAGE;
         this.mUserName = mUserName;
         this.mPassword = mPassword;
+        this.mAuthType = mAuthType;
     }
 
     public AuthMessage(long mTransactionID,long mTerminalId, String mUserName, String mPassword, AuthMsgType mAuthType) {
         super(mTransactionID);
+        this.mMessageType = MessageType.AUTH_MESSAGE;
         this.mTerminalId = mTerminalId;
         this.mUserName = mUserName;
         this.mPassword = mPassword;

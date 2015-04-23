@@ -18,7 +18,12 @@ public class UserService {
     private IMessageService mNativeService;
 
     public UserService(IMessageService service) {
-        this.mNativeService = service;
+        if(service != null){
+            this.mNativeService = service;
+        }else {
+            Log.e(LOG_TAG,"UserService constructor service is null");
+        }
+
     }
 
     /**
@@ -32,8 +37,8 @@ public class UserService {
             Log.e(LOG_TAG, "Invalid username: "+ username +"or pwd:" + pwd);
             return;
         }
-        final AuthMessage authMsg = new AuthMessage(username,pwd);
-        authMsg.mAuthType = AuthMessage.AuthMsgType.AUTH_LOGIN_MSG;
+        final AuthMessage authMsg = new AuthMessage(username,pwd, AuthMessage.AuthMsgType.AUTH_LOGIN_MSG);
+
 
         // Invoke native service to send message
         Log.d(LOG_TAG,"Start invoke native service to send message LOG IN.");
@@ -55,8 +60,7 @@ public class UserService {
 
     public void logOut(String username, String pwd){
         //Construct a new AUTH LOGOUT MSG
-        final AuthMessage authMsg = new AuthMessage(username, pwd);
-        authMsg.mAuthType = AuthMessage.AuthMsgType.AUTH_LOGOUT_MSG;
+        final AuthMessage authMsg = new AuthMessage(username, pwd, AuthMessage.AuthMsgType.AUTH_LOGOUT_MSG);
 
         // Invoke native service to send message
         mNativeService.sendMessage(authMsg,new ResponseListener() {

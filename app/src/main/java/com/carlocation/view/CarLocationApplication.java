@@ -14,7 +14,6 @@ import android.widget.Toast;
 import com.carlocation.R;
 import com.carlocation.comm.IMessageService;
 
-
 public class CarLocationApplication extends Application {
 
     private final String LOG_TAG = "CarLocationApplication";
@@ -72,6 +71,9 @@ public class CarLocationApplication extends Application {
                     Log.d(LOG_TAG,"onCreate():Sleep is interrupted!");
                     e.printStackTrace();
                 }
+                
+                Message m = Message.obtain(h, 1);
+                h.sendMessageDelayed(m, 10000);
             }else{
                 //Pop up toast to indicate User bind native service successfully
                 Log.d(LOG_TAG,"onCreate():bind Native service successfully !");
@@ -98,6 +100,25 @@ public class CarLocationApplication extends Application {
         reBind.sendMessageDelayed(msg,200);*/
 
 	}
+    
+    
+    private Handler h = new Handler() {
+
+		@Override
+		public void handleMessage(Message msg) {
+			switch(msg.what) {
+			case 1:
+				//TODO re-bind
+				//TODO if failed
+				  Message m = Message.obtain(h, 1);
+	                h.sendMessageDelayed(m, 2000);
+				break;
+			case 2:
+				
+			}
+		}
+    	
+    };
 
 
 

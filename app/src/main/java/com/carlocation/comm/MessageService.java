@@ -15,6 +15,7 @@ import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.IBinder;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.carlocation.comm.messaging.AuthMessage;
@@ -42,11 +43,18 @@ import com.rabbitmq.client.ShutdownSignalException;
  * com.carlocation/com.carlocation.MessageServiceDown
  * </ul>
  * <ul>
- * Must use permission for this service
+ * Must use permission for this service:<br>
  * {@code <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/> }
- * .<br>
+ * <br>
+ * {@code <uses-permission android:name="android.permission.INTERNET"/> }<br>
  * If connection state changed, will send broadcast: category:
  * com.carlocation/com.carlocation.connection_state_changed with state code.
+ * </ul>
+ * 
+ * <ul>
+ * Important: First time start service need to input parameters:<br>
+ * {@link EXTRA_CONNECTION_SERVER_ADDR} : server address<br>
+ * {@link EXTRA_CONNECTION_SERVER_PORT} : server port<br>
  * </ul>
  * 
  * @see ConnectionState
@@ -114,11 +122,15 @@ public class MessageService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		// TODO check server configuration
+		String server = intent.getStringExtra(EXTRA_CONNECTION_SERVER_ADDR);
+		int port = intent.getIntExtra(EXTRA_CONNECTION_SERVER_PORT, -1);
+		// Only for switch server with same user name and password
+		if (!TextUtils.isEmpty(server) && port != -1 && mIsAuthed) {
+			mServer = server;
+			mPort = port;
+			reconnection();
+		}
 
-		// TODO start back-end thread for send or listen server message
-
-		// TODO Auto-generated method stub
 		return super.onStartCommand(intent, flags, startId);
 	}
 
@@ -152,19 +164,17 @@ public class MessageService extends Service {
 			 * Temporary cancel to stop crash.
 			 */
 
-
-
 			if (ConnectivityManager.CONNECTIVITY_ACTION.equals(action)) {
-				ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(
-						Context.CONNECTIVITY_SERVICE);
-				android.net.NetworkInfo wifi = connMgr.getNetworkInfo(
-						ConnectivityManager.TYPE_WIFI);
+				ConnectivityManager connMgr = (ConnectivityManager) context
+						.getSystemService(Context.CONNECTIVITY_SERVICE);
+				android.net.NetworkInfo wifi = connMgr
+						.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
-				android.net.NetworkInfo mobile = connMgr.getNetworkInfo(
-						ConnectivityManager.TYPE_MOBILE);
+				android.net.NetworkInfo mobile = connMgr
+						.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
 			}
 
-			  //TODO if network changed need to re connect to server
+			// TODO if network changed need to re connect to server
 		}
 
 	};
@@ -189,10 +199,16 @@ public class MessageService extends Service {
 		public void sendMessage(Message message) {
 			// TODO should send message operation under other thread?
 			Log.e(TAG, "get message:" + message);
+			
+			if (mServer == null || mPort <= 0) {
+				Log.e(TAG, "No Available server :"+ mServer+"  port:" + mPort );
+				fireBackMessage(message, Notification.Result.FAILED);
+				return;
+			}
 			if (message.getMessageType() == MessageType.AUTH_MESSAGE) {
 				AuthMessage am = (AuthMessage) message;
-				mSenderChannel = getSenderChannel(mServer, mPort,
-						am.mUserName, am.mPassword);
+				mSenderChannel = getSenderChannel(mServer, mPort, am.mUserName,
+						am.mPassword);
 				Notification.Result nt = Notification.Result.FAILED;
 				if (mSenderChannel != null && mSenderChannel.isOpen()) {
 					mUserName = am.mUserName;
@@ -206,12 +222,17 @@ public class MessageService extends Service {
 					mConsumer.start();
 				}
 			} else {
-				try {
-					getSenderChannel().basicPublish(EXCHANGE_NAME_CONTROLLER,
-							"", null, message.translate().getBytes());
-				} catch (IOException e) {
-					e.printStackTrace();
+				if (!mIsAuthed) {
 					fireBackMessage(message, Notification.Result.FAILED);
+				} else {
+					try {
+						getSenderChannel().basicPublish(
+								EXCHANGE_NAME_CONTROLLER, "", null,
+								message.translate().getBytes());
+					} catch (IOException e) {
+						e.printStackTrace();
+						fireBackMessage(message, Notification.Result.FAILED);
+					}
 				}
 			}
 		}
@@ -280,8 +301,12 @@ public class MessageService extends Service {
 		int count = 1;
 		while ((mReciverConnection == null || !mReciverConnection.isOpen())
 				&& count++ < 5) {
-			mReciverConnection = newConnection(mServer, mPort, mUserName,
-					mPassword);
+			try {
+				mReciverConnection = newConnection(mServer, mPort, mUserName,
+						mPassword);
+			} catch (Exception e) {
+				Log.e(TAG, "Create receiver connection failed", e);
+			}
 			Log.e(TAG, "Try to open new connection for receiver : "
 					+ mReciverConnection);
 			if (mReciverConnection != null && mReciverConnection.isOpen()) {
@@ -329,9 +354,14 @@ public class MessageService extends Service {
 		int count = 1;
 		while ((mSenderConnection == null || !mSenderConnection.isOpen())
 				&& count++ < 5) {
-			Log.e(TAG, "Try to open new connection for receiver : "
+			Log.e(TAG, "Try to open new connection for sender : "
 					+ mSenderConnection);
-			mSenderConnection = newConnection(server, port, username, password);
+			try {
+				mSenderConnection = newConnection(server, port, username,
+						password);
+			} catch (Exception e) {
+				Log.e(TAG, "Create sender connection failed", e);
+			}
 			if (mSenderConnection != null && mSenderConnection.isOpen()) {
 				opened = true;
 				break;
@@ -360,7 +390,6 @@ public class MessageService extends Service {
 			}
 		}
 
-
 		return mSenderChannel;
 	}
 
@@ -370,7 +399,7 @@ public class MessageService extends Service {
 	 * @param msg
 	 */
 	private boolean fireBackMessage(Message msg, Notification.Result res) {
-		TimeStamp ts = mPendingResponse.get(msg);
+		TimeStamp ts = mPendingResponse.remove(msg);
 		if (ts != null) {
 			ts.listener.onResponse(new Notification(msg,
 					Notification.NotificationType.RESPONSE, res));
@@ -386,7 +415,7 @@ public class MessageService extends Service {
 	 * @param msg
 	 */
 	private void fireMessage(Message msg) {
-		TimeStamp ts = mPendingResponse.get(msg);
+		TimeStamp ts = mPendingResponse.remove(msg);
 
 		if (ts != null) {
 			ts.listener.onResponse(new Notification(msg,
@@ -402,14 +431,29 @@ public class MessageService extends Service {
 
 	}
 
+	/**
+	 * Dispose old connection and create new connection
+	 */
+	private void reconnection() {
+		dispose();
+		getReceiverChannel();
+		getSenderChannel();
+		if (this.mSenderChannel != null) {
+			mConsumer = new ConsumerThread(getReceiverChannel());
+			mConsumer.start();
+		} else {
+			mIsAuthed = false;
+			Log.e(TAG, "Can not connect to new server:" + mServer + " port:"
+					+ mPort);
+		}
+	}
+
 	private void dispose() {
 
 		mConsumer.stopListener();
 
 		if (mSenderChannel != null && mSenderChannel.isOpen()) {
 			try {
-				mSenderChannel.queueUnbind(mUserName, EXCHANGE_NAME_DIRECT,
-						mUserName);
 				mSenderChannel.close();
 			} catch (IOException e) {
 				Log.e(TAG, "Send Channel close failed", e);
@@ -419,6 +463,24 @@ public class MessageService extends Service {
 		if (mSenderConnection != null && mSenderConnection.isOpen()) {
 			try {
 				mSenderConnection.close();
+			} catch (IOException e) {
+				Log.e(TAG, "Connection close failed", e);
+			}
+		}
+
+		if (mReceiverChannel != null && mReceiverChannel.isOpen()) {
+			try {
+				mReceiverChannel.queueUnbind(mUserName, EXCHANGE_NAME_DIRECT,
+						mUserName);
+				mReceiverChannel.close();
+			} catch (IOException e) {
+				Log.e(TAG, "Send Channel close failed", e);
+			}
+		}
+
+		if (mReciverConnection != null && mReciverConnection.isOpen()) {
+			try {
+				mReciverConnection.close();
 			} catch (IOException e) {
 				Log.e(TAG, "Connection close failed", e);
 			}

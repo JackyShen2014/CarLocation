@@ -1,19 +1,19 @@
 package com.carlocation.view;
 
-import com.carlocation.R;
-import com.carlocation.comm.IMessageService;
-import com.carlocation.comm.NotificationListener;
-import com.carlocation.comm.messaging.AuthMessage;
-import com.carlocation.comm.messaging.Notification;
-
 import android.app.Application;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.carlocation.R;
+import com.carlocation.comm.IMessageService;
+
 
 public class CarLocationApplication extends Application {
 
@@ -79,7 +79,27 @@ public class CarLocationApplication extends Application {
                         .show();
             }
         }while (!bindOK && (bindTimes != 0));
+
+        //TODO implement rebind process by Handler
+        /*Handler reBind  = new Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                switch (msg.what){
+                    //FIXME: to handle rebind action
+                    //case:
+                }
+            }
+        };
+
+        Message msg = new Message();
+        //FIXME send msg to Handler to process rebind service after 200ms
+        msg.obtain(reBind,1);
+        reBind.sendMessageDelayed(msg,200);*/
+
 	}
+
+
 
 	@Override
 	public void onTerminate() {

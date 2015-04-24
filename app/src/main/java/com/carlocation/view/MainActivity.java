@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
@@ -18,6 +19,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import com.carlocation.R;
 import com.carlocation.comm.IMessageService;
@@ -44,10 +48,22 @@ public class MainActivity extends ActionBarActivity implements
 	 */
 	private CharSequence mTitle;
 
+    //LOG IN Views
+    private EditText field_usrName;
+    private EditText field_pasWord;
+    private Button button_logIn;
+
+    private String mUserName;
+    private String mPasWord;
+
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+
+        findViews();
+        setListeners();
 
 		mNavigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.navigation_drawer);
@@ -56,15 +72,6 @@ public class MainActivity extends ActionBarActivity implements
 		// Set up the drawer.
 		mNavigationDrawerFragment.setUp(R.id.navigation_drawer,
 				(DrawerLayout) findViewById(R.id.drawer_layout));
-        /**
-         * Retrieve native service.
-         */
-        mUserService = new UserService(((CarLocationApplication)getApplicationContext()).getService());
-
-        /**
-         * An example for how to use UserService to send MSG to Server
-         */
-        mUserService.logIn("username", "pwd");
 
         /**
          * An example to check translate() method
@@ -80,6 +87,79 @@ public class MainActivity extends ActionBarActivity implements
     protected void onStop() {
         super.onStop();
     }
+
+    public void findViews(){
+        field_usrName = (EditText)findViewById(R.id.userName);
+        field_pasWord = (EditText)findViewById(R.id.passWord);
+        button_logIn = (Button)findViewById(R.id.logIn);
+    }
+
+    public void setListeners(){
+        button_logIn.setOnClickListener(new Button.OnClickListener() {
+            /**
+             * Called when a view has been clicked.
+             *
+             * @param v The view that was clicked.
+             */
+            @Override
+            public void onClick(View v) {
+                MainActivity.this.start();
+            }
+        });
+    }
+
+    protected void start(){
+        if(field_usrName.getText().toString().length() == 0){
+            Toast.makeText(this.getApplicationContext(), "Pls enter UserName!", Toast.LENGTH_SHORT).show();
+            field_usrName.requestFocus();
+            return;
+        }else {
+            mUserName = field_usrName.getText().toString();
+        }
+        if(field_pasWord.getText().toString().length() == 0){
+            Toast.makeText(this.getApplicationContext(), "Pls enter Pass Word!", Toast.LENGTH_SHORT).show();
+            field_pasWord.requestFocus();
+            return;
+        }else {
+            mPasWord = field_pasWord.getText().toString();
+        }
+
+        new send().execute();
+    }
+
+    private class send extends AsyncTask<String, Void, Void> {
+
+        /**
+         * Override this method to perform a computation on a background thread. The
+         * specified parameters are the parameters passed to {@link #execute}
+         * by the caller of this task.
+         * <p/>
+         * This method can call {@link #publishProgress} to publish updates
+         * on the UI thread.
+         *
+         * @param params The parameters of the task.
+         * @return A result, defined by the subclass of this task.
+         * @see #onPreExecute()
+         * @see #onPostExecute
+         * @see #publishProgress
+         */
+        @Override
+        protected Void doInBackground(String... params) {
+            //Retrieve Native Service and Send LogIn MSG to server to login.
+            /**
+             * Retrieve native service.
+             */
+            mUserService = new UserService(((CarLocationApplication)getApplicationContext()).getService());
+
+            /**
+             * An example for how to use UserService to send MSG to Server
+             */
+            mUserService.logIn(mUserName, mPasWord);
+
+            return null;
+        }
+    }
+
 
     @Override
 	public void onNavigationDrawerItemSelected(int position) {

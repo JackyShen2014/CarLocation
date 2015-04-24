@@ -1,8 +1,10 @@
 package com.carlocation.view;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.carlocation.comm.IMessageService;
+import com.carlocation.comm.NotificationListener;
 import com.carlocation.comm.ResponseListener;
 import com.carlocation.comm.messaging.AuthMessage;
 import com.carlocation.comm.messaging.Notification;
@@ -16,8 +18,10 @@ public class UserService {
 
     //Native Service
     private IMessageService mNativeService;
+    public ResponseListener mRspListener;
 
-    public UserService(IMessageService service) {
+    public UserService(IMessageService service, ResponseListener rspListener) {
+        this.mRspListener = rspListener;
         if(service != null){
             this.mNativeService = service;
         }else {
@@ -41,35 +45,26 @@ public class UserService {
 
 
         // Invoke native service to send message
-        Log.d(LOG_TAG,"Start invoke native service to send message LOG IN.");
+        Log.d(LOG_TAG,"Start invoke native service to send message login.");
         if(mNativeService!= null){
-            mNativeService.sendMessage(authMsg,new ResponseListener() {
-                @Override
-                public void onResponse(Notification noti) {
-                    //TODO add call back for handling LOGIN Rsp
-                    authMsg.onResponseHandler(noti);
-
-                }
-            });
+            mNativeService.sendMessage(authMsg,mRspListener);
         }else {
             Log.e(LOG_TAG,"It seems failed to bind service mNativeService = "+mNativeService);
         }
 
-
     }
 
-    public void logOut(String username, String pwd){
+    public void logOut(String username, String pwd, ResponseListener listener){
         //Construct a new AUTH LOGOUT MSG
         final AuthMessage authMsg = new AuthMessage(username, pwd, AuthMessage.AuthMsgType.AUTH_LOGOUT_MSG);
 
         // Invoke native service to send message
-        mNativeService.sendMessage(authMsg,new ResponseListener() {
-            @Override
-            public void onResponse(Notification noti) {
-                //TODO add call back for handling LOGOUT　Rsp
-                authMsg.onResponseHandler(noti);
-            }
-        });
+        Log.d(LOG_TAG,"Start invoke native service to send message logout.");
+        if(mNativeService!= null){
+            mNativeService.sendMessage(authMsg,mRspListener);
+        }else {
+            Log.e(LOG_TAG,"It seems failed to bind service mNativeService = "+mNativeService);
+        }
 
     }
 

@@ -7,7 +7,9 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
@@ -25,11 +27,16 @@ import android.widget.Toast;
 
 import com.carlocation.R;
 import com.carlocation.comm.IMessageService;
+import com.carlocation.comm.ResponseListener;
+import com.carlocation.comm.messaging.AuthMessage;
 import com.carlocation.comm.messaging.LocationMessage;
+import com.carlocation.comm.messaging.MessageType;
+import com.carlocation.comm.messaging.Notification;
 import com.carlocation.comm.messaging.TerminalType;
 
 public class MainActivity extends ActionBarActivity implements
 		NavigationDrawerFragment.NavigationDrawerCallbacks {
+    private static final String LOG_TAG = "MainActivity";
 
     /**
      *User Service
@@ -55,6 +62,115 @@ public class MainActivity extends ActionBarActivity implements
 
     private String mUserName;
     private String mPasWord;
+
+    private static final int NOTIFY_TYPE_REQUEST = 0;
+    private static final int NOTIFY_TYPE_RESPONSE = 1;
+    private static final int NOTIFY_TYPE_UNSOLICITED = 2;
+
+    private static final int AUTH_MESSAGE = 0;
+    private static final int LOCATION_MESSAGE = 1;
+    private static final int IM_MESSAGE = 2;
+    private static final int TASK_MESSAGE = 3;
+    private static final int GLIDE_MESSAGE = 4;
+    private static final int WARN_MESSAGE = 5;
+    private static final int STATUS_MESSAGE = 6;
+
+
+
+    private Handler mRspHandler = new Handler() {
+
+            /**
+             * Subclasses must implement this to receive messages.
+             *
+             * @param msg
+             */
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+
+                Notification noti = (Notification) msg.obj;
+                if (null == noti) {
+                    Log.e(LOG_TAG, "handleMessage(): Error: No response received from server for Authentication MSG.");
+                    return;
+                }
+
+                switch (noti.notiType.ordinal()) {
+                    case NOTIFY_TYPE_REQUEST: {
+                        //TODO deal with all request notify
+                        break;
+                    }
+                    case NOTIFY_TYPE_RESPONSE: {
+                        //TODO Deal with all response notify
+
+                        if (noti.message == null){
+                            Log.e(LOG_TAG, "handleMessage(): Error: no message obj in noti!");
+                            return;
+                        }
+
+                        MessageType msgType = noti.message.getMessageType();
+                        switch (msgType.ordinal()){
+                            case AUTH_MESSAGE:
+                                //Deal with auth response
+                                AuthMessage authMsg = (AuthMessage) noti.message;
+
+                                if (authMsg.mAuthType == AuthMessage.AuthMsgType.AUTH_LOGIN_MSG) {
+                                    //Deal with login RSP
+                                    if (noti.result == Notification.Result.SUCCESS) {
+                                        Toast.makeText(MainActivity.this, R.string.notify_login_success, Toast.LENGTH_SHORT).show();
+                                        //TODO Start another activity to enter next action
+                                    } else {
+                                        String notifyFail = getResources().getText(R.string.info_bindServiceFail).toString();
+                                        Toast.makeText(MainActivity.this, notifyFail + noti.result, Toast.LENGTH_SHORT).show();
+                                    }
+
+                                } else if (authMsg.mAuthType == AuthMessage.AuthMsgType.AUTH_LOGOUT_MSG) {
+                                    //TODO Deal with logout RSP
+
+                                } else {
+                                    Log.e(LOG_TAG,"handleMessage(): Error: Wrong AuthType!");
+                                    return;
+                                }
+                                break;
+                            case LOCATION_MESSAGE:
+                                //TODO deal with auth response
+                                break;
+                            case IM_MESSAGE:
+                                //TODO deal with auth response
+                                break;
+                            case TASK_MESSAGE:
+                                //TODO deal with auth response
+                                break;
+                            case GLIDE_MESSAGE:
+                                //TODO deal with auth response
+                                break;
+                            case WARN_MESSAGE:
+                                //TODO deal with auth response
+                                break;
+                            case STATUS_MESSAGE:
+                                //TODO Deal with status response
+                                break;
+                        }
+
+                        break;
+                    }
+                    case NOTIFY_TYPE_UNSOLICITED:{
+                        //TODO Deal with all unsolicited notify
+                        break;
+                    }
+                    default:
+                }
+
+            }
+        };
+
+
+    private ResponseListener rspListener = new ResponseListener() {
+        @Override
+        public void onResponse(Notification noti) {
+            Message message =  Message.obtain(mRspHandler,0,noti);
+            mRspHandler.sendMessage(message);
+        }
+    };
 
 
 	@Override
@@ -149,7 +265,7 @@ public class MainActivity extends ActionBarActivity implements
             /**
              * Retrieve native service.
              */
-            mUserService = new UserService(((CarLocationApplication)getApplicationContext()).getService());
+            mUserService = new UserService(((CarLocationApplication)getApplicationContext()).getService(),rspListener );
 
             /**
              * An example for how to use UserService to send MSG to Server
@@ -159,6 +275,7 @@ public class MainActivity extends ActionBarActivity implements
             return null;
         }
     }
+
 
 
     @Override

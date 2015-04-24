@@ -13,5 +13,8 @@
     <string name="info_bindServiceOK">Bind Service Successfully</string>
     <string name="info_bindServiceFail">Bind Service failed! Left bind times: </string>
 
+    <string name="notify_login_success">Login success!</string>
+    <string name="notify_login_fail">Login failed for reason: </string>
+
 
 </resources>

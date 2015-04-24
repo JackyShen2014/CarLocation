@@ -1,6 +1,10 @@
 package com.carlocation.comm.messaging;
 
+import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
+
+import com.carlocation.R;
 
 import java.util.Random;
 
@@ -51,34 +55,6 @@ public class AuthMessage extends Message {
         this.mPassword = mPassword;
         this.mAuthType = mAuthType;
     }
-
-    public void onResponseHandler(Notification notify) {
-        if (null == notify) {
-            Log.e(LOG_TAG, "Error: No response received from server for Authentication MSG.");
-            return;
-        }
-        //Retrieve notification Msg
-        Notification respNotify = notify;
-
-        if (respNotify.message != null && respNotify.message.mMessageType == MessageType.AUTH_MESSAGE) {
-            // AuthMessage authMsg =  new AuthMessage();
-            AuthMessage authMsg = (AuthMessage) respNotify.message;
-
-            if (authMsg.mAuthType == AuthMsgType.AUTH_LOGIN_MSG) {
-                //TODO deal with login RSP
-
-            } else if (authMsg.mAuthType == AuthMsgType.AUTH_LOGOUT_MSG) {
-                //TODO deal with logout RSP
-
-            } else {
-                Log.e(LOG_TAG,"Error: Wrong AuthType!");
-                return;
-            }
-
-        }
-
-    }
-
 
     @Override
     public String translate() {

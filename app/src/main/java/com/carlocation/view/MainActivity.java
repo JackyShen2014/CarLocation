@@ -29,10 +29,20 @@ import com.carlocation.R;
 import com.carlocation.comm.IMessageService;
 import com.carlocation.comm.ResponseListener;
 import com.carlocation.comm.messaging.AuthMessage;
+import com.carlocation.comm.messaging.GlidingPathMessage;
+import com.carlocation.comm.messaging.IMMessage;
+import com.carlocation.comm.messaging.IMTxtMessage;
+import com.carlocation.comm.messaging.IMVoiceMessage;
+import com.carlocation.comm.messaging.Location;
 import com.carlocation.comm.messaging.LocationMessage;
 import com.carlocation.comm.messaging.MessageType;
 import com.carlocation.comm.messaging.Notification;
+import com.carlocation.comm.messaging.RestrictedAreaMessage;
+import com.carlocation.comm.messaging.StatusMessage;
+import com.carlocation.comm.messaging.TaskAssignmentMessage;
 import com.carlocation.comm.messaging.TerminalType;
+
+import java.util.ArrayList;
 
 public class MainActivity extends ActionBarActivity implements
 		NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -117,14 +127,25 @@ public class MainActivity extends ActionBarActivity implements
                                     //Deal with login RSP
                                     if (noti.result == Notification.Result.SUCCESS) {
                                         Toast.makeText(MainActivity.this, R.string.notify_login_success, Toast.LENGTH_SHORT).show();
-                                        //TODO Start another activity to enter next action
+                                        //TODO Start another activity to enter next action after login
+
+
                                     } else {
-                                        String notifyFail = getResources().getText(R.string.info_bindServiceFail).toString();
+                                        String notifyFail = getResources().getText(R.string.notify_login_fail).toString();
                                         Toast.makeText(MainActivity.this, notifyFail + noti.result, Toast.LENGTH_SHORT).show();
                                     }
 
                                 } else if (authMsg.mAuthType == AuthMessage.AuthMsgType.AUTH_LOGOUT_MSG) {
-                                    //TODO Deal with logout RSP
+                                    //Deal with logout RSP
+                                    if(noti.result == Notification.Result.SUCCESS){
+                                        Toast.makeText(MainActivity.this, R.string.notify_logout_success, Toast.LENGTH_SHORT).show();
+                                        //TODO Start another activity to enter next action after logout
+
+
+                                    }else {
+                                        String notifyFail = getResources().getText(R.string.notify_logout_fail).toString();
+                                        Toast.makeText(MainActivity.this, notifyFail + noti.result, Toast.LENGTH_SHORT).show();
+                                    }
 
                                 } else {
                                     Log.e(LOG_TAG,"handleMessage(): Error: Wrong AuthType!");
@@ -149,6 +170,7 @@ public class MainActivity extends ActionBarActivity implements
                             case STATUS_MESSAGE:
                                 //TODO Deal with status response
                                 break;
+                            default:break;
                         }
 
                         break;
@@ -157,8 +179,9 @@ public class MainActivity extends ActionBarActivity implements
                         //TODO Deal with all unsolicited notify
                         break;
                     }
-                    default:
+                    default: break;
                 }
+                return;
 
             }
         };
@@ -271,6 +294,21 @@ public class MainActivity extends ActionBarActivity implements
              * An example for how to use UserService to send MSG to Server
              */
             mUserService.logIn(mUserName, mPasWord);
+
+            //Print out all MSGs' json format
+            new AuthMessage(123,MessageType.AUTH_MESSAGE,456,"Name","password", AuthMessage.AuthMsgType.AUTH_LOGIN_MSG).translate();
+            ArrayList<Location> array = new ArrayList<>();
+            array.add(new Location(321.123, 456.654));
+            array.add(new Location(789.987,890.098));
+            new GlidingPathMessage(123,456,"title",7,array).translate();
+            //new IMTxtMessage(123,MessageType.IM_MESSAGE,456,789, IMMessage.IMMsgType.IM_TXT_MSG,11,"TXTContent").translate();
+            //new IMTxtMessage(123,MessageType.IM_MESSAGE,456,789, IMMessage.IMMsgType.IM_TXT_MSG,12,"TxtContetn").translate();
+            byte[] bArray = {1,2,3};
+            new IMVoiceMessage(123,MessageType.IM_MESSAGE,456,789, IMMessage.IMMsgType.IM_VOICE_MSG,bArray).translate();
+            new LocationMessage(123,MessageType.LOCATION_MESSAGE,456,TerminalType.TERMINAL_CAR,new Location(321.123, 456.654),1.1f).translate();
+            new RestrictedAreaMessage(123,MessageType.WARN_MESSAGE,array).translate();
+            new StatusMessage(123,MessageType.STATUS_MESSAGE,456, StatusMessage.StatusMsgType.STATUS_ONLINE,StatusMessage.UserType.MOBILE_PAD).translate();
+            //new TaskAssignmentMessage(123,MessageType.TASK_MESSAGE,456,1,TaskAssignmentMessage.TaskMsgType.TASK_BEGIN_MSG).translate();
 
             return null;
         }

@@ -15,6 +15,9 @@
 
     <string name="notify_login_success">Login success!</string>
     <string name="notify_login_fail">Login failed for reason: </string>
+    <string name="notify_logout_success">Logout success!</string>
+    <string name="notify_logout_fail">Logout failed for reason: </string>
+
 
 
 </resources>

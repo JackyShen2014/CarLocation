@@ -7,10 +7,14 @@ import com.carlocation.comm.IMessageService;
 import com.carlocation.comm.NotificationListener;
 import com.carlocation.comm.ResponseListener;
 import com.carlocation.comm.messaging.AuthMessage;
+import com.carlocation.comm.messaging.MessageType;
 import com.carlocation.comm.messaging.Notification;
+
+import java.util.Random;
 
 /**
  * Created by 28851620 on 4/21/2015.
+ * @author Jacky Shen
  */
 public class UserService {
 
@@ -36,12 +40,21 @@ public class UserService {
      * @param pwd
      */
     public void logIn(String username, String pwd) {
-        //Construct a new AUTH LOGIN MSG
         if (username==null || username.equals("") || pwd==null || pwd.equals("")){
             Log.e(LOG_TAG, "Invalid username: "+ username +"or pwd:" + pwd);
             return;
         }
-        final AuthMessage authMsg = new AuthMessage(username,pwd, AuthMessage.AuthMsgType.AUTH_LOGIN_MSG);
+
+        //FIXME Get TransactionID
+        Random rand = new Random();
+        long transactionID = rand.nextLong();
+
+        //FIXME Get Terminal ID
+        long terminalId = rand.nextLong();
+
+        //Construct a new Login MSG
+        AuthMessage authMsg = new AuthMessage(transactionID,MessageType.AUTH_MESSAGE,terminalId,
+                username,pwd, AuthMessage.AuthMsgType.AUTH_LOGIN_MSG);
 
 
         // Invoke native service to send message
@@ -54,12 +67,25 @@ public class UserService {
 
     }
 
-    public void logOut(String username, String pwd, ResponseListener listener){
+    public void logOut(String username, String pwd){
+        if (username==null || username.equals("") || pwd==null || pwd.equals("")){
+            Log.e(LOG_TAG, "Invalid username: "+ username +"or pwd:" + pwd);
+            return;
+        }
+
+        //FIXME Get TransactionID
+        Random rand = new Random();
+        long transactionID = rand.nextLong();
+
+        //FIXME Get Terminal ID
+        long terminalId = rand.nextLong();
+
         //Construct a new AUTH LOGOUT MSG
-        final AuthMessage authMsg = new AuthMessage(username, pwd, AuthMessage.AuthMsgType.AUTH_LOGOUT_MSG);
+        AuthMessage authMsg = new AuthMessage(transactionID,MessageType.AUTH_MESSAGE,terminalId,
+                username,pwd, AuthMessage.AuthMsgType.AUTH_LOGOUT_MSG);
 
         // Invoke native service to send message
-        Log.d(LOG_TAG,"Start invoke native service to send message logout.");
+        Log.d(LOG_TAG, "Start invoke native service to send message logout.");
         if(mNativeService!= null){
             mNativeService.sendMessage(authMsg,mRspListener);
         }else {

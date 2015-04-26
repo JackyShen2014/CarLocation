@@ -1,9 +1,16 @@
 package com.carlocation.comm.messaging;
 
+import android.util.Log;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Created by 28851620 on 4/22/2015.
+ * @author Jacky Shen
  */
 public class StatusMessage extends Message {
+    private final String LOG_TAG = "StatusMessage";
 
     public long mTerminalId;
     public StatusMsgType mStatus;
@@ -11,6 +18,14 @@ public class StatusMessage extends Message {
 
     public StatusMessage(long mTransactionID, long mTerminalId, StatusMsgType mStatus, UserType mUserType) {
         super(mTransactionID);
+        this.mTerminalId = mTerminalId;
+        this.mStatus = mStatus;
+        this.mUserType = mUserType;
+    }
+
+    public StatusMessage(long mTransactionID, MessageType mMessageType, long mTerminalId,
+                         StatusMsgType mStatus, UserType mUserType) {
+        super(mTransactionID, mMessageType);
         this.mTerminalId = mTerminalId;
         this.mStatus = mStatus;
         this.mUserType = mUserType;
@@ -33,10 +48,7 @@ public class StatusMessage extends Message {
         STATUS_LEAVE,
     }
 
-    @Override
-    public String toString() {
-        return super.toString();
-    }
+
 
     /**
      * Use to translate to network format
@@ -45,6 +57,34 @@ public class StatusMessage extends Message {
      */
     @Override
     public String translate() {
-        return null;
+        //Define return result
+        String jSonResult = "";
+        try{
+            JSONObject object = new JSONObject();
+            object.put("mTransactionID",StatusMessage.this.mTransactionID);
+            object.put("mMessageType",StatusMessage.this.mMessageType);
+            object.put("mTerminalId",mTerminalId);
+            object.put("mStatus",mStatus);
+            object.put("mUserType",mUserType);
+
+            jSonResult = object.toString();
+
+        }catch (JSONException e){
+            Log.e(LOG_TAG, "JSONException accured!");
+            e.printStackTrace();
+        }
+        Log.d(LOG_TAG,"Output json format is "+ jSonResult);
+        return jSonResult;
+    }
+
+
+    @Override
+    public String toString() {
+        return "StatusMessage ["
+                + super.toString()
+                + "mTerminalId=" + mTerminalId
+                + ", mStatus=" + mStatus
+                + ", mUserType=" + mUserType
+                + "]";
     }
 }

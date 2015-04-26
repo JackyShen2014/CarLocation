@@ -11,6 +11,7 @@ import org.json.JSONObject;
  * Maybe contain one location or multi locations.
  *
  * @author 28851274
+ * @author Jacky Shen
  */
 public class LocationMessage extends Message {
 
@@ -27,16 +28,14 @@ public class LocationMessage extends Message {
         this.mMessageType = MessageType.LOCATION_MESSAGE;
     }
 
-    public LocationMessage(long terminalId, TerminalType terminalType, double longitude,
-                           double latitude, float speed) {
-        super(System.currentTimeMillis());
-        this.mTerminalId = terminalId;
-        this.mTerminalType = terminalType;
-        this.mLocation = new Location(longitude,latitude);
-        this.mSpeed = speed;
-        this.mMessageType = MessageType.LOCATION_MESSAGE;
+    public LocationMessage(long mTransactionID, MessageType mMessageType, long mTerminalId,
+                           TerminalType mTerminalType, Location mLocation, float mSpeed) {
+        super(mTransactionID, mMessageType);
+        this.mTerminalId = mTerminalId;
+        this.mTerminalType = mTerminalType;
+        this.mLocation = mLocation;
+        this.mSpeed = mSpeed;
     }
-
 
     /**
      * Translate Class attributes to json format for network transmit.
@@ -51,6 +50,8 @@ public class LocationMessage extends Message {
 
         try{
             JSONObject object = new JSONObject();
+            object.put("mTransactionID",LocationMessage.this.mTransactionID);
+            object.put("mMessageType",LocationMessage.this.mMessageType);
             object.put("mTerminalId", mTerminalId);
             object.put("mTerminalType", mTerminalType);
 
@@ -78,8 +79,10 @@ public class LocationMessage extends Message {
      */
     @Override
     public String toString() {
-        return "LocationMessage [mVehicleId=" + mTerminalId
-                + ", mVehicleType=" + mTerminalType
+        return "LocationMessage ["
+                +super.toString()
+                + "mTerminalId=" + mTerminalId
+                + ", mTerminalType=" + mTerminalType
                 + ", mLng=" + mLocation.mLng
                 + ", mLat=" + mLocation.mLat
                 + ", mSpeed=" + mSpeed

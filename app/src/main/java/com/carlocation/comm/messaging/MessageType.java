@@ -2,7 +2,7 @@ package com.carlocation.comm.messaging;
 
 /**
  * <ul>Define message type for communications.</uL>
- *
+ * @author Jacky Shen
  */
 public enum MessageType {
 

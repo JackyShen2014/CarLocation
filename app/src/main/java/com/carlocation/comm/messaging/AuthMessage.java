@@ -6,12 +6,15 @@ import android.widget.Toast;
 
 import com.carlocation.R;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Random;
 
 /**
- * Use to authentication
+ * Used for authentication
  *
- * @author 28851274
+ * @author Jacky Shen
  */
 public class AuthMessage extends Message {
     private static final long serialVersionUID = -7313293501889870528L;
@@ -29,27 +32,12 @@ public class AuthMessage extends Message {
     }
 
     public AuthMessage() {
-        super(System.currentTimeMillis());
     }
 
-    public AuthMessage(String mUserName, String mPassword, AuthMsgType mAuthType) {
-        super();
-        Random rand = new Random();
-        //FIXME how to implement mTransactionID?
-        this.mTransactionID = rand.nextLong();
 
-        //FIXME how to get Terminal ID?
-        this.mTerminalId = rand.nextLong();
-
-        this.mMessageType = MessageType.AUTH_MESSAGE;
-        this.mUserName = mUserName;
-        this.mPassword = mPassword;
-        this.mAuthType = mAuthType;
-    }
-
-    public AuthMessage(long mTransactionID,long mTerminalId, String mUserName, String mPassword, AuthMsgType mAuthType) {
-        super(mTransactionID);
-        this.mMessageType = MessageType.AUTH_MESSAGE;
+    public AuthMessage(long mTransactionID, MessageType mMessageType, long mTerminalId,
+                       String mUserName, String mPassword, AuthMsgType mAuthType) {
+        super(mTransactionID, mMessageType);
         this.mTerminalId = mTerminalId;
         this.mUserName = mUserName;
         this.mPassword = mPassword;
@@ -58,7 +46,38 @@ public class AuthMessage extends Message {
 
     @Override
     public String translate() {
-        return null;
+        //Define return result
+        String jSonResult = "";
+        try{
+            JSONObject object = new JSONObject();
+            object.put("mTransactionID",AuthMessage.this.mTransactionID);
+            object.put("mMessageType",AuthMessage.this.mMessageType);
+            object.put("mTerminalId",mTerminalId);
+            object.put("mUserName",mUserName);
+            object.put("mPassword",mPassword);
+            object.put("mAuthType",mAuthType);
+
+            jSonResult = object.toString();
+
+        }catch (JSONException e){
+            Log.e(LOG_TAG,"JSONException accured!");
+            e.printStackTrace();
+        }
+        Log.d(LOG_TAG,"Output json format is "+ jSonResult);
+        return jSonResult;
     }
+
+
+    @Override
+    public String toString() {
+        return "AuthMessage ["
+                + super.toString()
+                + "mTerminalId=" + mTerminalId
+                + ", mUserName=" + mUserName
+                + ", mPassword=" + mPassword
+                + ", mAuthType=" + mAuthType
+                + "]";
+    }
+
 
 }

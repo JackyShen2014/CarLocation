@@ -6,6 +6,7 @@ import java.io.Serializable;
 /**
  * Basic message class
  * @author 28851274
+ * @author Jacky Shen
  *
  */
 public abstract class Message implements Serializable{
@@ -33,8 +34,12 @@ public abstract class Message implements Serializable{
 		this.mTransactionID = mTransactionID;
 	}
 
-	
-	/**
+    protected Message(long mTransactionID, MessageType mMessageType) {
+        this.mTransactionID = mTransactionID;
+        this.mMessageType = mMessageType;
+    }
+
+    /**
 	 * Use to translate to network format
 	 * @return
 	 */
@@ -92,8 +97,9 @@ public abstract class Message implements Serializable{
 
 	@Override
 	public String toString() {
-		return "Message [mTransactionID=" + mTransactionID + ", mMessageType="
-				+ mMessageType + "]";
+		return "Message [mTransactionID=" + mTransactionID
+                + ", mMessageType=" + mMessageType
+                + "]";
 	}
 	
 	

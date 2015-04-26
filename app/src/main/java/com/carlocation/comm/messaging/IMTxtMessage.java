@@ -1,24 +1,64 @@
 package com.carlocation.comm.messaging;
 
+import android.util.Log;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+
 /**
  * Created by Jacky on 2015/4/21.
+ * @author Jacky Shen
  */
 public class IMTxtMessage extends IMMessage {
+    private static final String LOG_TAG = "IMTxtMessage";
 
-    public byte mrank;
-    public char[] mtxtCont;
+    public byte mRank;
+    public String mTxtCont;
 
     public IMTxtMessage(long mTransactionID) {
         super(mTransactionID);
     }
 
-    @Override
-    public String toString() {
-        return super.toString();
+    public IMTxtMessage(long mTransactionID, MessageType mMessageType, long mFromTerminalId,
+                        long mToTerminalId, IMMsgType mImMsgType, byte mRank, String mTxtCont) {
+        super(mTransactionID, mMessageType, mFromTerminalId, mToTerminalId, mImMsgType);
+        this.mRank = mRank;
+        this.mTxtCont = mTxtCont;
     }
+
 
     @Override
     public String translate() {
-        return super.translate();
+        //Define return result
+        String jSonResult = "";
+        try{
+            JSONObject object = new JSONObject();
+            object.put("mTransactionID",IMTxtMessage.this.mTransactionID);
+            object.put("mMessageType",IMTxtMessage.this.mMessageType);
+            object.put("mFromTerminalId",mFromTerminalId);
+            object.put("mToTerminalId",mToTerminalId);
+            object.put("mImMsgType",mImMsgType);
+            object.put("mRank",mRank);
+            object.put("mTxtCont",mTxtCont);
+
+            jSonResult = object.toString();
+
+        }catch (JSONException e){
+            Log.e(LOG_TAG, "JSONException accured!");
+            e.printStackTrace();
+        }
+        Log.d(LOG_TAG,"Output json format is "+ jSonResult);
+        return jSonResult;
+    }
+
+    @Override
+    public String toString() {
+        return "IMTxtMessage ["
+                + super.toString()
+                + "mRank=" + mRank
+                + ", mTxtCont=" + mTxtCont
+                + "]";
     }
 }

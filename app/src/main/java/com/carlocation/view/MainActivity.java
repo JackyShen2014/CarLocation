@@ -65,6 +65,11 @@ public class MainActivity extends ActionBarActivity implements
 	 */
 	private CharSequence mTitle;
 
+    /**
+     * An indicator to indicate if this MainActivity still alive (not destroyed).
+     */
+    private boolean mResumed;
+
     //LOG IN Views
     private EditText field_usrName;
     private EditText field_pasWord;
@@ -190,8 +195,15 @@ public class MainActivity extends ActionBarActivity implements
     private ResponseListener rspListener = new ResponseListener() {
         @Override
         public void onResponse(Notification noti) {
-            Message message =  Message.obtain(mRspHandler,0,noti);
-            mRspHandler.sendMessage(message);
+            //Check if MainActivity is still alive (not destroyed), otherwise output error logs.
+            if (mResumed){
+                Message message =  Message.obtain(mRspHandler,0,noti);
+                mRspHandler.sendMessage(message);
+            }else {
+                Log.e(LOG_TAG,"onResponse():MainActivity has been destroyed,no alive handler set to handle message!");
+                //TODO Add more action to save pending msg and re-handle after activity restart.
+            }
+
         }
     };
 
@@ -211,20 +223,29 @@ public class MainActivity extends ActionBarActivity implements
 		// Set up the drawer.
 		mNavigationDrawerFragment.setUp(R.id.navigation_drawer,
 				(DrawerLayout) findViewById(R.id.drawer_layout));
-
-        /**
-         * An example to check translate() method
-         */
-        /*Log.d("Jacky","Test LocationMessge.translate() begin!");
-        LocationMessage examplLM = new LocationMessage(123L, TerminalType.TERMINAL_CAR,10.01,10.02,9.01f);
-        examplLM.translate();
-        Log.d("Jacky","Test LocationMessge.translate() end!");*/
-
 	}
+
+    /**
+     * This is the fragment-orientated version of {@link #onResume()} that you
+     * can override to perform operations in the Activity at the same point
+     * where its fragments are resumed.  Be sure to always call through to
+     * the super-class.
+     */
+    @Override
+    protected void onResumeFragments() {
+        super.onResumeFragments();
+        mResumed = true;
+    }
 
     @Override
     protected void onStop() {
         super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mResumed = false;
     }
 
     public void findViews(){
@@ -301,14 +322,13 @@ public class MainActivity extends ActionBarActivity implements
             array.add(new Location(321.123, 456.654));
             array.add(new Location(789.987,890.098));
             new GlidingPathMessage(123,456,"title",7,array).translate();
-            //new IMTxtMessage(123,MessageType.IM_MESSAGE,456,789, IMMessage.IMMsgType.IM_TXT_MSG,11,"TXTContent").translate();
-            //new IMTxtMessage(123,MessageType.IM_MESSAGE,456,789, IMMessage.IMMsgType.IM_TXT_MSG,12,"TxtContetn").translate();
-            byte[] bArray = {1,2,3};
+            new IMTxtMessage(123,MessageType.IM_MESSAGE,456,789, IMMessage.IMMsgType.IM_TXT_MSG,(byte)11,"TXTContent").translate();
+            byte[] bArray = {(byte)1,(byte)2,(byte)3};
             new IMVoiceMessage(123,MessageType.IM_MESSAGE,456,789, IMMessage.IMMsgType.IM_VOICE_MSG,bArray).translate();
             new LocationMessage(123,MessageType.LOCATION_MESSAGE,456,TerminalType.TERMINAL_CAR,new Location(321.123, 456.654),1.1f).translate();
             new RestrictedAreaMessage(123,MessageType.WARN_MESSAGE,array).translate();
             new StatusMessage(123,MessageType.STATUS_MESSAGE,456, StatusMessage.StatusMsgType.STATUS_ONLINE,StatusMessage.UserType.MOBILE_PAD).translate();
-            //new TaskAssignmentMessage(123,MessageType.TASK_MESSAGE,456,1,TaskAssignmentMessage.TaskMsgType.TASK_BEGIN_MSG).translate();
+            new TaskAssignmentMessage(123,MessageType.TASK_MESSAGE,456,(short)1,TaskAssignmentMessage.TaskMsgType.TASK_BEGIN_MSG).translate();
 
             return null;
         }

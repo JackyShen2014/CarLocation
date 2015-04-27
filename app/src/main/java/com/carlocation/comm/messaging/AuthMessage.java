@@ -1,15 +1,11 @@
 package com.carlocation.comm.messaging;
 
-import android.content.Context;
 import android.util.Log;
-import android.widget.Toast;
-
-import com.carlocation.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Random;
+import java.nio.charset.Charset;
 
 /**
  * Used for authentication

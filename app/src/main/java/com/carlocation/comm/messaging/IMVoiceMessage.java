@@ -2,6 +2,7 @@ package com.carlocation.comm.messaging;
 
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -12,7 +13,6 @@ import org.json.JSONObject;
 public class IMVoiceMessage extends IMMessage{
     private static final String LOG_TAG = "IMVoiceMessage";
 
-    //FIXME which type of data structure should I take
     public byte[] mVoiceData;
 
     public IMVoiceMessage(long mTransactionID) {
@@ -37,7 +37,13 @@ public class IMVoiceMessage extends IMMessage{
             object.put("mFromTerminalId",mFromTerminalId);
             object.put("mToTerminalId",mToTerminalId);
             object.put("mImMsgType",mImMsgType);
-            object.put("mVoiceData",mVoiceData);
+
+            JSONArray array = new JSONArray();
+            for (int i = 0; i<mVoiceData.length; i++){
+                array.put(mVoiceData[i]);
+            }
+
+            object.put("mVoiceData",array);
 
             jSonResult = object.toString();
 

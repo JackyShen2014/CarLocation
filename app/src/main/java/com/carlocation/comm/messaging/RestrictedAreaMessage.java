@@ -15,7 +15,7 @@ import java.util.ArrayList;
 public class RestrictedAreaMessage extends Message {
     private static final String LOG_TAG = "RestrictedAreaMessage";
 
-    public ArrayList<Location> mLocationArea = new ArrayList<>();
+    public ArrayList<Location> mLocationArea = new ArrayList<Location>();
 
     public RestrictedAreaMessage(long mTransactionID, ArrayList<Location> mLocationArea) {
         super(mTransactionID);

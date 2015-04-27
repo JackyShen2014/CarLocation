@@ -17,7 +17,7 @@ public class GlidingPathMessage extends Message {
     public long mTerminalId;
     public String mTitle;
     public int mGlidePathId;
-    public ArrayList<Location> mLocationArray = new ArrayList<>();
+    public ArrayList<Location> mLocationArray = new ArrayList<Location>();
 
 
     public GlidingPathMessage(long mTransactionID, long mTerminalId, String mTitle, int mGlidePathId,

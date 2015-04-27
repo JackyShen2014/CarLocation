@@ -16,7 +16,7 @@ import java.util.Random;
  * Created by 28851620 on 4/21/2015.
  * @author Jacky Shen
  */
-public class UserService {
+public class UserService implements NotificationListener{
 
     private final String LOG_TAG = "UserService";
 
@@ -31,6 +31,10 @@ public class UserService {
         }else {
             Log.e(LOG_TAG,"UserService constructor service is null");
         }
+
+        service.registerNotificationListener(this);
+
+        //service.unRegisterNotificationListener(this);
 
     }
 
@@ -94,4 +98,13 @@ public class UserService {
 
     }
 
+    /**
+     * Unsolicited message notification.
+     *
+     * @param noti
+     */
+    @Override
+    public void onNotify(Notification noti) {
+
+    }
 }

@@ -27,6 +27,7 @@ import android.widget.Toast;
 
 import com.carlocation.R;
 import com.carlocation.comm.IMessageService;
+import com.carlocation.comm.NotificationListener;
 import com.carlocation.comm.ResponseListener;
 import com.carlocation.comm.messaging.AuthMessage;
 import com.carlocation.comm.messaging.GlidingPathMessage;
@@ -48,6 +49,8 @@ public class MainActivity extends ActionBarActivity implements
 		NavigationDrawerFragment.NavigationDrawerCallbacks {
     private static final String LOG_TAG = "MainActivity";
 
+
+    private LocalListener mListener ;
     /**
      *User Service
      */
@@ -104,10 +107,6 @@ public class MainActivity extends ActionBarActivity implements
                 super.handleMessage(msg);
 
                 Notification noti = (Notification) msg.obj;
-                if (null == noti) {
-                    Log.e(LOG_TAG, "handleMessage(): Error: No response received from server for Authentication MSG.");
-                    return;
-                }
 
                 switch (noti.notiType.ordinal()) {
                     case NOTIFY_TYPE_REQUEST: {
@@ -116,68 +115,7 @@ public class MainActivity extends ActionBarActivity implements
                     }
                     case NOTIFY_TYPE_RESPONSE: {
                         //TODO Deal with all response notify
-
-                        if (noti.message == null){
-                            Log.e(LOG_TAG, "handleMessage(): Error: no message obj in noti!");
-                            return;
-                        }
-
-                        MessageType msgType = noti.message.getMessageType();
-                        switch (msgType.ordinal()){
-                            case AUTH_MESSAGE:
-                                //Deal with auth response
-                                AuthMessage authMsg = (AuthMessage) noti.message;
-
-                                if (authMsg.mAuthType == AuthMessage.AuthMsgType.AUTH_LOGIN_MSG) {
-                                    //Deal with login RSP
-                                    if (noti.result == Notification.Result.SUCCESS) {
-                                        Toast.makeText(MainActivity.this, R.string.notify_login_success, Toast.LENGTH_SHORT).show();
-                                        //TODO Start another activity to enter next action after login
-
-
-                                    } else {
-                                        String notifyFail = getResources().getText(R.string.notify_login_fail).toString();
-                                        Toast.makeText(MainActivity.this, notifyFail + noti.result, Toast.LENGTH_SHORT).show();
-                                    }
-
-                                } else if (authMsg.mAuthType == AuthMessage.AuthMsgType.AUTH_LOGOUT_MSG) {
-                                    //Deal with logout RSP
-                                    if(noti.result == Notification.Result.SUCCESS){
-                                        Toast.makeText(MainActivity.this, R.string.notify_logout_success, Toast.LENGTH_SHORT).show();
-                                        //TODO Start another activity to enter next action after logout
-
-
-                                    }else {
-                                        String notifyFail = getResources().getText(R.string.notify_logout_fail).toString();
-                                        Toast.makeText(MainActivity.this, notifyFail + noti.result, Toast.LENGTH_SHORT).show();
-                                    }
-
-                                } else {
-                                    Log.e(LOG_TAG,"handleMessage(): Error: Wrong AuthType!");
-                                    return;
-                                }
-                                break;
-                            case LOCATION_MESSAGE:
-                                //TODO deal with auth response
-                                break;
-                            case IM_MESSAGE:
-                                //TODO deal with auth response
-                                break;
-                            case TASK_MESSAGE:
-                                //TODO deal with auth response
-                                break;
-                            case GLIDE_MESSAGE:
-                                //TODO deal with auth response
-                                break;
-                            case WARN_MESSAGE:
-                                //TODO deal with auth response
-                                break;
-                            case STATUS_MESSAGE:
-                                //TODO Deal with status response
-                                break;
-                            default:break;
-                        }
-
+                        handleResponseMessage(msg);
                         break;
                     }
                     case NOTIFY_TYPE_UNSOLICITED:{
@@ -192,20 +130,65 @@ public class MainActivity extends ActionBarActivity implements
         };
 
 
-    private ResponseListener rspListener = new ResponseListener() {
-        @Override
-        public void onResponse(Notification noti) {
-            //Check if MainActivity is still alive (not destroyed), otherwise output error logs.
-            if (mResumed){
-                Message message =  Message.obtain(mRspHandler,0,noti);
-                mRspHandler.sendMessage(message);
-            }else {
-                Log.e(LOG_TAG,"onResponse():MainActivity has been destroyed,no alive handler set to handle message!");
-                //TODO Add more action to save pending msg and re-handle after activity restart.
-            }
+    private void handleResponseMessage(Message msg) {
+        Notification noti = (Notification) msg.obj;
+        MessageType msgType =noti.message.getMessageType();
+        switch (msgType.ordinal()){
+            case AUTH_MESSAGE:
+                //Deal with auth response
+                AuthMessage authMsg = (AuthMessage) noti.message;
 
+                if (authMsg.mAuthType == AuthMessage.AuthMsgType.AUTH_LOGIN_MSG) {
+                    //Deal with login RSP
+                    if (noti.result == Notification.Result.SUCCESS) {
+                        Toast.makeText(MainActivity.this, R.string.notify_login_success, Toast.LENGTH_SHORT).show();
+                        //TODO Start another activity to enter next action after login
+
+
+                    } else {
+                        String notifyFail = getResources().getText(R.string.notify_login_fail).toString();
+                        Toast.makeText(MainActivity.this, notifyFail + noti.result, Toast.LENGTH_SHORT).show();
+                    }
+
+                } else if (authMsg.mAuthType == AuthMessage.AuthMsgType.AUTH_LOGOUT_MSG) {
+                    //Deal with logout RSP
+                    if(noti.result == Notification.Result.SUCCESS){
+                        Toast.makeText(MainActivity.this, R.string.notify_logout_success, Toast.LENGTH_SHORT).show();
+                        //TODO Start another activity to enter next action after logout
+
+
+                    }else {
+                        String notifyFail = getResources().getText(R.string.notify_logout_fail).toString();
+                        Toast.makeText(MainActivity.this, notifyFail + noti.result, Toast.LENGTH_SHORT).show();
+                    }
+
+                } else {
+                    Log.e(LOG_TAG,"handleMessage(): Error: Wrong AuthType!");
+                    return;
+                }
+                break;
+            case LOCATION_MESSAGE:
+                //TODO deal with auth response
+                break;
+            case IM_MESSAGE:
+                //TODO deal with auth response
+                break;
+            case TASK_MESSAGE:
+                //TODO deal with auth response
+                break;
+            case GLIDE_MESSAGE:
+                //TODO deal with auth response
+                break;
+            case WARN_MESSAGE:
+                //TODO deal with auth response
+                break;
+            case STATUS_MESSAGE:
+                //TODO Deal with status response
+                break;
+            default:break;
         }
-    };
+
+    }
 
 
 	@Override
@@ -215,6 +198,7 @@ public class MainActivity extends ActionBarActivity implements
 
         findViews();
         setListeners();
+        mListener = new LocalListener();
 
 		mNavigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.navigation_drawer);
@@ -223,6 +207,11 @@ public class MainActivity extends ActionBarActivity implements
 		// Set up the drawer.
 		mNavigationDrawerFragment.setUp(R.id.navigation_drawer,
 				(DrawerLayout) findViewById(R.id.drawer_layout));
+
+
+        ///
+    //TODO make sure service is not null
+        (((CarLocationApplication)getApplicationContext()).getService()).registerNotificationListener(this.mListener);
 	}
 
     /**
@@ -246,6 +235,8 @@ public class MainActivity extends ActionBarActivity implements
     protected void onDestroy() {
         super.onDestroy();
         mResumed = false;
+
+        (((CarLocationApplication)getApplicationContext()).getService()).unRegisterNotificationListener(this.mListener);
     }
 
     public void findViews(){
@@ -309,7 +300,8 @@ public class MainActivity extends ActionBarActivity implements
             /**
              * Retrieve native service.
              */
-            mUserService = new UserService(((CarLocationApplication)getApplicationContext()).getService(),rspListener );
+            mUserService = new UserService(((CarLocationApplication)getApplicationContext()).getService(),mListener );
+
 
             /**
              * An example for how to use UserService to send MSG to Server
@@ -431,5 +423,42 @@ public class MainActivity extends ActionBarActivity implements
 					ARG_SECTION_NUMBER));
 		}
 	}
+
+
+
+
+
+    class LocalListener implements ResponseListener, NotificationListener {
+
+        /**
+         * Unsolicited message notification.
+         *
+         * @param noti
+         */
+        @Override
+        public void onNotify(Notification noti) {
+            forward(noti);
+        }
+
+        @Override
+        public void onResponse(Notification noti) {
+            forward(noti);
+        }
+
+
+        private void forward(Notification notif) {
+            if (mResumed){
+                if (null == notif) {
+                    Log.e(LOG_TAG, "handleMessage(): Error: No response received from server for Authentication MSG.");
+                    return;
+                }
+                Message message =  Message.obtain(mRspHandler,0,notif);
+                mRspHandler.sendMessage(message);
+            }else {
+                Log.e(LOG_TAG,"onResponse():MainActivity has been destroyed,no alive handler set to handle message!");
+                //TODO Add more action to save pending msg and re-handle after activity restart.
+            }
+        }
+    }
 
 }

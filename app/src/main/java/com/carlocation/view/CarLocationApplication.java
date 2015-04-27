@@ -33,6 +33,13 @@ public class CarLocationApplication extends Application {
      */
     private boolean mBound;
 
+    //Indicate the Max retry bind times
+    private int mBindRetryTimes = 3;
+
+    //Retry bind "what"
+    static final int TRY_REBIND = 1;
+
+
     @Override
 	public void onCreate() {
 		super.onCreate();
@@ -54,50 +61,24 @@ public class CarLocationApplication extends Application {
         };
 
         boolean bindOK;
-        byte bindTimes = 3;
-        do {
-            bindOK = this.bindService(serviceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
-            bindTimes--;
-            if (!bindOK){
-                Log.e(LOG_TAG,"onCreate():bind Native service failed!");
-                //Pop up toast to indicate User and try again
-                //If failed to bind service, then pop up left try times and sleep 3s for another bind.
-                String strBindFail = getResources().getText(R.string.info_bindServiceFail).toString();
-                Toast.makeText(CarLocationApplication.this,strBindFail + bindTimes , Toast.LENGTH_SHORT)
-                        .show();
-                try {
-                    Thread.sleep(3000);
-                }catch(InterruptedException e){
-                    Log.d(LOG_TAG,"onCreate():Sleep is interrupted!");
-                    e.printStackTrace();
-                }
-                
-                Message m = Message.obtain(h, 1);
-                h.sendMessageDelayed(m, 10000);
-            }else{
-                //Pop up toast to indicate User bind native service successfully
-                Log.d(LOG_TAG,"onCreate():bind Native service successfully !");
-                Toast.makeText(CarLocationApplication.this, R.string.info_bindServiceOK, Toast.LENGTH_SHORT)
-                        .show();
-            }
-        }while (!bindOK && (bindTimes != 0));
 
-        //TODO implement rebind process by Handler
-        /*Handler reBind  = new Handler(){
-            @Override
-            public void handleMessage(Message msg) {
-                super.handleMessage(msg);
-                switch (msg.what){
-                    //FIXME: to handle rebind action
-                    //case:
-                }
-            }
-        };
+        bindOK = this.bindService(serviceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
+        if (!bindOK) {
+            Log.e(LOG_TAG, "onCreate():bind Native service failed!");
+            //Pop up toast to indicate User and try again
+            //If failed to bind service, then pop up left try times and sleep 200ms for another try.
+            String strBindFail = getResources().getText(R.string.info_bindServiceFail).toString();
+            Toast.makeText(CarLocationApplication.this, strBindFail + mBindRetryTimes, Toast.LENGTH_SHORT)
+                    .show();
 
-        Message msg = new Message();
-        //FIXME send msg to Handler to process rebind service after 200ms
-        msg.obtain(reBind,1);
-        reBind.sendMessageDelayed(msg,200);*/
+            Message m = Message.obtain(h, TRY_REBIND);
+            h.sendMessageDelayed(m, 200);
+        } else {
+            //Pop up toast to indicate User bind native service successfully
+            Log.d(LOG_TAG, "onCreate():bind Native service successfully !");
+            Toast.makeText(CarLocationApplication.this, R.string.info_bindServiceOK, Toast.LENGTH_SHORT)
+                    .show();
+        }
 
 	}
     
@@ -107,14 +88,34 @@ public class CarLocationApplication extends Application {
 		@Override
 		public void handleMessage(Message msg) {
 			switch(msg.what) {
-			case 1:
-				//TODO re-bind
-				//TODO if failed
-				  Message m = Message.obtain(h, 1);
-	                h.sendMessageDelayed(m, 2000);
+			case TRY_REBIND:
+                if (mBindRetryTimes != 0){
+                    boolean bindOK;
+                    Intent serviceIntent = new Intent("com.carlocation.comm.message.service");
+                    bindOK = bindService(serviceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
+                    mBindRetryTimes--;
+
+                    if (!bindOK){
+                        Log.e(LOG_TAG,"onCreate():bind Native service failed!");
+                        //Pop up toast to indicate User and try again
+                        //If failed to bind service, then pop up left try times and sleep 200ms for another try.
+                        String strBindFail = getResources().getText(R.string.info_bindServiceFail).toString();
+                        Toast.makeText(CarLocationApplication.this,strBindFail + mBindRetryTimes , Toast.LENGTH_SHORT)
+                                .show();
+
+                        Message m = Message.obtain(h, TRY_REBIND);
+                        h.sendMessageDelayed(m, 200);
+
+                    }else {
+                        //Pop up toast to indicate User bind native service successfully
+                        Log.d(LOG_TAG,"onCreate():bind Native service successfully !");
+                        Toast.makeText(CarLocationApplication.this, R.string.info_bindServiceOK, Toast.LENGTH_SHORT)
+                                .show();
+                    }
+                }
 				break;
 			case 2:
-				
+				break;
 			}
 		}
     	

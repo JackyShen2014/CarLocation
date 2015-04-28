@@ -420,6 +420,7 @@ public class MessageService extends Service {
 		if (ts != null) {
 			ts.listener.onResponse(new Notification(msg,
 					Notification.NotificationType.RESPONSE, Result.SUCCESS));
+            return;
 		}
 
 		Notification notif = new Notification(msg,

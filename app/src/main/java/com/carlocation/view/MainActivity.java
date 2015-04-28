@@ -335,9 +335,19 @@ public class MainActivity extends ActionBarActivity implements
 
 
             /**
-             * An example for how to use UserService to send MSG to Server
+             * Examples for how to use UserService to send MSG to Server
              */
+
+            //Test case 1: send login msg to server
             mUserService.logIn(mUserName, mPasWord);
+
+            //Test case 2: send logout msg to server
+            mUserService.logOut(mUserName,mPasWord);
+
+            //Test case 2: update mylocation to server
+            mUserService.updateMyLocation();
+
+
 
             //Print out all MSGs' json format
             new AuthMessage(123, MessageType.AUTH_MESSAGE, 456, "Name", "password", AuthMessage.AuthMsgType.AUTH_LOGIN_MSG).translate();

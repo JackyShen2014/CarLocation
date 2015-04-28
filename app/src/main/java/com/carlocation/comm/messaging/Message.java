@@ -101,12 +101,7 @@ public abstract class Message implements Serializable{
                 + ", mMessageType=" + mMessageType
                 + "]";
 	}
-	
-	
-	
-	
-	
-	
+
 	
 	
 }

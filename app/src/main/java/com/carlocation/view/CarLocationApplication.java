@@ -39,6 +39,10 @@ public class CarLocationApplication extends Application {
     //Retry bind "what"
     static final int TRY_REBIND = 1;
 
+    private static final String EXTRA_CONNECTION_SERVER_ADDR = "server_addr";
+
+    private static final String EXTRA_CONNECTION_SERVER_PORT = "server_port";
+
 
     @Override
 	public void onCreate() {
@@ -46,6 +50,14 @@ public class CarLocationApplication extends Application {
 
         //Bind Native Service and Retrieve service
         Intent serviceIntent = new Intent("com.carlocation.comm.message.service");
+
+        //TODO add server IP and port to Intent for Native service
+        //FIXME how to retrieve server address and server port?
+        String serverAddr = "92.168.0.100";
+        int port = 8080;
+        serviceIntent.putExtra(EXTRA_CONNECTION_SERVER_ADDR,serverAddr);
+        serviceIntent.putExtra(EXTRA_CONNECTION_SERVER_PORT, port);
+
         mServiceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {

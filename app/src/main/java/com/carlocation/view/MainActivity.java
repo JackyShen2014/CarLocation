@@ -345,7 +345,7 @@ public class MainActivity extends ActionBarActivity implements
             mUserService.logOut(mUserName,mPasWord);
 
             //Test case 2: update mylocation to server
-            mUserService.updateMyLocation();
+            mUserService.sendMyLocation();
 
 
 

@@ -7,10 +7,14 @@ import com.carlocation.comm.IMessageService;
 import com.carlocation.comm.NotificationListener;
 import com.carlocation.comm.ResponseListener;
 import com.carlocation.comm.messaging.AuthMessage;
+import com.carlocation.comm.messaging.IMMessage;
+import com.carlocation.comm.messaging.IMTxtMessage;
+import com.carlocation.comm.messaging.IMVoiceMessage;
 import com.carlocation.comm.messaging.Location;
 import com.carlocation.comm.messaging.LocationMessage;
 import com.carlocation.comm.messaging.MessageType;
 import com.carlocation.comm.messaging.Notification;
+import com.carlocation.comm.messaging.TaskAssignmentMessage;
 import com.carlocation.comm.messaging.TerminalType;
 
 import java.util.Random;
@@ -37,7 +41,7 @@ public class UserService{
     }
 
     /**
-     * Used to send login MSG.
+     * Used to send login MSG. The response result will be handled by mRspListener.
      * @param username
      * @param pwd
      */
@@ -47,30 +51,23 @@ public class UserService{
             return;
         }
 
-        //FIXME Get TransactionID
-        Random rand = new Random();
-        long transactionID = rand.nextLong();
-
-        //FIXME Get Terminal ID
-        long terminalId = rand.nextLong();
-
         //Construct a new Login MSG
-        AuthMessage authMsg = new AuthMessage(transactionID,MessageType.AUTH_MESSAGE,terminalId,
+        AuthMessage authMsg = new AuthMessage(getTransactionId(),MessageType.AUTH_MESSAGE,getTerminalId(),
                 username,pwd, AuthMessage.AuthMsgType.AUTH_LOGIN_MSG);
 
 
         // Invoke native service to send message
-        Log.d(LOG_TAG,"Start invoke native service to send message login.");
+        Log.d(LOG_TAG,"logIn():Start invoke native service to send message login.");
         if(mNativeService!= null){
             mNativeService.sendMessage(authMsg,mRspListener);
         }else {
-            Log.e(LOG_TAG,"It seems failed to bind service mNativeService = "+mNativeService);
+            Log.e(LOG_TAG,"logIn():It seems failed to bind service mNativeService = "+mNativeService);
         }
 
     }
 
     /**
-     * Used to send logout MSG.
+     * Used to send logout MSG. The response result will be handled by mRspListener.
      * @param username
      * @param pwd
      */
@@ -80,57 +77,160 @@ public class UserService{
             return;
         }
 
-        //FIXME Get TransactionID
-        Random rand = new Random();
-        long transactionID = rand.nextLong();
-
-        //FIXME Get Terminal ID from property
-        long terminalId = rand.nextLong();
-
         //Construct a new AUTH LOGOUT MSG
-        AuthMessage authMsg = new AuthMessage(transactionID,MessageType.AUTH_MESSAGE,terminalId,
+        AuthMessage authMsg = new AuthMessage(getTransactionId(),MessageType.AUTH_MESSAGE,getTerminalId(),
                 username,pwd, AuthMessage.AuthMsgType.AUTH_LOGOUT_MSG);
 
         // Invoke native service to send message
-        Log.d(LOG_TAG, "Start invoke native service to send message logout.");
+        Log.d(LOG_TAG, "logOut():Start invoke native service to send message logout.");
         if(mNativeService!= null){
             mNativeService.sendMessage(authMsg,mRspListener);
         }else {
-            Log.e(LOG_TAG,"It seems failed to bind service mNativeService = "+mNativeService);
+            Log.e(LOG_TAG,"logOut():It seems failed to bind service mNativeService = "+mNativeService);
         }
 
     }
 
     /**
-     * Used to update my locaiton to server.
+     * Used to send my location to server.
      */
-    public void updateMyLocation (){
-
-        //FIXME Get TransactionID
-        Random rand = new Random();
-        long transactionID = rand.nextLong();
-
-        //FIXME Get Terminal ID from property
-        long terminalId = rand.nextLong();
-
-        //FIXME Get Terminal Type from property
-        TerminalType terminalType = TerminalType.TERMINAL_CAR;
-
-        LocationMessage myLocationMsg = new LocationMessage(transactionID,MessageType.LOCATION_MESSAGE,terminalId,
-                terminalType,getMyLocation(),getMySpeed());
+    public void sendMyLocation (){
+        LocationMessage myLocationMsg = new LocationMessage(getTransactionId(),MessageType.LOCATION_MESSAGE,getTerminalId(),
+                getTerminalType(),getMyLocation(),getMySpeed());
 
         // Invoke native service to send message
-        Log.d(LOG_TAG, "updateMyLocation(): Start invoke native service to send LocationMessage.");
+        Log.d(LOG_TAG, "sendMyLocation(): Start invoke native service to send LocationMessage.");
         if(mNativeService!= null){
             mNativeService.sendMessage(myLocationMsg);
         }else {
-            Log.e(LOG_TAG,"updateMyLocation():It seems failed to bind service mNativeService = "+mNativeService);
+            Log.e(LOG_TAG,"sendMyLocation():It seems failed to bind service mNativeService = "+mNativeService);
         }
 
     }
 
     /**
-     * Used to retrieve my location from BeiDou positioning system
+     * Send IM txt msg to another terminal. The response from destination will be handled by mRspListener.
+     * @param toTerminal    Terminal ID of destination
+     * @param rank          Rank of Msg
+     * @param content       Content of msg
+     */
+    public void sendImTxtMsg(long toTerminal, byte rank, String content){
+        IMTxtMessage txtMessage = new IMTxtMessage(getTransactionId(),MessageType.IM_MESSAGE,
+                getTerminalId(),toTerminal, IMMessage.IMMsgType.IM_TXT_MSG,rank,content);
+
+        // Invoke native service to send message
+        Log.d(LOG_TAG, "sendImTxtMsg(): Start invoke native service to send IM txt msg.");
+        if(mNativeService!= null){
+            mNativeService.sendMessage(txtMessage);
+        }else {
+            Log.e(LOG_TAG,"sendImTxtMsg():It seems failed to bind service mNativeService = "+mNativeService);
+        }
+
+    }
+
+    /**
+     * Send IM voice msg to another terminal. The response from destination will be handled by mRspListener.
+     * @param toTerminal    Terminal ID of destination
+     * @param voiceData     Context of voice data
+     */
+    public void sendImVoiceMsg(long toTerminal, byte[] voiceData){
+        IMVoiceMessage voiceMessage = new IMVoiceMessage(getTransactionId(),MessageType.IM_MESSAGE,
+                getTerminalId(),toTerminal, IMMessage.IMMsgType.IM_VOICE_MSG,voiceData);
+
+        // Invoke native service to send message
+        Log.d(LOG_TAG, "sendImVoiceMsg(): Start invoke native service to send IM voice msg.");
+        if(mNativeService!= null){
+            mNativeService.sendMessage(voiceMessage,mRspListener);
+        }else {
+            Log.e(LOG_TAG,"sendImVoiceMsg():It seems failed to bind service mNativeService = "+mNativeService);
+        }
+
+    }
+
+    /**
+     * send to schedule server to indicate starting to execute given <>taskID</>
+     * @param taskId
+     */
+    public void startWorkMsg(short taskId){
+        TaskAssignmentMessage startWorkMsg = new TaskAssignmentMessage(getTransactionId(),
+                MessageType.TASK_MESSAGE,getTerminalId(),taskId, TaskAssignmentMessage.TaskMsgType.TASK_BEGIN_MSG);
+
+        // Invoke native service to send message
+        Log.d(LOG_TAG, "startWork(): Start invoke native service to send start work msg.");
+        if(mNativeService!= null){
+            mNativeService.sendMessage(startWorkMsg,mRspListener);
+        }else {
+            Log.e(LOG_TAG,"startWork():It seems failed to bind service mNativeService = "+mNativeService);
+        }
+
+
+    }
+
+    /**
+     * Send to schedule server to indicate having finished the given <>taskID</>
+     * @param taskId
+     */
+    public void finishWorkMsg(short taskId){
+        TaskAssignmentMessage finishWorkMsg = new TaskAssignmentMessage(getTransactionId(),
+                MessageType.TASK_MESSAGE,getTerminalId(),taskId, TaskAssignmentMessage.TaskMsgType.TASK_FINISH_MSG);
+
+        // Invoke native service to send message
+        Log.d(LOG_TAG, "finishWork(): Start invoke native service to send finish work msg.");
+        if(mNativeService!= null){
+            mNativeService.sendMessage(finishWorkMsg,mRspListener);
+        }else {
+            Log.e(LOG_TAG,"finishWork():It seems failed to bind service mNativeService = "+mNativeService);
+        }
+
+    }
+
+    /**
+     * Send to schedule server to query work ID
+     * @param taskId
+     */
+    public void queryWorkById(short taskId){
+        TaskAssignmentMessage queryWorkMsg = new TaskAssignmentMessage(getTransactionId(),
+                MessageType.TASK_MESSAGE,getTerminalId(),taskId, TaskAssignmentMessage.TaskMsgType.TASK_QUERY_MSG);
+
+        // Invoke native service to send message
+        Log.d(LOG_TAG, "queryWorkMsg(): Start invoke native service to send query work by id msg.");
+        if(mNativeService!= null){
+            mNativeService.sendMessage(queryWorkMsg,mRspListener);
+        }else {
+            Log.e(LOG_TAG,"queryWorkMsg():It seems failed to bind service mNativeService = "+mNativeService);
+        }
+
+    }
+
+    /**
+     * Used to produce transaction id for send msg.
+     * @return
+     */
+    public long getTransactionId(){
+        //FIXME Get TransactionID
+        return (new Random().nextLong());
+    }
+
+    /**
+     * Used to get terminal ID from property.
+     * @return
+     */
+    public long getTerminalId (){
+        //FIXME Get Terminal ID from property
+        return 1234567L;
+    }
+
+    /**
+     * Used to get terminal type from property.
+     * @return
+     */
+    public TerminalType getTerminalType(){
+        //FIXME Get terminal ID from property
+        return TerminalType.TERMINAL_CAR;
+    }
+
+    /**
+     * Used to retrieve my location from BeiDou positioning system.
      * @return
      */
     public Location getMyLocation(){
@@ -141,10 +241,11 @@ public class UserService{
 
 
     /**
-     * Used to retrieve my speed from BeiDou positioning system
+     * Used to retrieve my speed from BeiDou positioning system.
      * @return
      */
     public float getMySpeed(){
+        //FIXME Get my speed from BeiDou positioning system
         float mySpeed = 12.23f;
         return mySpeed;
     }

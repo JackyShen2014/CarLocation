@@ -4,5 +4,5 @@ import java.io.Serializable;
 
 public enum ConnectionState implements Serializable {
 
-	CONNECTED, NO_CONNECTION, SERVER_REJECT, CONNECTING, SERVER_FAILED,
+	CONNECTED, NO_CONNECTION, SERVER_REJECT, CONNECTING, SERVER_FAILED, CONNECT_FAILED
 }

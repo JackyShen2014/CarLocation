@@ -351,7 +351,7 @@ public class MainActivity extends ActionBarActivity implements
 
             //Print out all MSGs' json format
             new AuthMessage(123, MessageType.AUTH_MESSAGE, 456, "Name", "password", AuthMessage.AuthMsgType.AUTH_LOGIN_MSG).translate();
-            ArrayList<Location> array = new ArrayList<>();
+            ArrayList<Location> array = new ArrayList<Location>();
             array.add(new Location(321.123, 456.654));
             array.add(new Location(789.987, 890.098));
             new GlidingPathMessage(123, 456, "title", 7, array).translate();

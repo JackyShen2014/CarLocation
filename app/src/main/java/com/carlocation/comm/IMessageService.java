@@ -1,6 +1,7 @@
 package com.carlocation.comm;
 
 import com.carlocation.comm.messaging.Message;
+import com.carlocation.comm.messaging.ResponseMessage;
 
 /**
  * Interface for message service.<br>
@@ -27,6 +28,13 @@ public interface IMessageService {
 	public void sendMessage(Message message, ResponseListener listener);
 	
 	
+	/**
+	 * Send response
+	 * @param rm
+	 */
+	public void sendMessageResponse(ResponseMessage rm);
+	
+	
 	
 	/**
 	 * Inform this service, UI won't wait this message response any longer
@@ -37,6 +45,8 @@ public interface IMessageService {
 	/**
 	 * Register listener for unsolicited message notification
 	 * @param listener
+	 * 
+	 * @see NotificationListener
 	 */
 	public void registerNotificationListener(NotificationListener listener);
 	
@@ -44,6 +54,8 @@ public interface IMessageService {
 	/**
 	 * Unregister listener and never receive unsolicited message any longer
 	 * @param listener
+	 * 
+	 * @see NotificationListener
 	 */
 	public void unRegisterNotificationListener(NotificationListener listener);
 

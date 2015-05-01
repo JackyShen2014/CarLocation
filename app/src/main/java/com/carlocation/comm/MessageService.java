@@ -769,6 +769,37 @@ public class MessageService extends Service {
 		}
 
 	};
+	
+	
+	
+	
+	class AuthRunnable implements Runnable {
+
+		private AuthMessage message;
+		public AuthRunnable(AuthMessage auth) {
+			message = auth;
+		}
+		
+		@Override
+		public void run() {
+			mSenderChannel = getSenderChannel(mServer, mPort, message.mUserName,
+					message.mPassword);
+			Notification.Result nt = Notification.Result.FAILED;
+			if (mSenderChannel != null && mSenderChannel.isOpen()) {
+				mUserName = message.mUserName;
+				mPassword = message.mPassword;
+				nt = Notification.Result.SUCCESS;
+			}
+			fireBackMessage(message, nt);
+
+			if (mIsAuthed && (mConsumer == null || !mConsumer.isAlive())) {
+				mConsumer = new ConsumerThread(getReceiverChannel());
+				mConsumer.start();
+			}
+			
+		}
+		
+	};
 
 	class TimeStamp {
         BaseMessage message;
@@ -798,21 +829,7 @@ public class MessageService extends Service {
 				return;
 			}
 			if (message.getMessageType() == MessageType.AUTH_MESSAGE) {
-				AuthMessage am = (AuthMessage) message;
-				mSenderChannel = getSenderChannel(mServer, mPort, am.mUserName,
-						am.mPassword);
-				Notification.Result nt = Notification.Result.FAILED;
-				if (mSenderChannel != null && mSenderChannel.isOpen()) {
-					mUserName = am.mUserName;
-					mPassword = am.mPassword;
-					nt = Notification.Result.SUCCESS;
-				}
-				fireBackMessage(message, nt);
-
-				if (mIsAuthed && (mConsumer == null || !mConsumer.isAlive())) {
-					mConsumer = new ConsumerThread(getReceiverChannel());
-					mConsumer.start();
-				}
+				mLocalHandler.post(new AuthRunnable((AuthMessage)message));
 			} else {
 				if (!mIsAuthed) {
 					fireBackMessage(message, Notification.Result.FAILED);

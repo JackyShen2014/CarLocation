@@ -187,8 +187,7 @@ public class CarLocationApplication extends Application {
 	@Override
 	public void onTrimMemory(int level) {
 		super.onTrimMemory(level);
-		if (level == ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN
-				|| level == ComponentCallbacks2.TRIM_MEMORY_COMPLETE) {
+		if (level == ComponentCallbacks2.TRIM_MEMORY_COMPLETE) {
 			unbindService(mServiceConnection);
 			mBound = false;
 		}

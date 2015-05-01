@@ -20,6 +20,7 @@ public class Notification {
         FAILED,
         TIME_OUT,
         SERVER_RJECT,
+        NO_CONNECTION,
     }
 
 

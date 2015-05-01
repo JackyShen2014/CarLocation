@@ -4,10 +4,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class ResponseMessage {
-	
-	
+
 	public static final String KEY_RQ = "rq";
-	
+
 	public static final String KEY_RET = "ret";
 
 	public BaseMessage message;
@@ -35,8 +34,9 @@ public class ResponseMessage {
 		return object.toString();
 	}
 
-    @Override
-    public String toString() {
-        return "ResponseMessage [ status= " + status +"]";
-    }
+	@Override
+	public String toString() {
+		return "ResponseMessage [message=" + message + "   status:" + status
+				+ "]";
+	}
 }

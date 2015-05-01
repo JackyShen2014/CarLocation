@@ -358,7 +358,7 @@ public class MainActivity extends ActionBarActivity implements
             new IMTxtMessage(123, MessageType.IM_MESSAGE, 456, 789, IMMessage.IMMsgType.IM_TXT_MSG, (byte) 11, "TXTContent").translate();
             byte[] bArray = {(byte) 1, (byte) 2, (byte) 3};
             new IMVoiceMessage(123, MessageType.IM_MESSAGE, 456, 789, IMMessage.IMMsgType.IM_VOICE_MSG, bArray).translate();
-            new LocationMessage(123, MessageType.LOCATION_MESSAGE, 456, TerminalType.TERMINAL_CAR, new Location(321.123, 456.654), 1.1f).translate();
+            new LocationMessage(123, 456, TerminalType.TERMINAL_CAR, new Location(321.123, 456.654), 1.1f).translate();
             new RestrictedAreaMessage(123, MessageType.WARN_MESSAGE, array).translate();
             new StatusMessage(123, MessageType.STATUS_MESSAGE, 456, StatusMessage.StatusMsgType.STATUS_ONLINE, StatusMessage.UserType.MOBILE_PAD).translate();
             new TaskAssignmentMessage(123, MessageType.TASK_MESSAGE, 456, (short) 1, TaskAssignmentMessage.TaskMsgType.TASK_BEGIN_MSG).translate();

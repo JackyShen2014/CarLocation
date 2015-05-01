@@ -95,7 +95,7 @@ public class UserService{
      * Used to send my location to server.
      */
     public void sendMyLocation (){
-        LocationMessage myLocationMsg = new LocationMessage(getTransactionId(),MessageType.LOCATION_MESSAGE,getTerminalId(),
+        LocationMessage myLocationMsg = new LocationMessage(getTransactionId(),getTerminalId(),
                 getTerminalType(),getMyLocation(),getMySpeed());
 
         // Invoke native service to send message

@@ -31,9 +31,6 @@
         <service android:name="com.carlocation.comm.MessageService"
                  android:enabled="true"
                  android:exported="false">
-            <intent-filter>
-                <action android:name="com.carlocation.comm.message.service" />
-            </intent-filter>
         </service>
     </application>
 

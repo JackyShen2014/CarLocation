@@ -28,9 +28,9 @@ public class LocationMessage extends Message {
         this.mMessageType = MessageType.LOCATION_MESSAGE;
     }
 
-    public LocationMessage(long mTransactionID, MessageType mMessageType, long mTerminalId,
+    public LocationMessage(long mTransactionID, long mTerminalId,
                            TerminalType mTerminalType, Location mLocation, float mSpeed) {
-        super(mTransactionID, mMessageType);
+        super(mTransactionID);
         this.mTerminalId = mTerminalId;
         this.mTerminalType = mTerminalType;
         this.mLocation = mLocation;

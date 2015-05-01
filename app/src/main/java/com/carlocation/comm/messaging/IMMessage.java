@@ -9,7 +9,7 @@ import org.json.JSONObject;
  * Created by Jacky on 2015/4/21.
  * @author Jacky Shen
  */
-public class IMMessage extends Message{
+public class IMMessage extends BaseMessage{
     private static final String LOG_TAG = "IMMessage";
 
     public long mFromTerminalId;

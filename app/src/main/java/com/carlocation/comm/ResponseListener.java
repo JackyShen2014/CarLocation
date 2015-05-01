@@ -8,7 +8,7 @@ import com.carlocation.comm.messaging.Notification;
  * </ul>
  * <ul>
  * To get response message, you have to make sure use
- * {@link IMessageService#sendMessage(com.carlocation.comm.messaging.Message, ResponseListener)}
+ * {@link IMessageService#sendMessage(com.carlocation.comm.messaging.BaseMessage, ResponseListener)}
  * to send request. Otherwise you can't receive response.
  * </ul>
  * 

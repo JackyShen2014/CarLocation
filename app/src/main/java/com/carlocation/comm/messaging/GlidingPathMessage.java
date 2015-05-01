@@ -12,7 +12,7 @@ import java.util.ArrayList;
  * Created by Jacky on 2015/4/21.
  * @author Jacky Shen
  */
-public class GlidingPathMessage extends Message {
+public class GlidingPathMessage extends BaseMessage {
     private static final String LOG_TAG = "GlidingPathMessage";
     public long mTerminalId;
     public String mTitle;

@@ -1,9 +1,5 @@
 package com.carlocation.view;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
 import android.app.Application;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
@@ -19,6 +15,9 @@ import android.widget.Toast;
 import com.carlocation.R;
 import com.carlocation.comm.IMessageService;
 import com.carlocation.comm.MessageService;
+
+import java.io.InputStream;
+import java.util.Properties;
 
 public class CarLocationApplication extends Application {
 

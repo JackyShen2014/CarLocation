@@ -13,7 +13,7 @@ import org.json.JSONObject;
  * @author 28851274
  * @author Jacky Shen
  */
-public class LocationMessage extends Message {
+public class LocationMessage extends BaseMessage {
 
     private static final long serialVersionUID = -1427264506745698504L;
     private final String LOG_TAG = "LocationMessage";

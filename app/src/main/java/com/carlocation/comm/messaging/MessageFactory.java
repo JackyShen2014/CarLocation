@@ -1,17 +1,17 @@
 package com.carlocation.comm.messaging;
 
-import java.io.IOException;
-import java.io.StringReader;
+import android.util.JsonReader;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.util.JsonReader;
+import java.io.IOException;
+import java.io.StringReader;
 
 public class MessageFactory {
 
 
-	public static String addHeader(Message message) {
+	public static String addHeader(BaseMessage message) {
 		JSONObject object = new JSONObject();
 		conHeader(object, new MessageHeader(1, 1));
 		try {
@@ -84,7 +84,7 @@ public class MessageFactory {
 		return h;
 	}
 
-	public static Message parseRequestFromJSON(String json) {
+	public static BaseMessage parseRequestFromJSON(String json) {
 		JsonReader reader = new JsonReader(new StringReader(json));
 		try {
 			return parseRequestFromJSON(reader);
@@ -100,7 +100,7 @@ public class MessageFactory {
 		return null;
 	}
 
-	public static Message parseRequestFromJSON(JsonReader reader) {
+	public static BaseMessage parseRequestFromJSON(JsonReader reader) {
 		return null;
 	}
 

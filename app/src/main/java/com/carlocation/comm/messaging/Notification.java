@@ -2,7 +2,7 @@ package com.carlocation.comm.messaging;
 
 public class Notification {
 
-    public Message message;
+    public BaseMessage message;
 
     public NotificationType notiType;
 
@@ -23,7 +23,7 @@ public class Notification {
     }
 
 
-    public Notification(Message message, NotificationType notiType, Result result) {
+    public Notification(BaseMessage message, NotificationType notiType, Result result) {
         super();
         this.message = message;
         this.notiType = notiType;

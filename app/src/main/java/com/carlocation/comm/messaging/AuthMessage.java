@@ -12,7 +12,7 @@ import java.nio.charset.Charset;
  *
  * @author Jacky Shen
  */
-public class AuthMessage extends Message {
+public class AuthMessage extends BaseMessage {
     private static final long serialVersionUID = -7313293501889870528L;
 
     private final String LOG_TAG = "AuthMessage";

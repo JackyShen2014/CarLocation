@@ -10,7 +10,7 @@ public class ResponseMessage {
 	
 	public static final String KEY_RET = "ret";
 
-	public Message message;
+	public BaseMessage message;
 
 	public MessageResponseStatus status;
 

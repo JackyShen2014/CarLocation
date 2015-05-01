@@ -12,7 +12,7 @@ import java.util.ArrayList;
  * Created by Jacky on 2015/4/21.
  * @author Jacky Shen
  */
-public class RestrictedAreaMessage extends Message {
+public class RestrictedAreaMessage extends BaseMessage {
     private static final String LOG_TAG = "RestrictedAreaMessage";
 
     public ArrayList<Location> mLocationArea = new ArrayList<Location>();

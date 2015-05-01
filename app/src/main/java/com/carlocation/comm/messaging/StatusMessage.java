@@ -9,7 +9,7 @@ import org.json.JSONObject;
  * Created by 28851620 on 4/22/2015.
  * @author Jacky Shen
  */
-public class StatusMessage extends Message {
+public class StatusMessage extends BaseMessage {
     private final String LOG_TAG = "StatusMessage";
 
     public long mTerminalId;

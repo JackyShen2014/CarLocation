@@ -9,7 +9,7 @@ import java.io.Serializable;
  * @author Jacky Shen
  *
  */
-public abstract class Message implements Serializable{
+public abstract class BaseMessage implements Serializable{
 
 	/**
 	 * 
@@ -25,16 +25,16 @@ public abstract class Message implements Serializable{
 	
 	protected MessageType mMessageType;
 
-    protected Message() {
+    protected BaseMessage() {
         super();
     }
 
-    public Message(long mTransactionID) {
+    public BaseMessage(long mTransactionID) {
 		super();
 		this.mTransactionID = mTransactionID;
 	}
 
-    protected Message(long mTransactionID, MessageType mMessageType) {
+    protected BaseMessage(long mTransactionID, MessageType mMessageType) {
         this.mTransactionID = mTransactionID;
         this.mMessageType = mMessageType;
     }
@@ -87,7 +87,7 @@ public abstract class Message implements Serializable{
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Message other = (Message) obj;
+        BaseMessage other = (BaseMessage) obj;
 		if (mTransactionID != other.mTransactionID)
 			return false;
 		return true;

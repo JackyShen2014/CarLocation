@@ -1,10 +1,8 @@
 package com.carlocation.view;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.carlocation.comm.IMessageService;
-import com.carlocation.comm.NotificationListener;
 import com.carlocation.comm.ResponseListener;
 import com.carlocation.comm.messaging.AuthMessage;
 import com.carlocation.comm.messaging.IMMessage;
@@ -13,7 +11,6 @@ import com.carlocation.comm.messaging.IMVoiceMessage;
 import com.carlocation.comm.messaging.Location;
 import com.carlocation.comm.messaging.LocationMessage;
 import com.carlocation.comm.messaging.MessageType;
-import com.carlocation.comm.messaging.Notification;
 import com.carlocation.comm.messaging.TaskAssignmentMessage;
 import com.carlocation.comm.messaging.TerminalType;
 

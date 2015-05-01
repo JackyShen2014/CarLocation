@@ -1,6 +1,6 @@
 package com.carlocation.comm;
 
-import com.carlocation.comm.messaging.Message;
+import com.carlocation.comm.messaging.BaseMessage;
 import com.carlocation.comm.messaging.ResponseMessage;
 
 /**
@@ -16,7 +16,7 @@ public interface IMessageService {
 	 * Send message to remote. will ignore response
 	 * @param message
 	 */
-	public void sendMessage(Message message);
+	public void sendMessage(BaseMessage message);
 	
 	
 	/**
@@ -25,7 +25,7 @@ public interface IMessageService {
 	 * @param message
 	 * @param listener
 	 */
-	public void sendMessage(Message message, ResponseListener listener);
+	public void sendMessage(BaseMessage message, ResponseListener listener);
 	
 	
 	/**
@@ -40,7 +40,7 @@ public interface IMessageService {
 	 * Inform this service, UI won't wait this message response any longer
 	 * @param message
 	 */
-	public void cancelWaiting(Message message);
+	public void cancelWaiting(BaseMessage message);
 	
 	/**
 	 * Register listener for unsolicited message notification

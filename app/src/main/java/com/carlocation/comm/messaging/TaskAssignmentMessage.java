@@ -10,7 +10,7 @@ import org.json.JSONObject;
  * @author Jacky Shen
  */
 
-public class TaskAssignmentMessage extends Message {
+public class TaskAssignmentMessage extends BaseMessage {
 
     private static final long serialVersionUID = 3013175663486838455L;
     private final String LOG_TAG = "TaskAssignmentMessage";

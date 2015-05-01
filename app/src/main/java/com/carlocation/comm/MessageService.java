@@ -1,11 +1,5 @@
 package com.carlocation.comm;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -21,7 +15,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.carlocation.comm.messaging.AuthMessage;
-import com.carlocation.comm.messaging.Message;
+import com.carlocation.comm.messaging.BaseMessage;
 import com.carlocation.comm.messaging.MessageFactory;
 import com.carlocation.comm.messaging.MessageHeader;
 import com.carlocation.comm.messaging.MessageType;
@@ -40,7 +34,12 @@ import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.QueueingConsumer.Delivery;
 import com.rabbitmq.client.ShutdownSignalException;
 import com.rabbitmq.client.TopologyRecoveryException;
-import com.rabbitmq.client.impl.AMQImpl;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Communication service.<br>
@@ -135,7 +134,7 @@ public class MessageService extends Service {
 
 	private List<NotificationListener> notificationListeners = new ArrayList<NotificationListener>();
 
-	private Map<Message, TimeStamp> mPendingResponse = new HashMap<Message, TimeStamp>();
+	private Map<BaseMessage, TimeStamp> mPendingResponse = new HashMap<BaseMessage, TimeStamp>();
 
 	private NativeService mService;
 
@@ -442,7 +441,7 @@ public class MessageService extends Service {
 	 * 
 	 * @param msg
 	 */
-	private boolean fireBackMessage(Message msg, Notification.Result res) {
+	private boolean fireBackMessage(BaseMessage msg, Notification.Result res) {
 		TimeStamp ts = mPendingResponse.remove(msg);
 		if (ts != null) {
 			ts.listener.onResponse(new Notification(msg,
@@ -473,7 +472,7 @@ public class MessageService extends Service {
 	 * 
 	 * @param msg
 	 */
-	private void fireMessage(Message msg) {
+	private void fireMessage(BaseMessage msg) {
 		TimeStamp ts = mPendingResponse.remove(msg);
 
 		if (ts != null) {
@@ -772,11 +771,11 @@ public class MessageService extends Service {
 	};
 
 	class TimeStamp {
-		Message message;
+        BaseMessage message;
 		long timestamp;
 		ResponseListener listener;
 
-		public TimeStamp(Message message, ResponseListener listener) {
+		public TimeStamp(BaseMessage message, ResponseListener listener) {
 			super();
 			this.message = message;
 			this.listener = listener;
@@ -788,7 +787,7 @@ public class MessageService extends Service {
 	class NativeService extends Binder implements IMessageService {
 
 		@Override
-		public void sendMessage(Message message) {
+		public void sendMessage(BaseMessage message) {
 			// TODO should send message operation under other thread?
 			Log.e(TAG, "get message:" + message);
 
@@ -832,7 +831,7 @@ public class MessageService extends Service {
 		}
 
 		@Override
-		public void sendMessage(Message message, ResponseListener listener) {
+		public void sendMessage(BaseMessage message, ResponseListener listener) {
 			if (message == null) {
 				throw new RuntimeException("message is null");
 			}
@@ -857,7 +856,7 @@ public class MessageService extends Service {
 		}
 
 		@Override
-		public void cancelWaiting(Message message) {
+		public void cancelWaiting(BaseMessage message) {
 			mPendingResponse.remove(message);
 		}
 

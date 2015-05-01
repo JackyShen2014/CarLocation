@@ -1,11 +1,20 @@
 package com.carlocation.view;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Properties;
+
 import android.app.Application;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -58,19 +67,21 @@ public class CarLocationApplication extends Application {
 
 		String serverAddr = null;
 		int port = -1;
-				
+		String mapversion = "";
 		try {
-			InputStream in = this.getAssets().open("server.config");
+			InputStream in = this.getAssets().open("env.config");
 			Properties prop = new Properties();
 			prop.load(in);
 			serverAddr = prop.getProperty("server");
 			port = Integer.parseInt(prop.getProperty("port"));
+			mapversion = prop.getProperty("map_update");
 			in.close();
 		} catch (Exception e) {
 			e.printStackTrace();
-		} 
-		
-		//TODO handle if can not get server addr
+		}
+
+
+		// TODO handle if can not get server addr
 		serviceIntent.putExtra(EXTRA_CONNECTION_SERVER_ADDR, serverAddr);
 		serviceIntent.putExtra(EXTRA_CONNECTION_SERVER_PORT, port);
 
@@ -112,6 +123,9 @@ public class CarLocationApplication extends Application {
 		}
 
 	}
+
+	
+
 
 	private Handler h = new Handler() {
 

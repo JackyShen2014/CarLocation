@@ -16,30 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
 
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="fill_parent"
-            android:layout_height="212dp"
-            android:layout_gravity="center">
-
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/userName"
-                android:hint="UserName" />
-
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/passWord"
-                android:hint="PassWord" />
-
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="LogIn"
-                android:id="@+id/logIn" />
-        </LinearLayout>
+      
     </FrameLayout>
 
     <!--

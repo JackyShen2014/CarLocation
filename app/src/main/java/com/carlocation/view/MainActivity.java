@@ -24,6 +24,7 @@ import com.carlocation.R;
 import com.carlocation.comm.IMessageService;
 import com.carlocation.comm.NotificationListener;
 import com.carlocation.comm.ResponseListener;
+import com.carlocation.comm.messaging.ActionType;
 import com.carlocation.comm.messaging.AuthMessage;
 import com.carlocation.comm.messaging.GlidingPathMessage;
 import com.carlocation.comm.messaging.IMMessage;
@@ -349,15 +350,15 @@ public class MainActivity extends ActionBarActivity implements
             ArrayList<Location> array = new ArrayList<Location>();
             array.add(new Location(321.123, 456.654));
             array.add(new Location(789.987, 890.098));
-            new GlidingPathMessage(123, 456, "title", 7, array).translate();
+
+            new GlidingPathMessage(123, MessageType.GLIDE_MESSAGE,ActionType.ACTION_QUERY,456,"title",7,array).translate();
             new IMTxtMessage(123, MessageType.IM_MESSAGE, 456, 789, IMMessage.IMMsgType.IM_TXT_MSG, (byte) 11, "TXTContent").translate();
             byte[] bArray = {(byte) 1, (byte) 2, (byte) 3};
             new IMVoiceMessage(123, MessageType.IM_MESSAGE, 456, 789, IMMessage.IMMsgType.IM_VOICE_MSG, bArray).translate();
             new LocationMessage(123, 456, TerminalType.TERMINAL_CAR, new Location(321.123, 456.654), 1.1f).translate();
-            new RestrictedAreaMessage(123, MessageType.WARN_MESSAGE, array).translate();
+            new RestrictedAreaMessage(123,MessageType.WARN_MESSAGE,ActionType.ACTION_QUERY,12,array).translate();
             new StatusMessage(123, MessageType.STATUS_MESSAGE, 456, StatusMessage.StatusMsgType.STATUS_ONLINE, StatusMessage.UserType.MOBILE_PAD).translate();
-            new TaskAssignmentMessage(123, MessageType.TASK_MESSAGE, 456, (short) 1, TaskAssignmentMessage.TaskMsgType.TASK_BEGIN_MSG).translate();
-
+            new TaskAssignmentMessage(123, MessageType.TASK_MESSAGE,ActionType.ACTION_QUERY,456,(short)1,null).translate();
             return null;
         }
     }

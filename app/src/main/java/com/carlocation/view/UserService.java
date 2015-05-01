@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.carlocation.comm.IMessageService;
 import com.carlocation.comm.ResponseListener;
+import com.carlocation.comm.messaging.ActionType;
 import com.carlocation.comm.messaging.AuthMessage;
 import com.carlocation.comm.messaging.IMMessage;
 import com.carlocation.comm.messaging.IMTxtMessage;
@@ -150,7 +151,7 @@ public class UserService{
      */
     public void startWorkMsg(short taskId){
         TaskAssignmentMessage startWorkMsg = new TaskAssignmentMessage(getTransactionId(),
-                MessageType.TASK_MESSAGE,getTerminalId(),taskId, TaskAssignmentMessage.TaskMsgType.TASK_BEGIN_MSG);
+                MessageType.TASK_MESSAGE,ActionType.ACTION_START,getTerminalId(),taskId,null);
 
         // Invoke native service to send message
         Log.d(LOG_TAG, "startWork(): Start invoke native service to send start work msg.");
@@ -169,7 +170,7 @@ public class UserService{
      */
     public void finishWorkMsg(short taskId){
         TaskAssignmentMessage finishWorkMsg = new TaskAssignmentMessage(getTransactionId(),
-                MessageType.TASK_MESSAGE,getTerminalId(),taskId, TaskAssignmentMessage.TaskMsgType.TASK_FINISH_MSG);
+                MessageType.TASK_MESSAGE, ActionType.ACTION_FINISH,getTerminalId(),taskId,null);
 
         // Invoke native service to send message
         Log.d(LOG_TAG, "finishWork(): Start invoke native service to send finish work msg.");
@@ -187,7 +188,7 @@ public class UserService{
      */
     public void queryWorkById(short taskId){
         TaskAssignmentMessage queryWorkMsg = new TaskAssignmentMessage(getTransactionId(),
-                MessageType.TASK_MESSAGE,getTerminalId(),taskId, TaskAssignmentMessage.TaskMsgType.TASK_QUERY_MSG);
+                MessageType.TASK_MESSAGE,ActionType.ACTION_QUERY,getTerminalId(),taskId,null);
 
         // Invoke native service to send message
         Log.d(LOG_TAG, "queryWorkMsg(): Start invoke native service to send query work by id msg.");

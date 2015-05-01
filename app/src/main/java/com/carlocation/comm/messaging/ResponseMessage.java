@@ -14,7 +14,16 @@ public class ResponseMessage {
 
 	public MessageResponseStatus status;
 
-	public String translate() {
+    public ResponseMessage() {
+        super();
+    }
+
+    public ResponseMessage(BaseMessage message, MessageResponseStatus status) {
+        this.message = message;
+        this.status = status;
+    }
+
+    public String translate() {
 		JSONObject object = new JSONObject();
 		try {
 			object.put(KEY_RQ, message.translate());
@@ -26,4 +35,8 @@ public class ResponseMessage {
 		return object.toString();
 	}
 
+    @Override
+    public String toString() {
+        return "ResponseMessage [ status= " + status +"]";
+    }
 }

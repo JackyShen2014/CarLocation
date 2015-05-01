@@ -15,31 +15,19 @@ public class TaskAssignmentMessage extends BaseMessage {
     private static final long serialVersionUID = 3013175663486838455L;
     private final String LOG_TAG = "TaskAssignmentMessage";
 
+    public ActionType mActionType;
     public long mTerminalId;
     public short mTaskId;
-    public TaskMsgType mTaskType;
+    public String mTaskContent;
 
-    public static enum TaskMsgType{
-        TASK_INITIAL_MSG,
-        TASK_BEGIN_MSG,
-        TASK_FINISH_MSG,
-        TASK_CLEAN_MSG,
-        TASK_QUERY_MSG,
-    }
-
-    public TaskAssignmentMessage (long mTransactionID, long mTerminalId, short mTaskId, TaskMsgType mTaskType) {
-        super(mTransactionID);
-        this.mTerminalId = mTerminalId;
-        this.mTaskId = mTaskId;
-        this.mTaskType = mTaskType;
-    }
-
-    public TaskAssignmentMessage(long mTransactionID, MessageType mMessageType, long mTerminalId,
-                                 short mTaskId, TaskMsgType mTaskType) {
+    public TaskAssignmentMessage(long mTransactionID, MessageType mMessageType,
+                                 ActionType mActionType, long mTerminalId,
+                                 short mTaskId, String mTaskContent) {
         super(mTransactionID, mMessageType);
+        this.mActionType = mActionType;
         this.mTerminalId = mTerminalId;
         this.mTaskId = mTaskId;
-        this.mTaskType = mTaskType;
+        this.mTaskContent = mTaskContent;
     }
 
     @Override
@@ -50,9 +38,11 @@ public class TaskAssignmentMessage extends BaseMessage {
             JSONObject object = new JSONObject();
             object.put("mTransactionID",TaskAssignmentMessage.this.mTransactionID);
             object.put("mMessageType",TaskAssignmentMessage.this.mMessageType);
+            object.put("mActionType",mActionType);
             object.put("mTerminalId",mTerminalId);
             object.put("mTaskId",mTaskId);
-            object.put("mTaskType",mTaskType);
+            object.put("mTaskContent",mTaskContent);
+
 
             jSonResult = object.toString();
 
@@ -68,9 +58,10 @@ public class TaskAssignmentMessage extends BaseMessage {
     public String toString() {
         return "TaskAssignmentMessage ["
                 + super.toString()
-                + "mTerminalId=" + mTerminalId
+                + ", mActionType=" + mActionType
+                + ", mTerminalId=" + mTerminalId
                 + ", mTaskId=" + mTaskId
-                + ", mTaskType=" + mTaskType
+                + ", mTaskContent=" + mTaskContent
                 + "]";
     }
 }

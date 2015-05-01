@@ -15,16 +15,15 @@ import java.util.ArrayList;
 public class RestrictedAreaMessage extends BaseMessage {
     private static final String LOG_TAG = "RestrictedAreaMessage";
 
+    public ActionType mActionType;
+    public int mWarnAreaId;
     public ArrayList<Location> mLocationArea = new ArrayList<Location>();
 
-    public RestrictedAreaMessage(long mTransactionID, ArrayList<Location> mLocationArea) {
-        super(mTransactionID);
-        this.mLocationArea = mLocationArea;
-    }
-
-    public RestrictedAreaMessage(long mTransactionID, MessageType mMessageType,
-                                 ArrayList<Location> mLocationArea) {
+    public RestrictedAreaMessage(long mTransactionID, MessageType mMessageType, ActionType mActionType,
+                                 int mWarnAreaId, ArrayList<Location> mLocationArea) {
         super(mTransactionID, mMessageType);
+        this.mActionType = mActionType;
+        this.mWarnAreaId = mWarnAreaId;
         this.mLocationArea = mLocationArea;
     }
 
@@ -36,6 +35,8 @@ public class RestrictedAreaMessage extends BaseMessage {
             JSONObject object = new JSONObject();
             object.put("mTransactionID",RestrictedAreaMessage.this.mTransactionID);
             object.put("mMessageType",RestrictedAreaMessage.this.mMessageType);
+            object.put("mActionType",mActionType);
+            object.put("mWarnAreaId",mWarnAreaId);
 
             JSONArray array = new JSONArray();
             for (Location location:mLocationArea){
@@ -62,6 +63,8 @@ public class RestrictedAreaMessage extends BaseMessage {
     public String toString() {
         return "RestrictedAreaMessage ["
                 + super.toString()
+                + ", mActionType=" + mActionType
+                + ", mWarnAreaId=" + mWarnAreaId
                 + ", mLocationArea=" + mLocationArea.toString()
                 + "]";
     }

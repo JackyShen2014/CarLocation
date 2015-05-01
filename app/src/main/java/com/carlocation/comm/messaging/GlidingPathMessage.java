@@ -14,16 +14,19 @@ import java.util.ArrayList;
  */
 public class GlidingPathMessage extends BaseMessage {
     private static final String LOG_TAG = "GlidingPathMessage";
+
+    public ActionType mActionType;
     public long mTerminalId;
     public String mTitle;
     public int mGlidePathId;
     public ArrayList<Location> mLocationArray = new ArrayList<Location>();
 
 
-    public GlidingPathMessage(long mTransactionID, long mTerminalId, String mTitle, int mGlidePathId,
+    public GlidingPathMessage(long mTransactionID, MessageType mMessageType, ActionType mActionType,
+                              long mTerminalId, String mTitle, int mGlidePathId,
                               ArrayList<Location> mLocationArray) {
-        super(mTransactionID);
-        this.mMessageType = MessageType.GLIDE_MESSAGE;
+        super(mTransactionID, mMessageType);
+        this.mActionType = mActionType;
         this.mTerminalId = mTerminalId;
         this.mTitle = mTitle;
         this.mGlidePathId = mGlidePathId;
@@ -38,6 +41,7 @@ public class GlidingPathMessage extends BaseMessage {
             JSONObject object = new JSONObject();
             object.put("mTransactionID",GlidingPathMessage.this.mTransactionID);
             object.put("mMessageType",GlidingPathMessage.this.mMessageType);
+            object.put("mActionType",mActionType);
             object.put("mTerminalId",mTerminalId);
             object.put("mTitle",mTitle);
             object.put("mGlidePathId",mGlidePathId);
@@ -68,7 +72,8 @@ public class GlidingPathMessage extends BaseMessage {
     public String toString() {
         return "GlidingPathMessage ["
                 + super.toString()
-                + "mTerminalId=" + mTerminalId
+                + ", mActionType=" + mActionType
+                + ", mTerminalId=" + mTerminalId
                 + ", mTitle=" + mTitle
                 + ", mGlidePathId=" + mGlidePathId
                 + ", mLocationArray=" + mLocationArray.toString()

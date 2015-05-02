@@ -2,7 +2,6 @@ package com.carlocation.view;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,7 +44,7 @@ public class MapFragment extends Fragment {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater,
-			@Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+			 ViewGroup container,  Bundle savedInstanceState) {
 		 View rootView = inflater.inflate(R.layout.map_fragment, container,
                  false);
 		 m_mapview = (MapView) rootView.findViewById(R.id.mapview);

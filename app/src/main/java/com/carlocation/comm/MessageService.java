@@ -276,6 +276,7 @@ public class MessageService extends Service {
 			connectionFactory.setPort(port);
 			connectionFactory.setExceptionHandler(mExceptionHandler);
 			connectionFactory.setAutomaticRecoveryEnabled(false);
+			connectionFactory.setRequestedHeartbeat(5);
 			Log.i(TAG, "Connection server with auth:" + mServerAuthRequired);
 		}
 		if (mServerAuthRequired) {
@@ -481,7 +482,7 @@ public class MessageService extends Service {
 	private void dispose() {
 
 		if (mConsumer != null) {
-			Log.i(TAG, "Request quit");
+			Log.i(TAG, "request consumer thread quit");
 			mConsumer.stopListener();
 		}
 
@@ -509,8 +510,8 @@ public class MessageService extends Service {
 				Log.e(TAG, "Connection close failed", e);
 			}
 		}
-
-		connectionFactory = null;
+ 
+//		connectionFactory = null;
 
 		mChannel = null;
 		mConnection = null;
@@ -648,7 +649,7 @@ public class MessageService extends Service {
 		public void run() {
 			try {
 				AMQP.Queue.DeclareOk deok = ch.queueDeclare(mUserName, false,
-						false, false, null);
+						false, true, null);
 				Log.i(TAG, "Declare queue:" + deok.getQueue()
 						+ "  consume count:" + deok.getConsumerCount()
 						+ "  msg count:" + deok.getMessageCount());
@@ -665,6 +666,7 @@ public class MessageService extends Service {
 				} catch (IOException e) {
 					
 				}
+				//ch.setDefaultConsumer(null);
 				ch.basicConsume(mUserName, true, mUserName, consumer);
 
 			} catch (IOException e) {

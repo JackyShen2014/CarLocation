@@ -46,16 +46,20 @@ public class GlidingPathMessage extends BaseMessage {
             object.put("mTitle",mTitle);
             object.put("mGlidePathId",mGlidePathId);
 
-            JSONArray array = new JSONArray();
-            for (Location location:mLocationArray){
-                JSONObject locObj = new JSONObject();
-                locObj.put("mLng",location.mLng);
-                locObj.put("mLat",location.mLat);
+            if(mLocationArray != null){
+                JSONArray array = new JSONArray();
 
-                array.put(locObj);
+                for (Location location:mLocationArray){
+                    JSONObject locObj = new JSONObject();
+                    locObj.put("mLng",location.mLng);
+                    locObj.put("mLat",location.mLat);
+
+                    array.put(locObj);
+                }
+
+                object.put("mLocationArray",array);
             }
 
-            object.put("mLocationArray",array);
 
             jSonResult = object.toString();
 
@@ -76,7 +80,7 @@ public class GlidingPathMessage extends BaseMessage {
                 + ", mTerminalId=" + mTerminalId
                 + ", mTitle=" + mTitle
                 + ", mGlidePathId=" + mGlidePathId
-                + ", mLocationArray=" + mLocationArray.toString()
+                + ", mLocationArray=" + (mLocationArray!=null ? mLocationArray.toString():null)
                 + "]";
     }
 }

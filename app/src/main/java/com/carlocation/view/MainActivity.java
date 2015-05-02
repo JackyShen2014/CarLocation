@@ -1,21 +1,16 @@
 package com.carlocation.view;
 
-import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -32,6 +27,7 @@ import com.carlocation.comm.messaging.IMTxtMessage;
 import com.carlocation.comm.messaging.IMVoiceMessage;
 import com.carlocation.comm.messaging.Location;
 import com.carlocation.comm.messaging.LocationMessage;
+import com.carlocation.comm.messaging.MessageResponseStatus;
 import com.carlocation.comm.messaging.MessageType;
 import com.carlocation.comm.messaging.Notification;
 import com.carlocation.comm.messaging.RestrictedAreaMessage;
@@ -41,12 +37,21 @@ import com.carlocation.comm.messaging.TerminalType;
 
 import java.util.ArrayList;
 
+import javax.xml.datatype.Duration;
+
 public class MainActivity extends ActionBarActivity implements
         NavigationDrawerFragment.NavigationDrawerCallbacks {
     private static final String LOG_TAG = "MainActivity";
 
 
+    /**
+     * Notification listener
+     */
     private LocalListener mListener;
+    /**
+     * Native Service
+     */
+    private IMessageService mNativeService;
     /**
      * User Service
      */
@@ -69,14 +74,6 @@ public class MainActivity extends ActionBarActivity implements
      */
     private boolean mResumed;
 
-    //LOG IN Views
-    private EditText field_usrName;
-    private EditText field_pasWord;
-    private Button button_logIn;
-
-    private String mUserName;
-    private String mPasWord;
-
 
     private static final int REGISTER_NOTIFICATION = 0;
     private static final int HANDLE_NOTIFICATION = 1;
@@ -92,6 +89,192 @@ public class MainActivity extends ActionBarActivity implements
     private static final int GLIDE_MESSAGE = 4;
     private static final int WARN_MESSAGE = 5;
     private static final int STATUS_MESSAGE = 6;
+
+    private static final int ACTION_ASSIGN = 0;
+    private static final int ACTION_QUERY = 1;
+    private static final int ACTION_START = 2;
+    private static final int ACTION_FINISH = 3;
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        /**
+         * Retrieve native service.
+         */
+        mListener = new LocalListener();
+        mNativeService = ((CarLocationApplication) getApplicationContext()).getService();
+        if (mUserService == null) {
+            mUserService = new UserService(mNativeService, mListener);
+        }
+
+
+        mNavigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.navigation_drawer);
+
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager
+                .beginTransaction()
+                .replace(R.id.container, new MapFragment()).commit();
+
+
+        mTitle = getTitle();
+
+        // Set up the drawer.
+        mNavigationDrawerFragment.setUp(R.id.navigation_drawer,
+                (DrawerLayout) findViewById(R.id.drawer_layout));
+
+        //RegisterNotificationListener
+        //make sure service is not null
+        Message msg = Message.obtain(mHandler, REGISTER_NOTIFICATION);
+        mHandler.sendMessageDelayed(msg, 500);
+
+        //FIXME asynTask used to test all APIs of logical service layer
+        new send().execute();
+    }
+
+    /**
+     * This is the fragment-orientated version of {@link #onResume()} that you
+     * can override to perform operations in the Activity at the same point
+     * where its fragments are resumed.  Be sure to always call through to
+     * the super-class.
+     */
+    @Override
+    protected void onResumeFragments() {
+        super.onResumeFragments();
+        mResumed = true;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mResumed = false;
+
+        (((CarLocationApplication) getApplicationContext()).getService()).unRegisterNotificationListener(this.mListener);
+    }
+
+    private class send extends AsyncTask<String, Void, Void> {
+
+        /**
+         * Override this method to perform a computation on a background thread. The
+         * specified parameters are the parameters passed to {@link #execute}
+         * by the caller of this task.
+         * <p/>
+         * This method can call {@link #publishProgress} to publish updates
+         * on the UI thread.
+         *
+         * @param params The parameters of the task.
+         * @return A result, defined by the subclass of this task.
+         * @see #onPreExecute()
+         * @see #onPostExecute
+         * @see #publishProgress
+         */
+        @Override
+        protected Void doInBackground(String... params) {
+            //Retrieve Native Service and Send LogIn MSG to server to login.
+
+            /**
+             * Examples for how to use UserService to send MSG to Server
+             */
+
+            //Test case 2: update mylocation to server
+            mUserService.sendMyStatus(StatusMessage.StatusMsgType.STATUS_ONLINE);
+            mUserService.sendMyLocation();
+            mUserService.sendImTxtMsg(123, (byte) 2, "IM txt msg.");
+            byte[] bArray = {(byte) 1, (byte) 2, (byte) 3};
+            mUserService.sendImVoiceMsg(123, bArray);
+            mUserService.startWorkMsg((short) 1);
+            mUserService.finishWorkMsg((short) 1);
+            mUserService.queryWorkById((short) 1);
+            mUserService.queryGlidePathById(1);
+            mUserService.queryWarnAreaById(1);
+
+
+            /**
+             * Below are used to test all msg json format
+             */
+            //Print out all MSGs' json format
+            /*new AuthMessage(123, MessageType.AUTH_MESSAGE, 456, "Name", "password", AuthMessage.AuthMsgType.AUTH_LOGIN_MSG).translate();
+            ArrayList<Location> array = new ArrayList<Location>();
+            array.add(new Location(321.123, 456.654));
+            array.add(new Location(789.987, 890.098));
+
+            new GlidingPathMessage(123, MessageType.GLIDE_MESSAGE, ActionType.ACTION_QUERY, 456, "title", 7, array).translate();
+            new IMTxtMessage(123, MessageType.IM_MESSAGE, 456, 789, IMMessage.IMMsgType.IM_TXT_MSG, (byte) 11, "TXTContent").translate();
+            byte[] bArray = {(byte) 1, (byte) 2, (byte) 3};
+            new IMVoiceMessage(123, MessageType.IM_MESSAGE, 456, 789, IMMessage.IMMsgType.IM_VOICE_MSG, bArray).translate();
+            new LocationMessage(123, 456, TerminalType.TERMINAL_CAR, new Location(321.123, 456.654), 1.1f).translate();
+            new RestrictedAreaMessage(123, MessageType.WARN_MESSAGE, ActionType.ACTION_QUERY, 12, array).translate();
+            new StatusMessage(123, MessageType.STATUS_MESSAGE, 456, StatusMessage.StatusMsgType.STATUS_ONLINE, StatusMessage.UserType.MOBILE_PAD).translate();
+            new TaskAssignmentMessage(123, MessageType.TASK_MESSAGE, ActionType.ACTION_QUERY, 456, (short) 1, null).translate();*/
+            return null;
+        }
+    }
+
+
+    @Override
+    public void onNavigationDrawerItemSelected(int position) {
+//        // update the main content by replacing fragments
+//        FragmentManager fragmentManager = getSupportFragmentManager();
+//        fragmentManager
+//                .beginTransaction()
+//                .replace(R.id.container,
+//                        PlaceholderFragment.newInstance(position + 1)).commit();
+    }
+
+    public void onSectionAttached(int number) {
+        switch (number) {
+            case 1:
+                mTitle = getString(R.string.title_section1);
+                break;
+            case 2:
+                mTitle = getString(R.string.title_section2);
+                break;
+            case 3:
+                mTitle = getString(R.string.title_section3);
+                break;
+        }
+    }
+
+    public void restoreActionBar() {
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+        actionBar.setDisplayShowTitleEnabled(true);
+        actionBar.setTitle(mTitle);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (!mNavigationDrawerFragment.isDrawerOpen()) {
+            // Only show items in the action bar relevant to this screen
+            // if the drawer is not showing. Otherwise, let the drawer
+            // decide what to show in the action bar.
+            getMenuInflater().inflate(R.menu.main, menu);
+            restoreActionBar();
+            return true;
+        }
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
 
     private Handler mHandler = new Handler() {
@@ -160,23 +343,13 @@ public class MainActivity extends ActionBarActivity implements
                 AuthMessage authMsg = (AuthMessage) noti.message;
 
                 if (authMsg.mAuthType == AuthMessage.AuthMsgType.AUTH_LOGIN_MSG) {
-                    //Deal with login RSP
-                    if (noti.result == Notification.Result.SUCCESS) {
-                        Toast.makeText(MainActivity.this, R.string.notify_login_success, Toast.LENGTH_SHORT).show();
-                        //TODO Start another activity to enter next action after login
-
-
-                    } else {
-                        String notifyFail = getResources().getText(R.string.notify_login_fail).toString();
-                        Toast.makeText(MainActivity.this, notifyFail + noti.result, Toast.LENGTH_SHORT).show();
-                    }
+                    //Already done in LoginActivity, so nothing to do
 
                 } else if (authMsg.mAuthType == AuthMessage.AuthMsgType.AUTH_LOGOUT_MSG) {
                     //Deal with logout RSP
                     if (noti.result == Notification.Result.SUCCESS) {
                         Toast.makeText(MainActivity.this, R.string.notify_logout_success, Toast.LENGTH_SHORT).show();
                         //TODO Start another activity to enter next action after logout
-
 
                     } else {
                         String notifyFail = getResources().getText(R.string.notify_logout_fail).toString();
@@ -189,22 +362,22 @@ public class MainActivity extends ActionBarActivity implements
                 }
                 break;
             case LOCATION_MESSAGE:
-                //TODO deal with auth response
+                //Current we don't send location with response callback. So nothing to do.
                 break;
             case IM_MESSAGE:
-                //TODO deal with auth response
+                //Current we don't send IM Msg with response callback. So nothing to do.
                 break;
             case TASK_MESSAGE:
-                //TODO deal with auth response
+                handleTaskAssignmentMsgRsp(noti);
                 break;
             case GLIDE_MESSAGE:
-                //TODO deal with auth response
+                handleGlidePathMsgRsp(noti);
                 break;
             case WARN_MESSAGE:
-                //TODO deal with auth response
+                handleWarnMsgRsp(noti);
                 break;
             case STATUS_MESSAGE:
-                //TODO Deal with status response
+                //Current we don't send IM Msg with response callback. So nothing to do.
                 break;
             default:
                 break;
@@ -212,210 +385,157 @@ public class MainActivity extends ActionBarActivity implements
 
     }
 
+    private void handleTaskAssignmentMsgRsp(Notification noti) {
+        TaskAssignmentMessage taskMsg = (TaskAssignmentMessage) noti.message;
+        switch (taskMsg.mActionType.ordinal()) {
+            case ACTION_ASSIGN:
+                Log.e(LOG_TAG, "handleTaskAssignmentMsgRsp(): It should not be here!");
+                break;
+            case ACTION_QUERY:
+            case ACTION_START:
+            case ACTION_FINISH:
+                if (noti.result == Notification.Result.SUCCESS) {
+                    Toast.makeText(MainActivity.this, R.string.notify_msg_resp_OK, Toast.LENGTH_SHORT).show();
+                } else if (noti.result == Notification.Result.NO_CONNECTION) {
+                    //Indicate to user that msg sent failed due to no connection
+                    Toast.makeText(MainActivity.this, R.string.notify_msg_resp_no_connection, Toast.LENGTH_SHORT).show();
+
+                } else if (noti.result == Notification.Result.SERVER_RJECT) {
+                    Toast.makeText(MainActivity.this, R.string.notify_msg_resp_reject, Toast.LENGTH_SHORT).show();
+                    //TODO if msg has been reject by server, what to do next?
+                } else {
+                    Log.d(LOG_TAG, "handleTaskAssignmentMsgRsp(): Server failed to receive " +
+                            "this msg for reason= " + noti.result);
+                    //Resend msg if server didn't receive msg for these reasons.
+                    mNativeService.sendMessage(taskMsg, mListener);
+                }
+
+                break;
+        }
+
+
+    }
+
+    private void handleGlidePathMsgRsp(Notification noti) {
+        GlidingPathMessage glideMsg = (GlidingPathMessage) noti.message;
+        switch (glideMsg.mActionType.ordinal()) {
+            case ACTION_ASSIGN:
+            case ACTION_START:
+            case ACTION_FINISH:
+                Log.e(LOG_TAG, "handleGlidePathMsgRsp(): It should not be here!");
+                break;
+            case ACTION_QUERY:
+                if (noti.result == Notification.Result.SUCCESS) {
+                    Toast.makeText(MainActivity.this, R.string.notify_msg_resp_OK, Toast.LENGTH_SHORT).show();
+                } else if (noti.result == Notification.Result.NO_CONNECTION) {
+                    //Indicate to user that msg sent failed due to no connection
+                    Toast.makeText(MainActivity.this, R.string.notify_msg_resp_no_connection, Toast.LENGTH_SHORT).show();
+
+                } else if (noti.result == Notification.Result.SERVER_RJECT) {
+                    Toast.makeText(MainActivity.this, R.string.notify_msg_resp_reject, Toast.LENGTH_SHORT).show();
+                    //TODO if msg has been reject by server, what to do next?
+                } else {
+                    Log.d(LOG_TAG, "handleGlidePathMsgRsp(): Server failed to receive " +
+                            "this msg for reason= " + noti.result);
+                    //Resend msg if server didn't receive msg for these reasons.
+                    mNativeService.sendMessage(glideMsg, mListener);
+                }
+                break;
+        }
+
+    }
+
+    private void handleWarnMsgRsp(Notification noti) {
+        RestrictedAreaMessage warnMsg = (RestrictedAreaMessage) noti.message;
+        switch (warnMsg.mActionType.ordinal()) {
+            case ACTION_ASSIGN:
+            case ACTION_START:
+            case ACTION_FINISH:
+                Log.e(LOG_TAG, "handleWarnMsgRsp(): It should not be here!");
+                break;
+            case ACTION_QUERY:
+                if (noti.result == Notification.Result.SUCCESS) {
+                    Toast.makeText(MainActivity.this, R.string.notify_msg_resp_OK, Toast.LENGTH_SHORT).show();
+                } else if (noti.result == Notification.Result.NO_CONNECTION) {
+                    //Indicate to user that msg sent failed due to no connection
+                    Toast.makeText(MainActivity.this, R.string.notify_msg_resp_no_connection, Toast.LENGTH_SHORT).show();
+
+                } else if (noti.result == Notification.Result.SERVER_RJECT) {
+                    Toast.makeText(MainActivity.this, R.string.notify_msg_resp_reject, Toast.LENGTH_SHORT).show();
+                    //TODO if msg has been reject by server, what to do next?
+                } else {
+                    Log.d(LOG_TAG, "handleWarnMsgRsp(): Server failed to receive " +
+                            "this msg for reason= " + noti.result);
+                    //Resend msg if server didn't receive msg for these reasons.
+                    mNativeService.sendMessage(warnMsg, mListener);
+                }
+                break;
+        }
+
+    }
+
     private void handleUnsolicitedMessage(Message msg) {
-        //TODO Deal with all unsolicited Message
-
-    }
-
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        findViews();
-        
-        mListener = new LocalListener();
-
-        mNavigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.navigation_drawer);
-        
-      FragmentManager fragmentManager = getSupportFragmentManager();
-      fragmentManager
-              .beginTransaction()
-              .replace(R.id.container, new MapFragment()).commit();
-        
-        
-        mTitle = getTitle();
-
-        // Set up the drawer.
-        mNavigationDrawerFragment.setUp(R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
-
-        //RegisterNotificationListener
-        //make sure service is not null
-        Message msg = Message.obtain(mHandler, REGISTER_NOTIFICATION);
-        mHandler.sendMessageDelayed(msg, 500);
-    }
-
-    /**
-     * This is the fragment-orientated version of {@link #onResume()} that you
-     * can override to perform operations in the Activity at the same point
-     * where its fragments are resumed.  Be sure to always call through to
-     * the super-class.
-     */
-    @Override
-    protected void onResumeFragments() {
-        super.onResumeFragments();
-        mResumed = true;
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mResumed = false;
-
-        (((CarLocationApplication) getApplicationContext()).getService()).unRegisterNotificationListener(this.mListener);
-    }
-
-    public void findViews() {
-        field_usrName = (EditText) findViewById(R.id.userName);
-        field_pasWord = (EditText) findViewById(R.id.passWord);
-        button_logIn = (Button) findViewById(R.id.logIn);
-    }
-
-   
-
-    protected void start() {
-        if (field_usrName.getText().toString().length() == 0) {
-            Toast.makeText(this.getApplicationContext(), "Pls enter UserName!", Toast.LENGTH_SHORT).show();
-            field_usrName.requestFocus();
-            return;
-        } else {
-            mUserName = field_usrName.getText().toString();
-        }
-        if (field_pasWord.getText().toString().length() == 0) {
-            Toast.makeText(this.getApplicationContext(), "Pls enter Pass Word!", Toast.LENGTH_SHORT).show();
-            field_pasWord.requestFocus();
-            return;
-        } else {
-            mPasWord = field_pasWord.getText().toString();
-        }
-
-        new send().execute();
-    }
-
-    private class send extends AsyncTask<String, Void, Void> {
-
-        /**
-         * Override this method to perform a computation on a background thread. The
-         * specified parameters are the parameters passed to {@link #execute}
-         * by the caller of this task.
-         * <p/>
-         * This method can call {@link #publishProgress} to publish updates
-         * on the UI thread.
-         *
-         * @param params The parameters of the task.
-         * @return A result, defined by the subclass of this task.
-         * @see #onPreExecute()
-         * @see #onPostExecute
-         * @see #publishProgress
-         */
-        @Override
-        protected Void doInBackground(String... params) {
-            //Retrieve Native Service and Send LogIn MSG to server to login.
-            /**
-             * Retrieve native service.
-             */
-            mUserService = new UserService(((CarLocationApplication) getApplicationContext()).getService(), mListener);
-
-
-            /**
-             * Examples for how to use UserService to send MSG to Server
-             */
-
-            //Test case 1: send login msg to server
-            mUserService.logIn(mUserName, mPasWord);
-
-            //Test case 2: send logout msg to server
-            mUserService.logOut(mUserName,mPasWord);
-
-            //Test case 2: update mylocation to server
-            mUserService.sendMyLocation();
-
-
-
-            //Print out all MSGs' json format
-            new AuthMessage(123, MessageType.AUTH_MESSAGE, 456, "Name", "password", AuthMessage.AuthMsgType.AUTH_LOGIN_MSG).translate();
-            ArrayList<Location> array = new ArrayList<Location>();
-            array.add(new Location(321.123, 456.654));
-            array.add(new Location(789.987, 890.098));
-
-            new GlidingPathMessage(123, MessageType.GLIDE_MESSAGE,ActionType.ACTION_QUERY,456,"title",7,array).translate();
-            new IMTxtMessage(123, MessageType.IM_MESSAGE, 456, 789, IMMessage.IMMsgType.IM_TXT_MSG, (byte) 11, "TXTContent").translate();
-            byte[] bArray = {(byte) 1, (byte) 2, (byte) 3};
-            new IMVoiceMessage(123, MessageType.IM_MESSAGE, 456, 789, IMMessage.IMMsgType.IM_VOICE_MSG, bArray).translate();
-            new LocationMessage(123, 456, TerminalType.TERMINAL_CAR, new Location(321.123, 456.654), 1.1f).translate();
-            new RestrictedAreaMessage(123,MessageType.WARN_MESSAGE,ActionType.ACTION_QUERY,12,array).translate();
-            new StatusMessage(123, MessageType.STATUS_MESSAGE, 456, StatusMessage.StatusMsgType.STATUS_ONLINE, StatusMessage.UserType.MOBILE_PAD).translate();
-            new TaskAssignmentMessage(123, MessageType.TASK_MESSAGE,ActionType.ACTION_QUERY,456,(short)1,null).translate();
-            return null;
-        }
-    }
-
-
-    @Override
-    public void onNavigationDrawerItemSelected(int position) {
-//        // update the main content by replacing fragments
-//        FragmentManager fragmentManager = getSupportFragmentManager();
-//        fragmentManager
-//                .beginTransaction()
-//                .replace(R.id.container,
-//                        PlaceholderFragment.newInstance(position + 1)).commit();
-    }
-
-    public void onSectionAttached(int number) {
-        switch (number) {
-            case 1:
-                mTitle = getString(R.string.title_section1);
+        Notification noti = (Notification) msg.obj;
+        MessageType msgType = noti.message.getMessageType();
+        switch (msgType.ordinal()){
+            case LOCATION_MESSAGE:
+                handleLocations(noti);
                 break;
-            case 2:
-                mTitle = getString(R.string.title_section2);
+            case IM_MESSAGE:
+                handleImMsg(noti);
                 break;
-            case 3:
-                mTitle = getString(R.string.title_section3);
+            case TASK_MESSAGE:
+                handleTaskMsg(noti);
                 break;
+            case GLIDE_MESSAGE:
+                break;
+            case WARN_MESSAGE:
+                break;
+            case STATUS_MESSAGE:
+                break;
+            default:break;
         }
+
     }
 
-    public void restoreActionBar() {
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(mTitle);
-    }
+    private void handleTaskMsg(Notification noti) {
+        TaskAssignmentMessage taskMsg = (TaskAssignmentMessage)noti.message;
+        if(taskMsg.mActionType == ActionType.ACTION_ASSIGN){
+            if(taskMsg.mTaskContent != null && taskMsg.mTaskContent.length()>0 ){
+                //TODO add taskContent and id to database
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        if (!mNavigationDrawerFragment.isDrawerOpen()) {
-            // Only show items in the action bar relevant to this screen
-            // if the drawer is not showing. Otherwise, let the drawer
-            // decide what to show in the action bar.
-            getMenuInflater().inflate(R.menu.main, menu);
-            restoreActionBar();
-            return true;
+                //Send back respond to server with success
+                MessageResponseStatus status = MessageResponseStatus.SUCCESS;
+                mUserService.responActionAssign(taskMsg,status);
+            }else {
+                //TODO check task id if exists in data base, otherwise need to send taskMsg query.
+
+            }
+
+
+        }else{
+            Log.e(LOG_TAG,"handleTaskMsg(): Wrong action type!");
+            //Send back respond to server with type not supported
+            MessageResponseStatus status = MessageResponseStatus.NOT_SUPPORTED;
+            mUserService.responActionAssign(taskMsg,status);
         }
-        return super.onCreateOptionsMenu(menu);
+
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
+    private void handleLocations(Notification noti){
+        //TODO update location on the map (How a server send locations with LocationMessage?)
+    }
+
+    private void handleImMsg(Notification noti){
+        IMMessage imMsg = (IMMessage)noti.message;
+        if (imMsg.mImMsgType == IMMessage.IMMsgType.IM_TXT_MSG){
+            //TODO Display txt to the user
+
+        }else{
+            //TODO Play voice to the user
         }
-        return super.onOptionsItemSelected(item);
-    }
 
-   
+    }
 
     class LocalListener implements ResponseListener, NotificationListener {
 

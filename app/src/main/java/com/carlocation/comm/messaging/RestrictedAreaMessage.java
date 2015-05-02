@@ -38,16 +38,18 @@ public class RestrictedAreaMessage extends BaseMessage {
             object.put("mActionType",mActionType);
             object.put("mWarnAreaId",mWarnAreaId);
 
-            JSONArray array = new JSONArray();
-            for (Location location:mLocationArea){
-                JSONObject locObj = new JSONObject();
-                locObj.put("mLng",location.mLng);
-                locObj.put("mLat",location.mLat);
+            if(mLocationArea != null){
+                JSONArray array = new JSONArray();
+                for (Location location:mLocationArea){
+                    JSONObject locObj = new JSONObject();
+                    locObj.put("mLng",location.mLng);
+                    locObj.put("mLat",location.mLat);
 
-                array.put(locObj);
+                    array.put(locObj);
+                }
+
+                object.put("mLocationArea",array);
             }
-
-            object.put("mLocationArea",array);
 
             jSonResult = object.toString();
 
@@ -65,7 +67,7 @@ public class RestrictedAreaMessage extends BaseMessage {
                 + super.toString()
                 + ", mActionType=" + mActionType
                 + ", mWarnAreaId=" + mWarnAreaId
-                + ", mLocationArea=" + mLocationArea.toString()
+                + ", mLocationArea=" + (mLocationArea!=null ? mLocationArea.toString():null)
                 + "]";
     }
 }

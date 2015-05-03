@@ -21,6 +21,7 @@ public class Notification {
         TIME_OUT,
         SERVER_RJECT,
         NO_CONNECTION,
+        SERVICE_DOWN,
     }
 
 

@@ -208,6 +208,7 @@ public class MessageService extends Service {
 		super.onDestroy();
 		Log.e(TAG, " service destoryed ");
 		mLocalHandlerThread.quit();
+		mLocalHandler = null;
 		
 		clearAllPendingMessage();
 		
@@ -453,6 +454,7 @@ public class MessageService extends Service {
 	 */
 	private void reconnect() {
 		dispose();
+		mSCS =  ServerConnectionState.CONNECTING;
 		connect();
 	}
 
@@ -498,7 +500,7 @@ public class MessageService extends Service {
 						mUserName);
 
 				mChannel.close();
-			} catch (IOException e) {
+			} catch (Exception e) {
 				Log.e(TAG, "Send Channel close failed", e);
 			}
 		}
@@ -602,14 +604,13 @@ public class MessageService extends Service {
 
 			// If authed, means user already connected to server.
 			// But network connection changed, we have to re-connect to server
+			Log.e(TAG, " network [old:" +mNS+"  new:" +newNS+"] ");
 			if (newNS == NetworkState.NONE) {
-				Log.e(TAG, " network [old:" +mNS+"  new:" +newNS+"] ");
 				dispose();
-				mNS = newNS;
-			} else if (mNS == NetworkState.NONE){
+			} else if (newNS != mNS){
 				mLocalHandler.post(mReconnectRunnable);
-				mNS = newNS;
 			}
+			mNS = newNS;
 			
 
 		}
@@ -648,8 +649,8 @@ public class MessageService extends Service {
 		@Override
 		public void run() {
 			try {
-				AMQP.Queue.DeclareOk deok = ch.queueDeclare(mUserName, false,
-						false, true, null);
+				AMQP.Queue.DeclareOk deok = ch.queueDeclare(mUserName, true,
+						false, false, null);
 				Log.i(TAG, "Declare queue:" + deok.getQueue()
 						+ "  consume count:" + deok.getConsumerCount()
 						+ "  msg count:" + deok.getMessageCount());
@@ -702,7 +703,10 @@ public class MessageService extends Service {
 					}
 				} catch (ShutdownSignalException e) {
 					e.printStackTrace();
-					return;
+					if (mNS != NetworkState.NONE && mSCS == ServerConnectionState.CONNECTED) {
+						mLocalHandler.postDelayed(mReconnectRunnable, 1000);
+					}
+					break;
 				} catch (ConsumerCancelledException e) {
 					e.printStackTrace();
 				} catch (InterruptedException e) {
@@ -852,6 +856,10 @@ public class MessageService extends Service {
 		@Override
 		public void sendMessage(BaseMessage message) {
 			Log.i(TAG, "send message:" + message);
+			if (mLocalHandler == null) {
+				fireBackMessage(message, Notification.Result.SERVICE_DOWN);
+				return;
+			}
 			if (message.getMessageType() == MessageType.AUTH_MESSAGE) {
 				mSCS =  ServerConnectionState.CONNECTING;
 				mLocalHandler.post(new AuthRunnable((AuthMessage) message));
@@ -874,6 +882,10 @@ public class MessageService extends Service {
 		@Override
 		public void sendMessageResponse(ResponseMessage rm) {
 			Log.i(TAG, "send response:" + rm);
+			if (mLocalHandler == null) {
+				fireBackMessage(rm, Notification.Result.SERVICE_DOWN);
+				return;
+			}
 			if (rm == null) {
 				throw new RuntimeException("ResponseMessage is null");
 			}

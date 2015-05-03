@@ -488,31 +488,92 @@ public class MainActivity extends ActionBarActivity implements
                 handleTaskMsg(noti);
                 break;
             case GLIDE_MESSAGE:
+                handleGlideMsg(noti);
                 break;
             case WARN_MESSAGE:
+                handleWarnMsg(noti);
                 break;
             case STATUS_MESSAGE:
+                handleStatusMsg(noti);
                 break;
             default:break;
         }
 
     }
 
+    private void handleStatusMsg(Notification noti) {
+        StatusMessage statMsg = (StatusMessage)noti.message;
+        if(statMsg.mUserType != StatusMessage.UserType.CONTROL_PC){
+            Log.d(LOG_TAG,"handleStatusMsg(): Wrong user type msg!");
+        }else{
+            /**
+             * Add the terminal id and correspond status (online, offline)to local database
+             * What mobile pad deal with schedule pc's status message?
+             */
+            //TODO deal with status msg of schedule pc
+
+        }
+    }
+
+    private void handleWarnMsg(Notification noti) {
+        RestrictedAreaMessage warnMsg = (RestrictedAreaMessage)noti.message;
+        if(warnMsg.mActionType == ActionType.ACTION_ASSIGN){
+            if(warnMsg.mLocationArea != null && !warnMsg.mLocationArea.isEmpty()){
+                //TODO check whether this id exists in database, add in if not.
+
+
+            }else {
+                //TODO check whether this id exists in database, send query msg if not
+
+            }
+            //Send back respond to server with success
+            MessageResponseStatus status = MessageResponseStatus.SUCCESS;
+            mUserService.responActionAssign(warnMsg,status);
+        }else {
+            Log.e(LOG_TAG,"handleWarnMsg(): Wrong action type!");
+            //Send back respond to server with type not supported
+            MessageResponseStatus status = MessageResponseStatus.NOT_SUPPORTED;
+            mUserService.responActionAssign(warnMsg,status);
+        }
+    }
+
+    private void handleGlideMsg(Notification noti) {
+        GlidingPathMessage glideMsg = (GlidingPathMessage)noti.message;
+        if (glideMsg.mActionType == ActionType.ACTION_ASSIGN){
+            if(glideMsg.mLocationArray != null && !glideMsg.mLocationArray.isEmpty()){
+                //TODO check whether this id exists in database, add in if not.
+
+            }else {
+                //TODO check whether this id exists in database, send query msg if not
+
+            }
+            //Send back respond to server with success
+            MessageResponseStatus status = MessageResponseStatus.SUCCESS;
+            mUserService.responActionAssign(glideMsg,status);
+
+        }else {
+            Log.e(LOG_TAG,"handleGlideMsg(): Wrong action type!");
+            //Send back respond to server with type not supported
+            MessageResponseStatus status = MessageResponseStatus.NOT_SUPPORTED;
+            mUserService.responActionAssign(glideMsg,status);
+        }
+    }
+
+
     private void handleTaskMsg(Notification noti) {
         TaskAssignmentMessage taskMsg = (TaskAssignmentMessage)noti.message;
         if(taskMsg.mActionType == ActionType.ACTION_ASSIGN){
             if(taskMsg.mTaskContent != null && taskMsg.mTaskContent.length()>0 ){
-                //TODO add taskContent and id to database
+                //TODO check whether this id exists in database, add in if not.
 
-                //Send back respond to server with success
-                MessageResponseStatus status = MessageResponseStatus.SUCCESS;
-                mUserService.responActionAssign(taskMsg,status);
+
             }else {
                 //TODO check task id if exists in data base, otherwise need to send taskMsg query.
 
             }
-
-
+            //Send back respond to server with success
+            MessageResponseStatus status = MessageResponseStatus.SUCCESS;
+            mUserService.responActionAssign(taskMsg,status);
         }else{
             Log.e(LOG_TAG,"handleTaskMsg(): Wrong action type!");
             //Send back respond to server with type not supported

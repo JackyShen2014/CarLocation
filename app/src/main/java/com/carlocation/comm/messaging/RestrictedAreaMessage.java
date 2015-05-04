@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 /**
  * Created by Jacky on 2015/4/21.
+ *
  * @author Jacky Shen
  */
 public class RestrictedAreaMessage extends BaseMessage {
@@ -19,9 +20,9 @@ public class RestrictedAreaMessage extends BaseMessage {
     public int mWarnAreaId;
     public ArrayList<Location> mLocationArea = new ArrayList<Location>();
 
-    public RestrictedAreaMessage(long mTransactionID, MessageType mMessageType, ActionType mActionType,
+    public RestrictedAreaMessage(long mTransactionID, ActionType mActionType,
                                  int mWarnAreaId, ArrayList<Location> mLocationArea) {
-        super(mTransactionID, mMessageType);
+        super(mTransactionID, MessageType.WARN_MESSAGE);
         this.mActionType = mActionType;
         this.mWarnAreaId = mWarnAreaId;
         this.mLocationArea = mLocationArea;
@@ -31,33 +32,33 @@ public class RestrictedAreaMessage extends BaseMessage {
     public String translate() {
         //Define return result
         String jSonResult = "";
-        try{
+        try {
             JSONObject object = new JSONObject();
-            object.put("mTransactionID",RestrictedAreaMessage.this.mTransactionID);
-            object.put("mMessageType",RestrictedAreaMessage.this.mMessageType);
-            object.put("mActionType",mActionType);
-            object.put("mWarnAreaId",mWarnAreaId);
+            object.put("mTransactionID", RestrictedAreaMessage.this.mTransactionID);
+            object.put("mMessageType", RestrictedAreaMessage.this.mMessageType.ordinal());
+            object.put("mActionType", mActionType.ordinal());
+            object.put("mWarnAreaId", mWarnAreaId);
 
-            if(mLocationArea != null){
+            if (mLocationArea != null) {
                 JSONArray array = new JSONArray();
-                for (Location location:mLocationArea){
+                for (Location location : mLocationArea) {
                     JSONObject locObj = new JSONObject();
-                    locObj.put("mLng",location.mLng);
-                    locObj.put("mLat",location.mLat);
+                    locObj.put("mLng", location.mLng);
+                    locObj.put("mLat", location.mLat);
 
                     array.put(locObj);
                 }
 
-                object.put("mLocationArea",array);
+                object.put("mLocationArea", array);
             }
 
             jSonResult = object.toString();
 
-        }catch (JSONException e){
+        } catch (JSONException e) {
             Log.e(LOG_TAG, "JSONException accured!");
             e.printStackTrace();
         }
-        Log.d(LOG_TAG,"Output json format is "+ jSonResult);
+        Log.d(LOG_TAG, "Output json format is " + jSonResult);
         return jSonResult;
     }
 
@@ -67,7 +68,7 @@ public class RestrictedAreaMessage extends BaseMessage {
                 + super.toString()
                 + ", mActionType=" + mActionType
                 + ", mWarnAreaId=" + mWarnAreaId
-                + ", mLocationArea=" + (mLocationArea!=null ? mLocationArea.toString():null)
+                + ", mLocationArea=" + (mLocationArea != null ? mLocationArea.toString() : null)
                 + "]";
     }
 }

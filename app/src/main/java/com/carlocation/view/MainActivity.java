@@ -202,19 +202,18 @@ public class MainActivity extends ActionBarActivity implements
              * Below are used to test all msg json format
              */
             //Print out all MSGs' json format
-            /*new AuthMessage(123, MessageType.AUTH_MESSAGE, 456, "Name", "password", AuthMessage.AuthMsgType.AUTH_LOGIN_MSG).translate();
+            new AuthMessage(123, 456, "Name", "password", AuthMessage.AuthMsgType.AUTH_LOGIN_MSG).translate();
             ArrayList<Location> array = new ArrayList<Location>();
             array.add(new Location(321.123, 456.654));
             array.add(new Location(789.987, 890.098));
 
-            new GlidingPathMessage(123, MessageType.GLIDE_MESSAGE, ActionType.ACTION_QUERY, 456, "title", 7, array).translate();
-            new IMTxtMessage(123, MessageType.IM_MESSAGE, 456, 789, IMMessage.IMMsgType.IM_TXT_MSG, (byte) 11, "TXTContent").translate();
-            byte[] bArray = {(byte) 1, (byte) 2, (byte) 3};
-            new IMVoiceMessage(123, MessageType.IM_MESSAGE, 456, 789, IMMessage.IMMsgType.IM_VOICE_MSG, bArray).translate();
+            new GlidingPathMessage(123, ActionType.ACTION_QUERY, 456, "title", 7, array).translate();
+            new IMTxtMessage(123, 456, 789,(byte) 11, "TXTContent").translate();
+            new IMVoiceMessage(123, 456, 789, bArray).translate();
             new LocationMessage(123, 456, TerminalType.TERMINAL_CAR, new Location(321.123, 456.654), 1.1f).translate();
-            new RestrictedAreaMessage(123, MessageType.WARN_MESSAGE, ActionType.ACTION_QUERY, 12, array).translate();
-            new StatusMessage(123, MessageType.STATUS_MESSAGE, 456, StatusMessage.StatusMsgType.STATUS_ONLINE, StatusMessage.UserType.MOBILE_PAD).translate();
-            new TaskAssignmentMessage(123, MessageType.TASK_MESSAGE, ActionType.ACTION_QUERY, 456, (short) 1, null).translate();*/
+            new RestrictedAreaMessage(123, ActionType.ACTION_QUERY, 12, array).translate();
+            new StatusMessage(123, 456, StatusMessage.StatusMsgType.STATUS_ONLINE, StatusMessage.UserType.MOBILE_PAD).translate();
+            new TaskAssignmentMessage(123, ActionType.ACTION_QUERY, 456, (short) 1, null).translate();
             return null;
         }
     }

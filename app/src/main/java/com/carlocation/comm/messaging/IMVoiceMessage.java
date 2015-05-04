@@ -8,9 +8,10 @@ import org.json.JSONObject;
 
 /**
  * Created by Jacky on 2015/4/21.
+ *
  * @author Jacky Shen
  */
-public class IMVoiceMessage extends IMMessage{
+public class IMVoiceMessage extends IMMessage {
     private static final String LOG_TAG = "IMVoiceMessage";
 
     public byte[] mVoiceData;
@@ -19,9 +20,9 @@ public class IMVoiceMessage extends IMMessage{
         super(mTransactionID);
     }
 
-    public IMVoiceMessage(long mTransactionID, MessageType mMessageType, long mFromTerminalId,
-                          long mToTerminalId, IMMsgType mImMsgType, byte[] mVoiceData) {
-        super(mTransactionID, mMessageType, mFromTerminalId, mToTerminalId, mImMsgType);
+    public IMVoiceMessage(long mTransactionID, long mFromTerminalId,
+                          long mToTerminalId, byte[] mVoiceData) {
+        super(mTransactionID, mFromTerminalId, mToTerminalId, IMMsgType.IM_VOICE_MSG);
         this.mVoiceData = mVoiceData;
     }
 
@@ -30,28 +31,28 @@ public class IMVoiceMessage extends IMMessage{
     public String translate() {
         //Define return result
         String jSonResult = "";
-        try{
+        try {
             JSONObject object = new JSONObject();
-            object.put("mTransactionID",IMVoiceMessage.this.mTransactionID);
-            object.put("mMessageType",IMVoiceMessage.this.mMessageType);
-            object.put("mFromTerminalId",mFromTerminalId);
-            object.put("mToTerminalId",mToTerminalId);
-            object.put("mImMsgType",mImMsgType);
+            object.put("mTransactionID", IMVoiceMessage.this.mTransactionID);
+            object.put("mMessageType", IMVoiceMessage.this.mMessageType.ordinal());
+            object.put("mFromTerminalId", mFromTerminalId);
+            object.put("mToTerminalId", mToTerminalId);
+            object.put("mImMsgType", mImMsgType.ordinal());
 
             JSONArray array = new JSONArray();
-            for (int i = 0; i<mVoiceData.length; i++){
+            for (int i = 0; i < mVoiceData.length; i++) {
                 array.put(mVoiceData[i]);
             }
 
-            object.put("mVoiceData",array);
+            object.put("mVoiceData", array);
 
             jSonResult = object.toString();
 
-        }catch (JSONException e){
+        } catch (JSONException e) {
             Log.e(LOG_TAG, "JSONException accured!");
             e.printStackTrace();
         }
-        Log.d(LOG_TAG,"Output json format is "+ jSonResult);
+        Log.d(LOG_TAG, "Output json format is " + jSonResult);
         return jSonResult;
     }
 

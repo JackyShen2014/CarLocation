@@ -55,7 +55,7 @@ public class UserService{
         }
 
         //Construct a new Login MSG
-        AuthMessage authMsg = new AuthMessage(getTransactionId(),MessageType.AUTH_MESSAGE,getTerminalId(),
+        AuthMessage authMsg = new AuthMessage(getTransactionId(),getTerminalId(),
                 username,pwd, AuthMessage.AuthMsgType.AUTH_LOGIN_MSG);
 
 
@@ -81,8 +81,8 @@ public class UserService{
         }
 
         //Construct a new AUTH LOGOUT MSG
-        AuthMessage authMsg = new AuthMessage(getTransactionId(),MessageType.AUTH_MESSAGE,getTerminalId(),
-                username,pwd, AuthMessage.AuthMsgType.AUTH_LOGOUT_MSG);
+        AuthMessage authMsg = new AuthMessage(getTransactionId(), getTerminalId(),
+                username, pwd, AuthMessage.AuthMsgType.AUTH_LOGOUT_MSG);
 
         // Invoke native service to send message
         Log.d(LOG_TAG, "logOut():Start invoke native service to send message logout.");
@@ -99,7 +99,7 @@ public class UserService{
      * @param status
      */
     void sendMyStatus(StatusMessage.StatusMsgType status){
-        StatusMessage statMsg = new StatusMessage(getTransactionId(),MessageType.STATUS_MESSAGE,getTerminalId(),status, StatusMessage.UserType.MOBILE_PAD);
+        StatusMessage statMsg = new StatusMessage(getTransactionId(),getTerminalId(),status, StatusMessage.UserType.MOBILE_PAD);
 
         // Invoke native service to send message
         Log.d(LOG_TAG, "sendMyStatus():Start invoke native service to send status message.");
@@ -135,8 +135,8 @@ public class UserService{
      * @param content       Content of msg
      */
     public void sendImTxtMsg(long toTerminal, byte rank, String content){
-        IMTxtMessage txtMessage = new IMTxtMessage(getTransactionId(),MessageType.IM_MESSAGE,
-                getTerminalId(),toTerminal, IMMessage.IMMsgType.IM_TXT_MSG,rank,content);
+        IMTxtMessage txtMessage = new IMTxtMessage(getTransactionId(),
+                getTerminalId(),toTerminal, rank,content);
 
         // Invoke native service to send message
         Log.d(LOG_TAG, "sendImTxtMsg(): Start invoke native service to send IM txt msg.");
@@ -154,8 +154,8 @@ public class UserService{
      * @param voiceData     Context of voice data
      */
     public void sendImVoiceMsg(long toTerminal, byte[] voiceData){
-        IMVoiceMessage voiceMessage = new IMVoiceMessage(getTransactionId(),MessageType.IM_MESSAGE,
-                getTerminalId(),toTerminal, IMMessage.IMMsgType.IM_VOICE_MSG,voiceData);
+        IMVoiceMessage voiceMessage = new IMVoiceMessage(getTransactionId(),
+                getTerminalId(),toTerminal,voiceData);
 
         // Invoke native service to send message
         Log.d(LOG_TAG, "sendImVoiceMsg(): Start invoke native service to send IM voice msg.");
@@ -173,7 +173,7 @@ public class UserService{
      */
     public void startWorkMsg(short taskId){
         TaskAssignmentMessage startWorkMsg = new TaskAssignmentMessage(getTransactionId(),
-                MessageType.TASK_MESSAGE,ActionType.ACTION_START,getTerminalId(),taskId,null);
+                ActionType.ACTION_START,getTerminalId(),taskId,null);
 
         //TODO add to sent queue and removed until success response received.
 
@@ -194,7 +194,7 @@ public class UserService{
      */
     public void finishWorkMsg(short taskId){
         TaskAssignmentMessage finishWorkMsg = new TaskAssignmentMessage(getTransactionId(),
-                MessageType.TASK_MESSAGE, ActionType.ACTION_FINISH,getTerminalId(),taskId,null);
+                ActionType.ACTION_FINISH,getTerminalId(),taskId,null);
 
         //TODO add to sent queue and removed until success response received.
 
@@ -214,7 +214,7 @@ public class UserService{
      */
     public void queryWorkById(short taskId){
         TaskAssignmentMessage queryWorkMsg = new TaskAssignmentMessage(getTransactionId(),
-                MessageType.TASK_MESSAGE,ActionType.ACTION_QUERY,getTerminalId(),taskId,null);
+                ActionType.ACTION_QUERY,getTerminalId(),taskId,null);
 
         //TODO add to sent queue and removed until success response received.
 
@@ -234,7 +234,7 @@ public class UserService{
      */
     void queryGlidePathById(int glidePathId){
         GlidingPathMessage queryPathMsg = new GlidingPathMessage(getTransactionId(),
-                MessageType.GLIDE_MESSAGE,ActionType.ACTION_QUERY,getTerminalId(),null,glidePathId,null);
+                ActionType.ACTION_QUERY,getTerminalId(),null,glidePathId,null);
 
         //TODO add to sent queue and removed until success response received.
 
@@ -252,7 +252,7 @@ public class UserService{
      * @param warnAreaId
      */
     void queryWarnAreaById(int warnAreaId){
-        RestrictedAreaMessage queryWarnMsg  = new RestrictedAreaMessage(getTransactionId(),MessageType.WARN_MESSAGE,ActionType.ACTION_QUERY,warnAreaId,null);
+        RestrictedAreaMessage queryWarnMsg  = new RestrictedAreaMessage(getTransactionId(), ActionType.ACTION_QUERY,warnAreaId,null);
 
         //TODO add to sent queue and removed until success response received.
 

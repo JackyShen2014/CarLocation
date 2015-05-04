@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 /**
  * Created by Jacky on 2015/4/21.
+ *
  * @author Jacky Shen
  */
 public class GlidingPathMessage extends BaseMessage {
@@ -22,10 +23,10 @@ public class GlidingPathMessage extends BaseMessage {
     public ArrayList<Location> mLocationArray = new ArrayList<Location>();
 
 
-    public GlidingPathMessage(long mTransactionID, MessageType mMessageType, ActionType mActionType,
+    public GlidingPathMessage(long mTransactionID, ActionType mActionType,
                               long mTerminalId, String mTitle, int mGlidePathId,
                               ArrayList<Location> mLocationArray) {
-        super(mTransactionID, mMessageType);
+        super(mTransactionID, MessageType.GLIDE_MESSAGE);
         this.mActionType = mActionType;
         this.mTerminalId = mTerminalId;
         this.mTitle = mTitle;
@@ -37,37 +38,37 @@ public class GlidingPathMessage extends BaseMessage {
     public String translate() {
         //Define return result
         String jSonResult = "";
-        try{
+        try {
             JSONObject object = new JSONObject();
-            object.put("mTransactionID",GlidingPathMessage.this.mTransactionID);
-            object.put("mMessageType",GlidingPathMessage.this.mMessageType);
-            object.put("mActionType",mActionType);
-            object.put("mTerminalId",mTerminalId);
-            object.put("mTitle",mTitle);
-            object.put("mGlidePathId",mGlidePathId);
+            object.put("mTransactionID", GlidingPathMessage.this.mTransactionID);
+            object.put("mMessageType", GlidingPathMessage.this.mMessageType.ordinal());
+            object.put("mActionType", mActionType.ordinal());
+            object.put("mTerminalId", mTerminalId);
+            object.put("mTitle", mTitle);
+            object.put("mGlidePathId", mGlidePathId);
 
-            if(mLocationArray != null){
+            if (mLocationArray != null) {
                 JSONArray array = new JSONArray();
 
-                for (Location location:mLocationArray){
+                for (Location location : mLocationArray) {
                     JSONObject locObj = new JSONObject();
-                    locObj.put("mLng",location.mLng);
-                    locObj.put("mLat",location.mLat);
+                    locObj.put("mLng", location.mLng);
+                    locObj.put("mLat", location.mLat);
 
                     array.put(locObj);
                 }
 
-                object.put("mLocationArray",array);
+                object.put("mLocationArray", array);
             }
 
 
             jSonResult = object.toString();
 
-        }catch (JSONException e){
+        } catch (JSONException e) {
             Log.e(LOG_TAG, "JSONException accured!");
             e.printStackTrace();
         }
-        Log.d(LOG_TAG,"Output json format is "+ jSonResult);
+        Log.d(LOG_TAG, "Output json format is " + jSonResult);
         return jSonResult;
     }
 
@@ -80,7 +81,7 @@ public class GlidingPathMessage extends BaseMessage {
                 + ", mTerminalId=" + mTerminalId
                 + ", mTitle=" + mTitle
                 + ", mGlidePathId=" + mGlidePathId
-                + ", mLocationArray=" + (mLocationArray!=null ? mLocationArray.toString():null)
+                + ", mLocationArray=" + (mLocationArray != null ? mLocationArray.toString() : null)
                 + "]";
     }
 }

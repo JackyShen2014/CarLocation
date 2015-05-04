@@ -7,6 +7,7 @@ import org.json.JSONObject;
 
 /**
  * Created by 28851620 on 4/22/2015.
+ *
  * @author Jacky Shen
  */
 
@@ -20,10 +21,10 @@ public class TaskAssignmentMessage extends BaseMessage {
     public short mTaskId;
     public String mTaskContent;
 
-    public TaskAssignmentMessage(long mTransactionID, MessageType mMessageType,
+    public TaskAssignmentMessage(long mTransactionID,
                                  ActionType mActionType, long mTerminalId,
                                  short mTaskId, String mTaskContent) {
-        super(mTransactionID, mMessageType);
+        super(mTransactionID, MessageType.TASK_MESSAGE);
         this.mActionType = mActionType;
         this.mTerminalId = mTerminalId;
         this.mTaskId = mTaskId;
@@ -34,23 +35,23 @@ public class TaskAssignmentMessage extends BaseMessage {
     public String translate() {
         //Define return result
         String jSonResult = "";
-        try{
+        try {
             JSONObject object = new JSONObject();
-            object.put("mTransactionID",TaskAssignmentMessage.this.mTransactionID);
-            object.put("mMessageType",TaskAssignmentMessage.this.mMessageType);
-            object.put("mActionType",mActionType);
-            object.put("mTerminalId",mTerminalId);
-            object.put("mTaskId",mTaskId);
-            object.put("mTaskContent",mTaskContent);
+            object.put("mTransactionID", TaskAssignmentMessage.this.mTransactionID);
+            object.put("mMessageType", TaskAssignmentMessage.this.mMessageType.ordinal());
+            object.put("mActionType", mActionType.ordinal());
+            object.put("mTerminalId", mTerminalId);
+            object.put("mTaskId", mTaskId);
+            object.put("mTaskContent", mTaskContent);
 
 
             jSonResult = object.toString();
 
-        }catch (JSONException e){
+        } catch (JSONException e) {
             Log.e(LOG_TAG, "JSONException accured!");
             e.printStackTrace();
         }
-        Log.d(LOG_TAG,"Output json format is "+ jSonResult);
+        Log.d(LOG_TAG, "Output json format is " + jSonResult);
         return jSonResult;
     }
 

@@ -30,7 +30,7 @@ public class LocationMessage extends BaseMessage {
 
     public LocationMessage(long mTransactionID, long mTerminalId,
                            TerminalType mTerminalType, Location mLocation, float mSpeed) {
-        super(mTransactionID);
+        super(mTransactionID, MessageType.LOCATION_MESSAGE);
         this.mTerminalId = mTerminalId;
         this.mTerminalType = mTerminalType;
         this.mLocation = mLocation;
@@ -48,27 +48,27 @@ public class LocationMessage extends BaseMessage {
         //Define return result
         String jSonResult = "";
 
-        try{
+        try {
             JSONObject object = new JSONObject();
-            object.put("mTransactionID",LocationMessage.this.mTransactionID);
-            object.put("mMessageType",LocationMessage.this.mMessageType);
+            object.put("mTransactionID", LocationMessage.this.mTransactionID);
+            object.put("mMessageType", LocationMessage.this.mMessageType.ordinal());
             object.put("mTerminalId", mTerminalId);
-            object.put("mTerminalType", mTerminalType);
+            object.put("mTerminalType", mTerminalType.ordinal());
 
             JSONObject jSonObj = new JSONObject();
             jSonObj.put("mLng", mLocation.mLng);
             jSonObj.put("mLat", mLocation.mLat);
 
-            object.put("mLocation",jSonObj);
+            object.put("mLocation", jSonObj);
             object.put("mSpeed", mSpeed);
 
             jSonResult = object.toString();
 
-        }catch (JSONException e){
-            Log.e(LOG_TAG,"JSONException accured!");
+        } catch (JSONException e) {
+            Log.e(LOG_TAG, "JSONException accured!");
             e.printStackTrace();
         }
-        Log.d(LOG_TAG,"Output json format is "+ jSonResult);
+        Log.d(LOG_TAG, "Output json format is " + jSonResult);
         return jSonResult;
     }
 
@@ -80,7 +80,7 @@ public class LocationMessage extends BaseMessage {
     @Override
     public String toString() {
         return "LocationMessage ["
-                +super.toString()
+                + super.toString()
                 + "mTerminalId=" + mTerminalId
                 + ", mTerminalType=" + mTerminalType
                 + ", mLng=" + mLocation.mLng

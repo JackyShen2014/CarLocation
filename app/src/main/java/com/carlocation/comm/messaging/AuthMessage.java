@@ -31,9 +31,9 @@ public class AuthMessage extends BaseMessage {
     }
 
 
-    public AuthMessage(long mTransactionID, MessageType mMessageType, long mTerminalId,
+    public AuthMessage(long mTransactionID, long mTerminalId,
                        String mUserName, String mPassword, AuthMsgType mAuthType) {
-        super(mTransactionID, mMessageType);
+        super(mTransactionID, MessageType.AUTH_MESSAGE);
         this.mTerminalId = mTerminalId;
         this.mUserName = mUserName;
         this.mPassword = mPassword;
@@ -44,22 +44,22 @@ public class AuthMessage extends BaseMessage {
     public String translate() {
         //Define return result
         String jSonResult = "";
-        try{
+        try {
             JSONObject object = new JSONObject();
-            object.put("mTransactionID",AuthMessage.this.mTransactionID);
-            object.put("mMessageType",AuthMessage.this.mMessageType);
-            object.put("mTerminalId",mTerminalId);
-            object.put("mUserName",mUserName);
-            object.put("mPassword",mPassword);
-            object.put("mAuthType",mAuthType);
+            object.put("mTransactionID", AuthMessage.this.mTransactionID);
+            object.put("mMessageType", AuthMessage.this.mMessageType.ordinal());
+            object.put("mTerminalId", mTerminalId);
+            object.put("mUserName", mUserName);
+            object.put("mPassword", mPassword);
+            object.put("mAuthType", mAuthType.ordinal());
 
             jSonResult = object.toString();
 
-        }catch (JSONException e){
-            Log.e(LOG_TAG,"JSONException accured!");
+        } catch (JSONException e) {
+            Log.e(LOG_TAG, "JSONException accured!");
             e.printStackTrace();
         }
-        Log.d(LOG_TAG,"Output json format is "+ jSonResult);
+        Log.d(LOG_TAG, "Output json format is " + jSonResult);
         return jSonResult;
     }
 

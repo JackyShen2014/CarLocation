@@ -7,16 +7,17 @@ import org.json.JSONObject;
 
 /**
  * Created by Jacky on 2015/4/21.
+ *
  * @author Jacky Shen
  */
-public class IMMessage extends BaseMessage{
+public class IMMessage extends BaseMessage {
     private static final String LOG_TAG = "IMMessage";
 
     public long mFromTerminalId;
     public long mToTerminalId;
     public IMMsgType mImMsgType;
 
-    public static enum IMMsgType{
+    public static enum IMMsgType {
         IM_TXT_MSG,
         IM_VOICE_MSG,
     }
@@ -26,9 +27,9 @@ public class IMMessage extends BaseMessage{
         super(mTransactionID);
     }
 
-    public IMMessage(long mTransactionID, MessageType mMessageType, long mFromTerminalId,
+    public IMMessage(long mTransactionID, long mFromTerminalId,
                      long mToTerminalId, IMMsgType mImMsgType) {
-        super(mTransactionID, mMessageType);
+        super(mTransactionID, MessageType.IM_MESSAGE);
         this.mFromTerminalId = mFromTerminalId;
         this.mToTerminalId = mToTerminalId;
         this.mImMsgType = mImMsgType;
@@ -39,21 +40,21 @@ public class IMMessage extends BaseMessage{
     public String translate() {
         //Define return result
         String jSonResult = "";
-        try{
+        try {
             JSONObject object = new JSONObject();
-            object.put("mTransactionID",IMMessage.this.mTransactionID);
-            object.put("mMessageType",IMMessage.this.mMessageType);
-            object.put("mFromTerminalId",mFromTerminalId);
-            object.put("mToTerminalId",mToTerminalId);
-            object.put("mImMsgType",mImMsgType);
+            object.put("mTransactionID", IMMessage.this.mTransactionID);
+            object.put("mMessageType", IMMessage.this.mMessageType.ordinal());
+            object.put("mFromTerminalId", mFromTerminalId);
+            object.put("mToTerminalId", mToTerminalId);
+            object.put("mImMsgType", mImMsgType.ordinal());
 
             jSonResult = object.toString();
 
-        }catch (JSONException e){
+        } catch (JSONException e) {
             Log.e(LOG_TAG, "JSONException accured!");
             e.printStackTrace();
         }
-        Log.d(LOG_TAG,"Output json format is "+ jSonResult);
+        Log.d(LOG_TAG, "Output json format is " + jSonResult);
         return jSonResult;
     }
 

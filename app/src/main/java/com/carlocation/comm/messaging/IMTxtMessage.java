@@ -9,6 +9,7 @@ import java.util.ArrayList;
 
 /**
  * Created by Jacky on 2015/4/21.
+ *
  * @author Jacky Shen
  */
 public class IMTxtMessage extends IMMessage {
@@ -21,9 +22,9 @@ public class IMTxtMessage extends IMMessage {
         super(mTransactionID);
     }
 
-    public IMTxtMessage(long mTransactionID, MessageType mMessageType, long mFromTerminalId,
-                        long mToTerminalId, IMMsgType mImMsgType, byte mRank, String mTxtCont) {
-        super(mTransactionID, mMessageType, mFromTerminalId, mToTerminalId, mImMsgType);
+    public IMTxtMessage(long mTransactionID, long mFromTerminalId,
+                        long mToTerminalId, byte mRank, String mTxtCont) {
+        super(mTransactionID, mFromTerminalId, mToTerminalId, IMMsgType.IM_TXT_MSG);
         this.mRank = mRank;
         this.mTxtCont = mTxtCont;
     }
@@ -33,23 +34,23 @@ public class IMTxtMessage extends IMMessage {
     public String translate() {
         //Define return result
         String jSonResult = "";
-        try{
+        try {
             JSONObject object = new JSONObject();
-            object.put("mTransactionID",IMTxtMessage.this.mTransactionID);
-            object.put("mMessageType",IMTxtMessage.this.mMessageType);
-            object.put("mFromTerminalId",mFromTerminalId);
-            object.put("mToTerminalId",mToTerminalId);
-            object.put("mImMsgType",mImMsgType);
-            object.put("mRank",mRank);
-            object.put("mTxtCont",mTxtCont);
+            object.put("mTransactionID", IMTxtMessage.this.mTransactionID);
+            object.put("mMessageType", IMTxtMessage.this.mMessageType.ordinal());
+            object.put("mFromTerminalId", mFromTerminalId);
+            object.put("mToTerminalId", mToTerminalId);
+            object.put("mImMsgType", mImMsgType.ordinal());
+            object.put("mRank", mRank);
+            object.put("mTxtCont", mTxtCont);
 
             jSonResult = object.toString();
 
-        }catch (JSONException e){
+        } catch (JSONException e) {
             Log.e(LOG_TAG, "JSONException accured!");
             e.printStackTrace();
         }
-        Log.d(LOG_TAG,"Output json format is "+ jSonResult);
+        Log.d(LOG_TAG, "Output json format is " + jSonResult);
         return jSonResult;
     }
 

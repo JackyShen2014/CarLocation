@@ -9,7 +9,7 @@ import org.json.JSONObject;
 /**
  * Location message.<br>
  * Maybe contain one location or multi locations.
- *
+ * 
  * @author 28851274
  * @author Jacky Shen
  */
@@ -37,56 +37,62 @@ public class LocationMessage extends BaseMessage {
         this.mSpeed = mSpeed;
     }
 
-    /**
-     * Translate Class attributes to json format for network transmit.
-     *
-     * @return
-     */
-    @Override
-    public String translate() {
+	/**
+	 * Translate Class attributes to json format for network transmit.
+	 * 
+	 * @return
+	 */
+	@Override
+	public String translate() {
 
-        //Define return result
-        String jSonResult = "";
+		// Define return result
+		String jSonResult = "";
 
-        try {
-            JSONObject object = new JSONObject();
-            object.put("mTransactionID", LocationMessage.this.mTransactionID);
-            object.put("mMessageType", LocationMessage.this.mMessageType.ordinal());
-            object.put("mTerminalId", mTerminalId);
-            object.put("mTerminalType", mTerminalType.ordinal());
+		JSONObject object = translateJsonObject();
+		if (object != null) {
+			jSonResult = object.toString();
+		}
 
-            JSONObject jSonObj = new JSONObject();
-            jSonObj.put("mLng", mLocation.mLng);
-            jSonObj.put("mLat", mLocation.mLat);
+		Log.d(LOG_TAG, "Output json format is " + jSonResult);
+		return jSonResult;
+	}
 
-            object.put("mLocation", jSonObj);
-            object.put("mSpeed", mSpeed);
+	@Override
+	public JSONObject translateJsonObject() {
+		try {
+			JSONObject object = new JSONObject();
+			object.put("mTransactionID", LocationMessage.this.mTransactionID);
+			object.put("mMessageType", LocationMessage.this.mMessageType);
+			object.put("mTerminalId", mTerminalId);
+			object.put("mTerminalType", mTerminalType);
 
-            jSonResult = object.toString();
+			JSONObject jSonObj = new JSONObject();
+			jSonObj.put("mLng", mLocation.mLng);
+			jSonObj.put("mLat", mLocation.mLat);
 
-        } catch (JSONException e) {
-            Log.e(LOG_TAG, "JSONException accured!");
-            e.printStackTrace();
-        }
-        Log.d(LOG_TAG, "Output json format is " + jSonResult);
-        return jSonResult;
-    }
+			object.put("mLocation", jSonObj);
+			object.put("mSpeed", mSpeed);
 
-    /**
-     * Used for logging
-     *
-     * @return
-     */
-    @Override
-    public String toString() {
-        return "LocationMessage ["
-                + super.toString()
-                + "mTerminalId=" + mTerminalId
-                + ", mTerminalType=" + mTerminalType
-                + ", mLng=" + mLocation.mLng
-                + ", mLat=" + mLocation.mLat
-                + ", mSpeed=" + mSpeed
-                + "]";
-    }
+			return object;
+
+		} catch (JSONException e) {
+			Log.e(LOG_TAG, "JSONException accured!");
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	/**
+	 * Used for logging
+	 * 
+	 * @return
+	 */
+	@Override
+	public String toString() {
+		return "LocationMessage [" + super.toString() + "mTerminalId="
+				+ mTerminalId + ", mTerminalType=" + mTerminalType + ", mLng="
+				+ mLocation.mLng + ", mLat=" + mLocation.mLat + ", mSpeed="
+				+ mSpeed + "]";
+	}
 
 }

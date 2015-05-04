@@ -22,16 +22,16 @@ public class ResponseMessage {
         this.status = status;
     }
 
-    public String translate() {
+    public JSONObject translate() {
 		JSONObject object = new JSONObject();
 		try {
-			object.put(KEY_RQ, message.translate());
+			object.put(KEY_RQ, message.translateJsonObject());
 			object.put(KEY_RET, status.getValue());
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
 
-		return object.toString();
+		return object;
 	}
 
 	@Override

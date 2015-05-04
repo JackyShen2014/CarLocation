@@ -34,54 +34,61 @@ public class GlidingPathMessage extends BaseMessage {
         this.mLocationArray = mLocationArray;
     }
 
-    @Override
-    public String translate() {
-        //Define return result
-        String jSonResult = "";
-        try {
-            JSONObject object = new JSONObject();
-            object.put("mTransactionID", GlidingPathMessage.this.mTransactionID);
-            object.put("mMessageType", GlidingPathMessage.this.mMessageType.ordinal());
-            object.put("mActionType", mActionType.ordinal());
-            object.put("mTerminalId", mTerminalId);
-            object.put("mTitle", mTitle);
-            object.put("mGlidePathId", mGlidePathId);
 
-            if (mLocationArray != null) {
-                JSONArray array = new JSONArray();
+	@Override
+	public String translate() {
+		// Define return result
+		String jSonResult = "";
+		JSONObject object = translateJsonObject();
+		if (object != null) {
+			jSonResult = object.toString();
+		}
+		Log.d(LOG_TAG, "Output json format is " + jSonResult);
+		return jSonResult;
+	}
 
-                for (Location location : mLocationArray) {
-                    JSONObject locObj = new JSONObject();
-                    locObj.put("mLng", location.mLng);
-                    locObj.put("mLat", location.mLat);
+	@Override
+	public JSONObject translateJsonObject() {
+		// Define return result
+		try {
+			JSONObject object = new JSONObject();
+			object.put("mTransactionID", GlidingPathMessage.this.mTransactionID);
+			object.put("mMessageType", GlidingPathMessage.this.mMessageType);
+			object.put("mActionType", mActionType);
+			object.put("mTerminalId", mTerminalId);
+			object.put("mTitle", mTitle);
+			object.put("mGlidePathId", mGlidePathId);
 
-                    array.put(locObj);
-                }
+			if (mLocationArray != null) {
+				JSONArray array = new JSONArray();
 
-                object.put("mLocationArray", array);
-            }
+				for (Location location : mLocationArray) {
+					JSONObject locObj = new JSONObject();
+					locObj.put("mLng", location.mLng);
+					locObj.put("mLat", location.mLat);
 
+					array.put(locObj);
+				}
 
-            jSonResult = object.toString();
+				object.put("mLocationArray", array);
+			}
 
-        } catch (JSONException e) {
-            Log.e(LOG_TAG, "JSONException accured!");
-            e.printStackTrace();
-        }
-        Log.d(LOG_TAG, "Output json format is " + jSonResult);
-        return jSonResult;
-    }
+			return object;
 
+		} catch (JSONException e) {
+			Log.e(LOG_TAG, "JSONException accured!");
+			e.printStackTrace();
+		}
+		return null;
+	}
 
-    @Override
-    public String toString() {
-        return "GlidingPathMessage ["
-                + super.toString()
-                + ", mActionType=" + mActionType
-                + ", mTerminalId=" + mTerminalId
-                + ", mTitle=" + mTitle
-                + ", mGlidePathId=" + mGlidePathId
-                + ", mLocationArray=" + (mLocationArray != null ? mLocationArray.toString() : null)
-                + "]";
-    }
+	@Override
+	public String toString() {
+		return "GlidingPathMessage [" + super.toString() + ", mActionType="
+				+ mActionType + ", mTerminalId=" + mTerminalId + ", mTitle="
+				+ mTitle + ", mGlidePathId=" + mGlidePathId
+				+ ", mLocationArray="
+				+ (mLocationArray != null ? mLocationArray.toString() : null)
+				+ "]";
+	}
 }

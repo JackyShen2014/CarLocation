@@ -13,9 +13,9 @@ public class MessageFactory {
 
 	public static String addHeader(BaseMessage message) {
 		JSONObject object = new JSONObject();
-		conHeader(object, new MessageHeader(1, 1));
+		conHeader(object, new MessageHeader(0, 1));
 		try {
-			object.put("body", message.translate());
+			object.put("body", message.translateJsonObject());
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}

@@ -2,6 +2,8 @@ package com.carlocation.comm.messaging;
 
 import java.io.Serializable;
 
+import org.json.JSONObject;
+
 
 /**
  * Basic message class
@@ -44,6 +46,13 @@ public abstract class BaseMessage implements Serializable{
 	 * @return
 	 */
 	public abstract String translate();
+	
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public abstract JSONObject translateJsonObject();
 	
 	
 

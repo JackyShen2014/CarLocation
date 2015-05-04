@@ -7,15 +7,14 @@ import org.json.JSONObject;
 
 /**
  * Created by 28851620 on 4/22/2015.
- *
  * @author Jacky Shen
  */
 public class StatusMessage extends BaseMessage {
-    private final String LOG_TAG = "StatusMessage";
+	private final String LOG_TAG = "StatusMessage";
 
-    public long mTerminalId;
-    public StatusMsgType mStatus;
-    public UserType mUserType;
+	public long mTerminalId;
+	public StatusMsgType mStatus;
+	public UserType mUserType;
 
 
     public StatusMessage(long mTransactionID, long mTerminalId,
@@ -43,42 +42,46 @@ public class StatusMessage extends BaseMessage {
         STATUS_LEAVE,
     }
 
+	/**
+	 * Use to translate to network format
+	 * 
+	 * @return
+	 */
+	@Override
+	public String translate() {
+		// Define return result
+		String jSonResult = "";
+		JSONObject object = translateJsonObject();
+		if (object != null) {
+			jSonResult = object.toString();
+		}
 
-    /**
-     * Use to translate to network format
-     *
-     * @return
-     */
-    @Override
-    public String translate() {
-        //Define return result
-        String jSonResult = "";
-        try {
-            JSONObject object = new JSONObject();
-            object.put("mTransactionID", StatusMessage.this.mTransactionID);
-            object.put("mMessageType", StatusMessage.this.mMessageType.ordinal());
-            object.put("mTerminalId", mTerminalId);
-            object.put("mStatus", mStatus);
-            object.put("mUserType", mUserType.ordinal());
+		Log.d(LOG_TAG, "Output json format is " + jSonResult);
+		return jSonResult;
+	}
 
-            jSonResult = object.toString();
+	@Override
+	public JSONObject translateJsonObject() {
+		try {
+			JSONObject object = new JSONObject();
+			object.put("mTransactionID", StatusMessage.this.mTransactionID);
+			object.put("mMessageType", StatusMessage.this.mMessageType);
+			object.put("mTerminalId", mTerminalId);
+			object.put("mStatus", mStatus);
+			object.put("mUserType", mUserType);
+			return object;
 
-        } catch (JSONException e) {
-            Log.e(LOG_TAG, "JSONException accured!");
-            e.printStackTrace();
-        }
-        Log.d(LOG_TAG, "Output json format is " + jSonResult);
-        return jSonResult;
-    }
+		} catch (JSONException e) {
+			Log.e(LOG_TAG, "JSONException accured!");
+			e.printStackTrace();
+		}
+		return null;
+	}
 
-
-    @Override
-    public String toString() {
-        return "StatusMessage ["
-                + super.toString()
-                + "mTerminalId=" + mTerminalId
-                + ", mStatus=" + mStatus
-                + ", mUserType=" + mUserType
-                + "]";
-    }
+	@Override
+	public String toString() {
+		return "StatusMessage [" + super.toString() + "mTerminalId="
+				+ mTerminalId + ", mStatus=" + mStatus + ", mUserType="
+				+ mUserType + "]";
+	}
 }

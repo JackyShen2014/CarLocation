@@ -65,10 +65,10 @@ public class StatusMessage extends BaseMessage {
 		try {
 			JSONObject object = new JSONObject();
 			object.put("mTransactionID", StatusMessage.this.mTransactionID);
-			object.put("mMessageType", StatusMessage.this.mMessageType);
+			object.put("mMessageType", StatusMessage.this.mMessageType.ordinal());
 			object.put("mTerminalId", mTerminalId);
-			object.put("mStatus", mStatus);
-			object.put("mUserType", mUserType);
+			object.put("mStatus", mStatus.ordinal());
+			object.put("mUserType", mUserType.ordinal());
 			return object;
 
 		} catch (JSONException e) {

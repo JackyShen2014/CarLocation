@@ -746,6 +746,8 @@ public class MessageService extends Service {
 			} else {
 				try {
 					// FIXME add send P2P message
+                    //Print out the json format of sending msg
+                    Log.d(TAG,"JSON format: "+MessageFactory.addHeader(message));
 					getChannel().basicPublish(EXCHANGE_NAME_CONTROLLER,
 							"", null,
 							MessageFactory.addHeader(message).getBytes());

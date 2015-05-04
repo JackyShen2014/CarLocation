@@ -32,8 +32,18 @@ public class IMTxtMessage extends IMMessage {
 
     @Override
     public String translate() {
-        //Define return result
+        // Define return result
         String jSonResult = "";
+        JSONObject object = translateJsonObject();
+        if (object != null) {
+            jSonResult = object.toString();
+        }
+        Log.d(LOG_TAG, "Output json format is " + jSonResult);
+        return jSonResult;
+    }
+
+    @Override
+    public JSONObject translateJsonObject() {
         try {
             JSONObject object = new JSONObject();
             object.put("mTransactionID", IMTxtMessage.this.mTransactionID);
@@ -44,14 +54,13 @@ public class IMTxtMessage extends IMMessage {
             object.put("mRank", mRank);
             object.put("mTxtCont", mTxtCont);
 
-            jSonResult = object.toString();
+            return object;
 
         } catch (JSONException e) {
             Log.e(LOG_TAG, "JSONException accured!");
             e.printStackTrace();
         }
-        Log.d(LOG_TAG, "Output json format is " + jSonResult);
-        return jSonResult;
+        return null;
     }
 
     @Override

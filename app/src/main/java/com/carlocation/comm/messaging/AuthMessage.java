@@ -59,11 +59,11 @@ public class AuthMessage extends BaseMessage {
 		try {
 			JSONObject object = new JSONObject();
 			object.put("mTransactionID", AuthMessage.this.mTransactionID);
-			object.put("mMessageType", AuthMessage.this.mMessageType);
+			object.put("mMessageType", AuthMessage.this.mMessageType.ordinal());
 			object.put("mTerminalId", mTerminalId);
 			object.put("mUserName", mUserName);
 			object.put("mPassword", mPassword);
-			object.put("mAuthType", mAuthType);
+			object.put("mAuthType", mAuthType.ordinal());
 
 			return object;
 

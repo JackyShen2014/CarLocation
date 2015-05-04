@@ -29,8 +29,18 @@ public class IMVoiceMessage extends IMMessage {
 
     @Override
     public String translate() {
-        //Define return result
+        // Define return result
         String jSonResult = "";
+        JSONObject object = translateJsonObject();
+        if (object != null) {
+            jSonResult = object.toString();
+        }
+        Log.d(LOG_TAG, "Output json format is " + jSonResult);
+        return jSonResult;
+    }
+
+    @Override
+    public JSONObject translateJsonObject() {
         try {
             JSONObject object = new JSONObject();
             object.put("mTransactionID", IMVoiceMessage.this.mTransactionID);
@@ -46,14 +56,13 @@ public class IMVoiceMessage extends IMMessage {
 
             object.put("mVoiceData", array);
 
-            jSonResult = object.toString();
+            return object;
 
         } catch (JSONException e) {
             Log.e(LOG_TAG, "JSONException accured!");
             e.printStackTrace();
         }
-        Log.d(LOG_TAG, "Output json format is " + jSonResult);
-        return jSonResult;
+        return null;
     }
 
     @Override

@@ -53,8 +53,8 @@ public class GlidingPathMessage extends BaseMessage {
 		try {
 			JSONObject object = new JSONObject();
 			object.put("mTransactionID", GlidingPathMessage.this.mTransactionID);
-			object.put("mMessageType", GlidingPathMessage.this.mMessageType);
-			object.put("mActionType", mActionType);
+			object.put("mMessageType", GlidingPathMessage.this.mMessageType.ordinal());
+			object.put("mActionType", mActionType.ordinal());
 			object.put("mTerminalId", mTerminalId);
 			object.put("mTitle", mTitle);
 			object.put("mGlidePathId", mGlidePathId);

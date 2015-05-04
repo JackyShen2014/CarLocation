@@ -37,7 +37,7 @@ public class TaskAssignmentMessage extends BaseMessage {
         //Define return result
         String jSonResult = "";
         JSONObject object = translateJsonObject();
-        if (jSonResult != null) {
+        if (object != null) {
         	jSonResult = object.toString();
         }
 		Log.d(LOG_TAG, "Output json format is " + jSonResult);
@@ -50,11 +50,13 @@ public class TaskAssignmentMessage extends BaseMessage {
 			JSONObject object = new JSONObject();
 			object.put("mTransactionID",
 					TaskAssignmentMessage.this.mTransactionID);
-			object.put("mMessageType", TaskAssignmentMessage.this.mMessageType);
-			object.put("mActionType", mActionType);
+			object.put("mMessageType", TaskAssignmentMessage.this.mMessageType.ordinal());
+			object.put("mActionType", mActionType.ordinal());
 			object.put("mTerminalId", mTerminalId);
 			object.put("mTaskId", mTaskId);
 			object.put("mTaskContent", mTaskContent);
+
+            return object;
 
 		} catch (JSONException e) {
 			Log.e(LOG_TAG, "JSONException accured!");

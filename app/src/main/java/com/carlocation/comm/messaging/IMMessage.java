@@ -51,10 +51,10 @@ public class IMMessage extends BaseMessage {
 		try {
 			JSONObject object = new JSONObject();
 			object.put("mTransactionID", IMMessage.this.mTransactionID);
-			object.put("mMessageType", IMMessage.this.mMessageType);
+			object.put("mMessageType", IMMessage.this.mMessageType.ordinal());
 			object.put("mFromTerminalId", mFromTerminalId);
 			object.put("mToTerminalId", mToTerminalId);
-			object.put("mImMsgType", mImMsgType);
+			object.put("mImMsgType", mImMsgType.ordinal());
 
 			return object;
 		} catch (JSONException e) {

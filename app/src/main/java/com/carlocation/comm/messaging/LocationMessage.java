@@ -62,9 +62,9 @@ public class LocationMessage extends BaseMessage {
 		try {
 			JSONObject object = new JSONObject();
 			object.put("mTransactionID", LocationMessage.this.mTransactionID);
-			object.put("mMessageType", LocationMessage.this.mMessageType);
+			object.put("mMessageType", LocationMessage.this.mMessageType.ordinal());
 			object.put("mTerminalId", mTerminalId);
-			object.put("mTerminalType", mTerminalType);
+			object.put("mTerminalType", mTerminalType.ordinal());
 
 			JSONObject jSonObj = new JSONObject();
 			jSonObj.put("mLng", mLocation.mLng);

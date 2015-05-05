@@ -14,6 +14,7 @@ import com.carlocation.comm.messaging.Location;
 import com.carlocation.comm.messaging.LocationCell;
 import com.carlocation.comm.messaging.LocationMessage;
 import com.carlocation.comm.messaging.MessageResponseStatus;
+import com.carlocation.comm.messaging.RankType;
 import com.carlocation.comm.messaging.ResponseMessage;
 import com.carlocation.comm.messaging.RestrictedAreaMessage;
 import com.carlocation.comm.messaging.StatusMessage;
@@ -135,7 +136,7 @@ public class UserService{
      * @param rank          Rank of Msg
      * @param content       Content of msg
      */
-    public void sendImTxtMsg(List<Long> toTerminal, IMTxtMessage.RANK rank, String content){
+    public void sendImTxtMsg(List<Long> toTerminal, RankType rank, String content){
         IMTxtMessage txtMessage = new IMTxtMessage(getTransactionId(),getTerminalId(),toTerminal,rank,content);
 
         // Invoke native service to send message

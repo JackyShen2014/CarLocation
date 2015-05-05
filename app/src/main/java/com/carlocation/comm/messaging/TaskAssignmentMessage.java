@@ -20,13 +20,23 @@ public class TaskAssignmentMessage extends BaseMessage {
 	public ActionType mActionType;
 	public short mTaskId;
 	public String mTaskContent;
+    public RankType mRank;
 
-    public TaskAssignmentMessage(long mTransactionID, long mSenderId,ActionType mActionType,
+    public TaskAssignmentMessage(long mTransactionID,long mSenderId,ActionType mActionType,
                                  short mTaskId, String mTaskContent) {
         super(mTransactionID, MessageType.TASK_MESSAGE, mSenderId, TerminalType.TERMINAL_CAR);
         this.mActionType = mActionType;
         this.mTaskId = mTaskId;
         this.mTaskContent = mTaskContent;
+    }
+
+    public TaskAssignmentMessage(long mTransactionID,long mSenderId,ActionType mActionType,
+                                 short mTaskId, String mTaskContent, RankType mRank) {
+        super(mTransactionID, MessageType.TASK_MESSAGE, mSenderId, TerminalType.TERMINAL_CAR);
+        this.mActionType = mActionType;
+        this.mTaskId = mTaskId;
+        this.mTaskContent = mTaskContent;
+        this.mRank = mRank;
     }
 
     @Override
@@ -53,6 +63,7 @@ public class TaskAssignmentMessage extends BaseMessage {
 			object.put("mActionType", mActionType.ordinal());
 			object.put("mTaskId", mTaskId);
 			object.put("mTaskContent", mTaskContent);
+            object.put("mRank",mRank);
 
             return object;
 
@@ -65,8 +76,11 @@ public class TaskAssignmentMessage extends BaseMessage {
 
 	@Override
 	public String toString() {
-		return "TaskAssignmentMessage [" + super.toString() + ", mActionType="
-				+ mActionType + ", mTaskId="
-				+ mTaskId + ", mTaskContent=" + mTaskContent + "]";
+		return "TaskAssignmentMessage [" + super.toString()
+                + ", mActionType=" + mActionType
+                + ", mTaskId=" + mActionType
+                + ", mTaskId=" + mTaskId
+                + ", mRank=" + mRank
+                + ", mTaskContent=" + mTaskContent + "]";
 	}
 }

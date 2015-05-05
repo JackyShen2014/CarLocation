@@ -27,6 +27,7 @@ import com.carlocation.comm.messaging.Location;
 import com.carlocation.comm.messaging.MessageResponseStatus;
 import com.carlocation.comm.messaging.MessageType;
 import com.carlocation.comm.messaging.Notification;
+import com.carlocation.comm.messaging.RankType;
 import com.carlocation.comm.messaging.RestrictedAreaMessage;
 import com.carlocation.comm.messaging.StatusMessage;
 import com.carlocation.comm.messaging.TaskAssignmentMessage;
@@ -197,7 +198,7 @@ public class MainActivity extends ActionBarActivity implements
 
             mUserService.sendMyStatus(StatusMessage.StatusMsgType.STATUS_ONLINE);
             mUserService.sendMyLocation();
-            mUserService.sendImTxtMsg(toArray, IMTxtMessage.RANK.EMERGENCY,"IM txt msg");
+            mUserService.sendImTxtMsg(toArray, RankType.EMERGENCY,"IM txt msg");
             mUserService.sendImVoiceMsg(toArray,bArray);
             mUserService.startWorkMsg((short) 1);
             mUserService.finishWorkMsg((short) 1);

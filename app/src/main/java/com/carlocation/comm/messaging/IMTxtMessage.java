@@ -17,16 +17,11 @@ import java.util.List;
 public class IMTxtMessage extends IMMessage {
     private static final String LOG_TAG = "IMTxtMessage";
 
-    public RANK mRank;
+    public RankType mRank;
     public String mTxtCont;
 
-    public static enum RANK{
-        EMERGENCY,
-        NORMAL,
-    }
-
     public IMTxtMessage(long mTransactionID, long mSenderId, List<Long> mToTerminalId,
-                        RANK mRank, String mTxtCont) {
+                        RankType mRank, String mTxtCont) {
         super(mTransactionID, mSenderId, mToTerminalId, IMMsgType.IM_TXT_MSG);
         this.mRank = mRank;
         this.mTxtCont = mTxtCont;

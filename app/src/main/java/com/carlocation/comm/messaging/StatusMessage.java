@@ -12,26 +12,13 @@ import org.json.JSONObject;
 public class StatusMessage extends BaseMessage {
 	private final String LOG_TAG = "StatusMessage";
 
-	public long mTerminalId;
 	public StatusMsgType mStatus;
-	public UserType mUserType;
 
-
-    public StatusMessage(long mTransactionID, long mTerminalId,
-                         StatusMsgType mStatus, UserType mUserType) {
-        super(mTransactionID, MessageType.STATUS_MESSAGE);
-        this.mTerminalId = mTerminalId;
+    public StatusMessage(long mTransactionID,long mSenderId,StatusMsgType mStatus) {
+        super(mTransactionID, MessageType.STATUS_MESSAGE, mSenderId, TerminalType.TERMINAL_CAR);
         this.mStatus = mStatus;
-        this.mUserType = mUserType;
     }
 
-    /**
-     * Used for indicate where the msg comes from
-     */
-    public static enum UserType {
-        MOBILE_PAD,
-        CONTROL_PC,
-    }
 
     /**
      * Used for indicate current status
@@ -66,9 +53,11 @@ public class StatusMessage extends BaseMessage {
 			JSONObject object = new JSONObject();
 			object.put("mTransactionID", StatusMessage.this.mTransactionID);
 			object.put("mMessageType", StatusMessage.this.mMessageType.ordinal());
-			object.put("mTerminalId", mTerminalId);
+            object.put("mMessageType", StatusMessage.this.mSenderId);
+            object.put("mMessageType", StatusMessage.this.mSenderType.ordinal());
+
 			object.put("mStatus", mStatus.ordinal());
-			object.put("mUserType", mUserType.ordinal());
+
 			return object;
 
 		} catch (JSONException e) {
@@ -80,8 +69,6 @@ public class StatusMessage extends BaseMessage {
 
 	@Override
 	public String toString() {
-		return "StatusMessage [" + super.toString() + "mTerminalId="
-				+ mTerminalId + ", mStatus=" + mStatus + ", mUserType="
-				+ mUserType + "]";
+		return "StatusMessage [" + super.toString()+ ", mStatus=" + mStatus + "]";
 	}
 }

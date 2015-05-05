@@ -8,18 +8,20 @@ import com.carlocation.comm.messaging.ActionType;
 import com.carlocation.comm.messaging.AuthMessage;
 import com.carlocation.comm.messaging.BaseMessage;
 import com.carlocation.comm.messaging.GlidingPathMessage;
-import com.carlocation.comm.messaging.IMMessage;
 import com.carlocation.comm.messaging.IMTxtMessage;
 import com.carlocation.comm.messaging.IMVoiceMessage;
 import com.carlocation.comm.messaging.Location;
+import com.carlocation.comm.messaging.LocationCell;
 import com.carlocation.comm.messaging.LocationMessage;
 import com.carlocation.comm.messaging.MessageResponseStatus;
-import com.carlocation.comm.messaging.MessageType;
+import com.carlocation.comm.messaging.ResponseMessage;
 import com.carlocation.comm.messaging.RestrictedAreaMessage;
 import com.carlocation.comm.messaging.StatusMessage;
 import com.carlocation.comm.messaging.TaskAssignmentMessage;
 import com.carlocation.comm.messaging.TerminalType;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -99,7 +101,7 @@ public class UserService{
      * @param status
      */
     void sendMyStatus(StatusMessage.StatusMsgType status){
-        StatusMessage statMsg = new StatusMessage(getTransactionId(),getTerminalId(),status, StatusMessage.UserType.MOBILE_PAD);
+        StatusMessage statMsg = new StatusMessage(getTransactionId(),getTerminalId(),status);
 
         // Invoke native service to send message
         Log.d(LOG_TAG, "sendMyStatus():Start invoke native service to send status message.");
@@ -115,8 +117,7 @@ public class UserService{
      * Used to send my location to server.
      */
     public void sendMyLocation (){
-        LocationMessage myLocationMsg = new LocationMessage(getTransactionId(),getTerminalId(),
-                getTerminalType(),getMyLocation(),getMySpeed());
+        LocationMessage myLocationMsg = new LocationMessage(getTransactionId(),getTerminalId(),getMyLocation());
 
         // Invoke native service to send message
         Log.d(LOG_TAG, "sendMyLocation(): Start invoke native service to send LocationMessage.");
@@ -130,13 +131,12 @@ public class UserService{
 
     /**
      * Send IM txt msg to another terminal.
-     * @param toTerminal    Terminal ID of destination
+     * @param toTerminal    Terminal IDs of destination
      * @param rank          Rank of Msg
      * @param content       Content of msg
      */
-    public void sendImTxtMsg(long toTerminal, IMTxtMessage.RANK rank, String content){
-        IMTxtMessage txtMessage = new IMTxtMessage(getTransactionId(),
-                getTerminalId(),toTerminal, rank,content);
+    public void sendImTxtMsg(List<Long> toTerminal, IMTxtMessage.RANK rank, String content){
+        IMTxtMessage txtMessage = new IMTxtMessage(getTransactionId(),getTerminalId(),toTerminal,rank,content);
 
         // Invoke native service to send message
         Log.d(LOG_TAG, "sendImTxtMsg(): Start invoke native service to send IM txt msg.");
@@ -153,7 +153,7 @@ public class UserService{
      * @param toTerminal    Terminal ID of destination
      * @param voiceData     Context of voice data
      */
-    public void sendImVoiceMsg(long toTerminal, byte[] voiceData){
+    public void sendImVoiceMsg(List<Long> toTerminal, byte[] voiceData){
         IMVoiceMessage voiceMessage = new IMVoiceMessage(getTransactionId(),
                 getTerminalId(),toTerminal,voiceData);
 
@@ -172,8 +172,8 @@ public class UserService{
      * @param taskId
      */
     public void startWorkMsg(short taskId){
-        TaskAssignmentMessage startWorkMsg = new TaskAssignmentMessage(getTransactionId(),
-                ActionType.ACTION_START,getTerminalId(),taskId,null);
+        TaskAssignmentMessage startWorkMsg  = new TaskAssignmentMessage(getTransactionId(),
+                getTerminalId(),ActionType.ACTION_START,taskId,null);
 
         //TODO add to sent queue and removed until success response received.
 
@@ -193,8 +193,7 @@ public class UserService{
      * @param taskId
      */
     public void finishWorkMsg(short taskId){
-        TaskAssignmentMessage finishWorkMsg = new TaskAssignmentMessage(getTransactionId(),
-                ActionType.ACTION_FINISH,getTerminalId(),taskId,null);
+        TaskAssignmentMessage finishWorkMsg = new TaskAssignmentMessage(getTransactionId(),getTerminalId(),ActionType.ACTION_FINISH,taskId,null);
 
         //TODO add to sent queue and removed until success response received.
 
@@ -214,7 +213,7 @@ public class UserService{
      */
     public void queryWorkById(short taskId){
         TaskAssignmentMessage queryWorkMsg = new TaskAssignmentMessage(getTransactionId(),
-                ActionType.ACTION_QUERY,getTerminalId(),taskId,null);
+                getTerminalId(),ActionType.ACTION_QUERY,taskId,null);
 
         //TODO add to sent queue and removed until success response received.
 
@@ -252,9 +251,8 @@ public class UserService{
      * @param warnAreaId
      */
     void queryWarnAreaById(int warnAreaId){
-        RestrictedAreaMessage queryWarnMsg  = new RestrictedAreaMessage(getTransactionId(), ActionType.ACTION_QUERY,warnAreaId,null);
-
-        //TODO add to sent queue and removed until success response received.
+        RestrictedAreaMessage queryWarnMsg = new RestrictedAreaMessage(getTransactionId(),
+                getTerminalId(),ActionType.ACTION_QUERY,warnAreaId,null);
 
         // Invoke native service to send message
         Log.d(LOG_TAG, "queryWarnMsg(): Start invoke native service to query warn area by id msg.");
@@ -266,7 +264,14 @@ public class UserService{
     }
 
     void responActionAssign(BaseMessage message, MessageResponseStatus status){
-
+        ResponseMessage rspMsg = new ResponseMessage(message,status);
+        // Invoke native service to send message
+        Log.d(LOG_TAG, "responActionAssign(): Start invoke native service to send rsp of assignment to server.");
+        if(mNativeService!= null){
+            mNativeService.sendMessageResponse(rspMsg);
+        }else {
+            Log.e(LOG_TAG,"responActionAssign():It seems failed to bind service mNativeService = "+mNativeService);
+        }
     }
 
 
@@ -301,9 +306,15 @@ public class UserService{
      * Used to retrieve my location from BeiDou positioning system.
      * @return
      */
-    public Location getMyLocation(){
+    public ArrayList<LocationCell> getMyLocation(){
         //FIXME Get Location from BeiDou positioning system
-        Location myLocation = new Location(111.111,222.222);
+        ArrayList<LocationCell> myLocation  = new ArrayList<LocationCell>();
+
+        Location loc = new Location(111.111,222.222);
+        LocationCell myCell = new LocationCell(getTerminalId(),TerminalType.TERMINAL_CAR,loc,getMySpeed());
+
+        myLocation.add(myCell);
+
         return myLocation;
     }
 

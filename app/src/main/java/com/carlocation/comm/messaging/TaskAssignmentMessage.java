@@ -18,16 +18,13 @@ public class TaskAssignmentMessage extends BaseMessage {
 	private final String LOG_TAG = "TaskAssignmentMessage";
 
 	public ActionType mActionType;
-	public long mTerminalId;
 	public short mTaskId;
 	public String mTaskContent;
 
-    public TaskAssignmentMessage(long mTransactionID,
-                                 ActionType mActionType, long mTerminalId,
+    public TaskAssignmentMessage(long mTransactionID, long mSenderId,ActionType mActionType,
                                  short mTaskId, String mTaskContent) {
-        super(mTransactionID, MessageType.TASK_MESSAGE);
+        super(mTransactionID, MessageType.TASK_MESSAGE, mSenderId, TerminalType.TERMINAL_CAR);
         this.mActionType = mActionType;
-        this.mTerminalId = mTerminalId;
         this.mTaskId = mTaskId;
         this.mTaskContent = mTaskContent;
     }
@@ -48,11 +45,12 @@ public class TaskAssignmentMessage extends BaseMessage {
 	public JSONObject translateJsonObject() {
 		try {
 			JSONObject object = new JSONObject();
-			object.put("mTransactionID",
-					TaskAssignmentMessage.this.mTransactionID);
+			object.put("mTransactionID",TaskAssignmentMessage.this.mTransactionID);
 			object.put("mMessageType", TaskAssignmentMessage.this.mMessageType.ordinal());
+            object.put("mMessageType", TaskAssignmentMessage.this.mSenderId);
+            object.put("mMessageType", TaskAssignmentMessage.this.mSenderType.ordinal());
+
 			object.put("mActionType", mActionType.ordinal());
-			object.put("mTerminalId", mTerminalId);
 			object.put("mTaskId", mTaskId);
 			object.put("mTaskContent", mTaskContent);
 
@@ -68,7 +66,7 @@ public class TaskAssignmentMessage extends BaseMessage {
 	@Override
 	public String toString() {
 		return "TaskAssignmentMessage [" + super.toString() + ", mActionType="
-				+ mActionType + ", mTerminalId=" + mTerminalId + ", mTaskId="
+				+ mActionType + ", mTaskId="
 				+ mTaskId + ", mTaskContent=" + mTaskContent + "]";
 	}
 }

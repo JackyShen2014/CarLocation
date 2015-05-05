@@ -7,4 +7,5 @@ package com.carlocation.comm.messaging;
 public enum TerminalType {
     TERMINAL_CAR,
     TERMINAL_PLANE,
+    TERMINAL_PC,
 }

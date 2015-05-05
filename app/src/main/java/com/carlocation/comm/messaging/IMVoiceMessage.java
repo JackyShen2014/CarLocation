@@ -6,6 +6,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.List;
+
 /**
  * Created by Jacky on 2015/4/21.
  *
@@ -16,16 +18,11 @@ public class IMVoiceMessage extends IMMessage {
 
     public byte[] mVoiceData;
 
-    public IMVoiceMessage(long mTransactionID) {
-        super(mTransactionID);
-    }
-
-    public IMVoiceMessage(long mTransactionID, long mFromTerminalId,
-                          long mToTerminalId, byte[] mVoiceData) {
-        super(mTransactionID, mFromTerminalId, mToTerminalId, IMMsgType.IM_VOICE_MSG);
+    public IMVoiceMessage(long mTransactionID, long mSenderId, List<Long> mToTerminalId,
+                          byte[] mVoiceData) {
+        super(mTransactionID, mSenderId, mToTerminalId, IMMsgType.IM_VOICE_MSG);
         this.mVoiceData = mVoiceData;
     }
-
 
     @Override
     public String translate() {
@@ -45,8 +42,17 @@ public class IMVoiceMessage extends IMMessage {
             JSONObject object = new JSONObject();
             object.put("mTransactionID", IMVoiceMessage.this.mTransactionID);
             object.put("mMessageType", IMVoiceMessage.this.mMessageType.ordinal());
-            object.put("mFromTerminalId", mFromTerminalId);
-            object.put("mToTerminalId", mToTerminalId);
+            object.put("mSenderId", IMVoiceMessage.this.mSenderId);
+            object.put("mSenderType", IMVoiceMessage.this.mSenderType.ordinal());
+
+            if (mToTerminalId != null) {
+                JSONArray array = new JSONArray();
+                for (long terminalId : mToTerminalId) {
+                    array.put(terminalId);
+                }
+
+                object.put("mToTerminalId", array);
+            }
             object.put("mImMsgType", mImMsgType.ordinal());
 
             JSONArray array = new JSONArray();

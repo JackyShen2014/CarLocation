@@ -6,6 +6,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+
 /**
  * Location message.<br>
  * Maybe contain one location or multi locations.
@@ -18,26 +20,14 @@ public class LocationMessage extends BaseMessage {
     private static final long serialVersionUID = -1427264506745698504L;
     private final String LOG_TAG = "LocationMessage";
 
-    public long mTerminalId;
-    public TerminalType mTerminalType;
-    public Location mLocation;
-    public float mSpeed;
+    public ArrayList<LocationCell> mLocationArray = new ArrayList<LocationCell>();
 
-    public LocationMessage() {
-        super(System.currentTimeMillis());
-        this.mMessageType = MessageType.LOCATION_MESSAGE;
+    public LocationMessage(long mTransactionID,long mSenderId,ArrayList<LocationCell> mLocationArray) {
+        super(mTransactionID, MessageType.LOCATION_MESSAGE, mSenderId, TerminalType.TERMINAL_CAR);
+        this.mLocationArray = mLocationArray;
     }
 
-    public LocationMessage(long mTransactionID, long mTerminalId,
-                           TerminalType mTerminalType, Location mLocation, float mSpeed) {
-        super(mTransactionID, MessageType.LOCATION_MESSAGE);
-        this.mTerminalId = mTerminalId;
-        this.mTerminalType = mTerminalType;
-        this.mLocation = mLocation;
-        this.mSpeed = mSpeed;
-    }
-
-	/**
+    /**
 	 * Translate Class attributes to json format for network transmit.
 	 * 
 	 * @return
@@ -63,15 +53,29 @@ public class LocationMessage extends BaseMessage {
 			JSONObject object = new JSONObject();
 			object.put("mTransactionID", LocationMessage.this.mTransactionID);
 			object.put("mMessageType", LocationMessage.this.mMessageType.ordinal());
-			object.put("mTerminalId", mTerminalId);
-			object.put("mTerminalType", mTerminalType.ordinal());
+            object.put("mSenderId", LocationMessage.this.mSenderId);
+            object.put("mSenderType", LocationMessage.this.mSenderType.ordinal());
 
-			JSONObject jSonObj = new JSONObject();
-			jSonObj.put("mLng", mLocation.mLng);
-			jSonObj.put("mLat", mLocation.mLat);
+            if (mLocationArray != null) {
+                JSONArray array = new JSONArray();
 
-			object.put("mLocation", jSonObj);
-			object.put("mSpeed", mSpeed);
+                for (LocationCell locations : mLocationArray) {
+                    JSONObject locObj = new JSONObject();
+                    locObj.put("mTerminalId", locations.mTerminalId);
+                    locObj.put("mTerminalType", locations.mTerminalType.ordinal());
+                    locObj.put("mSpeed", locations.mSpeed);
+
+                    JSONObject local = new JSONObject();
+                    local.put("mLng",locations.mLocation.mLng);
+                    local.put("mLat",locations.mLocation.mLat);
+
+                    locObj.put("mLocation",local);
+
+                    array.put(locObj);
+                }
+
+                object.put("mLocationArray", array);
+            }
 
 			return object;
 
@@ -89,10 +93,9 @@ public class LocationMessage extends BaseMessage {
 	 */
 	@Override
 	public String toString() {
-		return "LocationMessage [" + super.toString() + "mTerminalId="
-				+ mTerminalId + ", mTerminalType=" + mTerminalType + ", mLng="
-				+ mLocation.mLng + ", mLat=" + mLocation.mLat + ", mSpeed="
-				+ mSpeed + "]";
+		return "LocationMessage [" + super.toString() + "mLocationArray=" +
+                (mLocationArray != null ? mLocationArray.toString() : null)
+				+ "]";
 	}
 
 }

@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Jacky on 2015/4/21.
@@ -19,18 +20,18 @@ public class RestrictedAreaMessage extends BaseMessage {
 
 	public ActionType mActionType;
 	public int mWarnAreaId;
-	public ArrayList<Location> mLocationArea = new ArrayList<Location>();
+	public List<Location> mLocationArea;
 
-    public RestrictedAreaMessage(long mTransactionID, ActionType mActionType,
-                                 int mWarnAreaId, ArrayList<Location> mLocationArea) {
-        super(mTransactionID, MessageType.WARN_MESSAGE);
+
+    public RestrictedAreaMessage(long mTransactionID, long mSenderId, ActionType mActionType,
+                                 int mWarnAreaId, List<Location> mLocationArea) {
+        super(mTransactionID, MessageType.WARN_MESSAGE, mSenderId, TerminalType.TERMINAL_CAR);
         this.mActionType = mActionType;
         this.mWarnAreaId = mWarnAreaId;
         this.mLocationArea = mLocationArea;
     }
 
-
-	@Override
+    @Override
 	public String translate() {
 		// Define return result
 		String jSonResult = "";
@@ -50,6 +51,8 @@ public class RestrictedAreaMessage extends BaseMessage {
 			JSONObject object = new JSONObject();
 			object.put("mTransactionID",RestrictedAreaMessage.this.mTransactionID);
 			object.put("mMessageType", RestrictedAreaMessage.this.mMessageType.ordinal());
+            object.put("mSenderId", RestrictedAreaMessage.this.mSenderId);
+            object.put("mSenderType", RestrictedAreaMessage.this.mSenderType.ordinal());
 			object.put("mActionType", mActionType.ordinal());
 			object.put("mWarnAreaId", mWarnAreaId);
 

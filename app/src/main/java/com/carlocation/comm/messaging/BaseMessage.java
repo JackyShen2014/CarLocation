@@ -22,12 +22,12 @@ public abstract class BaseMessage implements Serializable{
 	/**
 	 * Transaction id
 	 */
-	protected long mTransactionID;
-	
-	
-	protected MessageType mMessageType;
+	public long mTransactionID;
+	public MessageType mMessageType;
+    public long mSenderId;
+    public TerminalType mSenderType;
 
-    protected BaseMessage() {
+    public BaseMessage() {
         super();
     }
 
@@ -36,9 +36,17 @@ public abstract class BaseMessage implements Serializable{
 		this.mTransactionID = mTransactionID;
 	}
 
-    protected BaseMessage(long mTransactionID, MessageType mMessageType) {
+    public BaseMessage(long mTransactionID, MessageType mMessageType) {
         this.mTransactionID = mTransactionID;
         this.mMessageType = mMessageType;
+    }
+
+    public BaseMessage(long mTransactionID, MessageType mMessageType, long mSenderId,
+                          TerminalType mSenderType) {
+        this.mTransactionID = mTransactionID;
+        this.mMessageType = mMessageType;
+        this.mSenderId = mSenderId;
+        this.mSenderType = mSenderType;
     }
 
     /**
@@ -56,25 +64,10 @@ public abstract class BaseMessage implements Serializable{
 	
 	
 
-	public long getTransationID() {
-		return mTransactionID;
-	}
-
-
-	public void setTransationID(long transactionID) {
-		this.mTransactionID = transactionID;
-	}
-
 
 	public MessageType getMessageType() {
 		return mMessageType;
 	}
-
-
-	public void setMessageType(MessageType messageType) {
-		this.mMessageType = messageType;
-	}
-
 
 
 	@Override
@@ -108,6 +101,8 @@ public abstract class BaseMessage implements Serializable{
 	public String toString() {
 		return "Message [mTransactionID=" + mTransactionID
                 + ", mMessageType=" + mMessageType
+                + ", mSenderId=" + mSenderId
+                + ", mSenderType=" + mSenderType
                 + "]";
 	}
 

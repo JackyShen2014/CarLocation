@@ -18,7 +18,7 @@ public class AuthMessage extends BaseMessage {
 
     private final String LOG_TAG = "AuthMessage";
 
-    public long mTerminalId;
+
     public String mUserName;
     public String mPassword;
     public AuthMsgType mAuthType;
@@ -28,21 +28,14 @@ public class AuthMessage extends BaseMessage {
         AUTH_LOGOUT_MSG,
     }
 
-    public AuthMessage() {
-    }
-
-
-    public AuthMessage(long mTransactionID, long mTerminalId,
-                       String mUserName, String mPassword, AuthMsgType mAuthType) {
-        super(mTransactionID, MessageType.AUTH_MESSAGE);
-        this.mTerminalId = mTerminalId;
+    public AuthMessage(long mTransactionID,long mSenderId,String mUserName, String mPassword, AuthMsgType mAuthType) {
+        super(mTransactionID, MessageType.AUTH_MESSAGE, mSenderId, TerminalType.TERMINAL_CAR);
         this.mUserName = mUserName;
         this.mPassword = mPassword;
         this.mAuthType = mAuthType;
     }
 
-
-	@Override
+    @Override
 	public String translate() {
 		// Define return result
 		String jSonResult = "";
@@ -60,7 +53,9 @@ public class AuthMessage extends BaseMessage {
 			JSONObject object = new JSONObject();
 			object.put("mTransactionID", AuthMessage.this.mTransactionID);
 			object.put("mMessageType", AuthMessage.this.mMessageType.ordinal());
-			object.put("mTerminalId", mTerminalId);
+			object.put("mSenderId", AuthMessage.this.mSenderId);
+            object.put("mSenderType", AuthMessage.this.mSenderType.ordinal());
+
 			object.put("mUserName", mUserName);
 			object.put("mPassword", mPassword);
 			object.put("mAuthType", mAuthType.ordinal());
@@ -74,5 +69,11 @@ public class AuthMessage extends BaseMessage {
 		return null;
 	}
 
-
+    @Override
+    public String toString() {
+        return "AuthMessage [" + super.toString() + ", mUserName="
+                + mUserName + ", mPassword="
+                + mPassword + ", mAuthType=" + mAuthType
+                + "]";
+    }
 }

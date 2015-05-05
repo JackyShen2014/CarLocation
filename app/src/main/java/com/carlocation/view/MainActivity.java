@@ -11,8 +11,6 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.carlocation.R;
@@ -26,7 +24,6 @@ import com.carlocation.comm.messaging.IMMessage;
 import com.carlocation.comm.messaging.IMTxtMessage;
 import com.carlocation.comm.messaging.IMVoiceMessage;
 import com.carlocation.comm.messaging.Location;
-import com.carlocation.comm.messaging.LocationMessage;
 import com.carlocation.comm.messaging.MessageResponseStatus;
 import com.carlocation.comm.messaging.MessageType;
 import com.carlocation.comm.messaging.Notification;
@@ -36,8 +33,7 @@ import com.carlocation.comm.messaging.TaskAssignmentMessage;
 import com.carlocation.comm.messaging.TerminalType;
 
 import java.util.ArrayList;
-
-import javax.xml.datatype.Duration;
+import java.util.List;
 
 public class MainActivity extends ActionBarActivity implements
         NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -185,35 +181,46 @@ public class MainActivity extends ActionBarActivity implements
              * Examples for how to use UserService to send MSG to Server
              */
 
-            //Test case 2: update mylocation to server
+            List<Long> toArray  = new ArrayList<Long>();
+            toArray.add(567l);
+            toArray.add(789l);
+
+            byte[] bArray = {(byte) 1, (byte) 2, (byte) 3};
+
+            ArrayList<Location> array = new ArrayList<Location>();
+            array.add(new Location(321.123, 456.654));
+            array.add(new Location(789.987, 890.098));
+
+            /**
+             * Print out  JSON format of request messages
+             */
+
             mUserService.sendMyStatus(StatusMessage.StatusMsgType.STATUS_ONLINE);
             mUserService.sendMyLocation();
-            mUserService.sendImTxtMsg(123, IMTxtMessage.RANK.EMERGENCY, "IM txt msg.");
-            byte[] bArray = {(byte) 1, (byte) 2, (byte) 3};
-            mUserService.sendImVoiceMsg(123, bArray);
+            mUserService.sendImTxtMsg(toArray, IMTxtMessage.RANK.EMERGENCY,"IM txt msg");
+            mUserService.sendImVoiceMsg(toArray,bArray);
             mUserService.startWorkMsg((short) 1);
             mUserService.finishWorkMsg((short) 1);
             mUserService.queryWorkById((short) 1);
             mUserService.queryGlidePathById(1);
             mUserService.queryWarnAreaById(1);
 
-
             /**
-             * Below are used to test all msg json format
+             * Print out  JSON format of response messages
              */
-            //Print out all MSGs' json format
-            new AuthMessage(123, 456, "Name", "password", AuthMessage.AuthMsgType.AUTH_LOGIN_MSG).translate();
-            ArrayList<Location> array = new ArrayList<Location>();
-            array.add(new Location(321.123, 456.654));
-            array.add(new Location(789.987, 890.098));
 
-            new GlidingPathMessage(123, ActionType.ACTION_QUERY, 456, "title", 7, array).translate();
-            new IMTxtMessage(123, 456, 789, IMTxtMessage.RANK.EMERGENCY, "TXTContent").translate();
-            new IMVoiceMessage(123, 456, 789, bArray).translate();
-            new LocationMessage(123, 456, TerminalType.TERMINAL_CAR, new Location(321.123, 456.654), 1.1f).translate();
-            new RestrictedAreaMessage(123, ActionType.ACTION_QUERY, 12, array).translate();
-            new StatusMessage(123, 456, StatusMessage.StatusMsgType.STATUS_ONLINE, StatusMessage.UserType.MOBILE_PAD).translate();
-            new TaskAssignmentMessage(123, ActionType.ACTION_QUERY, 456, (short) 1, null).translate();
+            GlidingPathMessage glideMsg = new GlidingPathMessage(123, ActionType.ACTION_QUERY, 456, "title", 7, array);
+            RestrictedAreaMessage warnMsg = new RestrictedAreaMessage(123,456,ActionType.ACTION_QUERY,12,array);
+            TaskAssignmentMessage taskMsg = new TaskAssignmentMessage(123,456,ActionType.ACTION_QUERY,(short)1,null);
+
+            MessageResponseStatus status = MessageResponseStatus.SUCCESS;
+            mUserService.responActionAssign(glideMsg,status);
+            mUserService.responActionAssign(warnMsg,status);
+            mUserService.responActionAssign(taskMsg,status);
+
+
+
+
             return null;
         }
     }
@@ -502,7 +509,7 @@ public class MainActivity extends ActionBarActivity implements
 
     private void handleStatusMsg(Notification noti) {
         StatusMessage statMsg = (StatusMessage)noti.message;
-        if(statMsg.mUserType != StatusMessage.UserType.CONTROL_PC){
+        if(statMsg.mSenderType != TerminalType.TERMINAL_PC){
             Log.d(LOG_TAG,"handleStatusMsg(): Wrong user type msg!");
         }else{
             /**

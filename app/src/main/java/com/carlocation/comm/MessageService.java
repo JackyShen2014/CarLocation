@@ -776,6 +776,8 @@ public class MessageService extends Service {
 		@Override
 		public void run() {
 			try {
+                //Print out the json format of sending rsp msg
+                Log.d(TAG,"JSON format of RSP: "+MessageFactory.addHeader(response));
 				getChannel().basicPublish(EXCHANGE_NAME_CONTROLLER, "",
 						null, MessageFactory.addHeader(response).getBytes());
 			} catch (IOException e) {

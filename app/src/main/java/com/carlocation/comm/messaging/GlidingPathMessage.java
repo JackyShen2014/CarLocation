@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Jacky on 2015/4/21.
@@ -17,25 +18,20 @@ public class GlidingPathMessage extends BaseMessage {
     private static final String LOG_TAG = "GlidingPathMessage";
 
     public ActionType mActionType;
-    public long mTerminalId;
     public String mTitle;
     public int mGlidePathId;
-    public ArrayList<Location> mLocationArray = new ArrayList<Location>();
+    public List<Location> mLocationArray;
 
-
-    public GlidingPathMessage(long mTransactionID, ActionType mActionType,
-                              long mTerminalId, String mTitle, int mGlidePathId,
-                              ArrayList<Location> mLocationArray) {
-        super(mTransactionID, MessageType.GLIDE_MESSAGE);
+    public GlidingPathMessage(long mTransactionID, ActionType mActionType, long mSenderId,
+                              String mTitle, int mGlidePathId, List<Location> mLocationArray) {
+        super(mTransactionID, MessageType.GLIDE_MESSAGE, mSenderId, TerminalType.TERMINAL_CAR);
         this.mActionType = mActionType;
-        this.mTerminalId = mTerminalId;
         this.mTitle = mTitle;
         this.mGlidePathId = mGlidePathId;
         this.mLocationArray = mLocationArray;
     }
 
-
-	@Override
+    @Override
 	public String translate() {
 		// Define return result
 		String jSonResult = "";
@@ -54,8 +50,10 @@ public class GlidingPathMessage extends BaseMessage {
 			JSONObject object = new JSONObject();
 			object.put("mTransactionID", GlidingPathMessage.this.mTransactionID);
 			object.put("mMessageType", GlidingPathMessage.this.mMessageType.ordinal());
+            object.put("mSenderId", GlidingPathMessage.this.mSenderId);
+            object.put("mSenderType", GlidingPathMessage.this.mSenderType.ordinal());
+
 			object.put("mActionType", mActionType.ordinal());
-			object.put("mTerminalId", mTerminalId);
 			object.put("mTitle", mTitle);
 			object.put("mGlidePathId", mGlidePathId);
 
@@ -85,7 +83,7 @@ public class GlidingPathMessage extends BaseMessage {
 	@Override
 	public String toString() {
 		return "GlidingPathMessage [" + super.toString() + ", mActionType="
-				+ mActionType + ", mTerminalId=" + mTerminalId + ", mTitle="
+				+ mActionType + ", mTitle="
 				+ mTitle + ", mGlidePathId=" + mGlidePathId
 				+ ", mLocationArray="
 				+ (mLocationArray != null ? mLocationArray.toString() : null)

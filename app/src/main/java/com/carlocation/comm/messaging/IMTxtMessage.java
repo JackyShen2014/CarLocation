@@ -2,10 +2,12 @@ package com.carlocation.comm.messaging;
 
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Jacky on 2015/4/21.
@@ -23,17 +25,12 @@ public class IMTxtMessage extends IMMessage {
         NORMAL,
     }
 
-    public IMTxtMessage(long mTransactionID) {
-        super(mTransactionID);
-    }
-
-    public IMTxtMessage(long mTransactionID, long mFromTerminalId,
-                        long mToTerminalId, RANK mRank, String mTxtCont) {
-        super(mTransactionID, mFromTerminalId, mToTerminalId, IMMsgType.IM_TXT_MSG);
+    public IMTxtMessage(long mTransactionID, long mSenderId, List<Long> mToTerminalId,
+                        RANK mRank, String mTxtCont) {
+        super(mTransactionID, mSenderId, mToTerminalId, IMMsgType.IM_TXT_MSG);
         this.mRank = mRank;
         this.mTxtCont = mTxtCont;
     }
-
 
     @Override
     public String translate() {
@@ -53,9 +50,20 @@ public class IMTxtMessage extends IMMessage {
             JSONObject object = new JSONObject();
             object.put("mTransactionID", IMTxtMessage.this.mTransactionID);
             object.put("mMessageType", IMTxtMessage.this.mMessageType.ordinal());
-            object.put("mFromTerminalId", mFromTerminalId);
-            object.put("mToTerminalId", mToTerminalId);
+            object.put("mSenderId", IMTxtMessage.this.mSenderId);
+            object.put("mSenderType", IMTxtMessage.this.mSenderType.ordinal());
+
+            if (mToTerminalId != null) {
+                JSONArray array = new JSONArray();
+                for (long terminalId : mToTerminalId) {
+                    array.put(terminalId);
+                }
+
+                object.put("mToTerminalId", array);
+            }
+
             object.put("mImMsgType", mImMsgType.ordinal());
+
             object.put("mRank", mRank.ordinal());
             object.put("mTxtCont", mTxtCont);
 

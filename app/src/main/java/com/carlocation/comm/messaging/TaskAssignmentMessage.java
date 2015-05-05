@@ -63,7 +63,10 @@ public class TaskAssignmentMessage extends BaseMessage {
 			object.put("mActionType", mActionType.ordinal());
 			object.put("mTaskId", mTaskId);
 			object.put("mTaskContent", mTaskContent);
-            object.put("mRank",mRank.ordinal());
+            if(mRank!=null){
+                object.put("mRank",mRank.ordinal());
+            }
+
 
             return object;
 

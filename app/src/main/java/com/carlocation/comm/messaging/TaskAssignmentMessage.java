@@ -57,13 +57,13 @@ public class TaskAssignmentMessage extends BaseMessage {
 			JSONObject object = new JSONObject();
 			object.put("mTransactionID",TaskAssignmentMessage.this.mTransactionID);
 			object.put("mMessageType", TaskAssignmentMessage.this.mMessageType.ordinal());
-            object.put("mMessageType", TaskAssignmentMessage.this.mSenderId);
-            object.put("mMessageType", TaskAssignmentMessage.this.mSenderType.ordinal());
+            object.put("mSenderId", TaskAssignmentMessage.this.mSenderId);
+            object.put("mSenderType", TaskAssignmentMessage.this.mSenderType.ordinal());
 
 			object.put("mActionType", mActionType.ordinal());
 			object.put("mTaskId", mTaskId);
 			object.put("mTaskContent", mTaskContent);
-            object.put("mRank",mRank);
+            object.put("mRank",mRank.ordinal());
 
             return object;
 

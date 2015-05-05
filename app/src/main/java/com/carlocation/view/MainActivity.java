@@ -188,7 +188,7 @@ public class MainActivity extends ActionBarActivity implements
             //Test case 2: update mylocation to server
             mUserService.sendMyStatus(StatusMessage.StatusMsgType.STATUS_ONLINE);
             mUserService.sendMyLocation();
-            mUserService.sendImTxtMsg(123, (byte) 2, "IM txt msg.");
+            mUserService.sendImTxtMsg(123, IMTxtMessage.RANK.EMERGENCY, "IM txt msg.");
             byte[] bArray = {(byte) 1, (byte) 2, (byte) 3};
             mUserService.sendImVoiceMsg(123, bArray);
             mUserService.startWorkMsg((short) 1);
@@ -208,7 +208,7 @@ public class MainActivity extends ActionBarActivity implements
             array.add(new Location(789.987, 890.098));
 
             new GlidingPathMessage(123, ActionType.ACTION_QUERY, 456, "title", 7, array).translate();
-            new IMTxtMessage(123, 456, 789,(byte) 11, "TXTContent").translate();
+            new IMTxtMessage(123, 456, 789, IMTxtMessage.RANK.EMERGENCY, "TXTContent").translate();
             new IMVoiceMessage(123, 456, 789, bArray).translate();
             new LocationMessage(123, 456, TerminalType.TERMINAL_CAR, new Location(321.123, 456.654), 1.1f).translate();
             new RestrictedAreaMessage(123, ActionType.ACTION_QUERY, 12, array).translate();

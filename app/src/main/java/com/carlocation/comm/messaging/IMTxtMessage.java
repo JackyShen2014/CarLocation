@@ -15,15 +15,20 @@ import java.util.ArrayList;
 public class IMTxtMessage extends IMMessage {
     private static final String LOG_TAG = "IMTxtMessage";
 
-    public byte mRank;
+    public RANK mRank;
     public String mTxtCont;
+
+    public static enum RANK{
+        EMERGENCY,
+        NORMAL,
+    }
 
     public IMTxtMessage(long mTransactionID) {
         super(mTransactionID);
     }
 
     public IMTxtMessage(long mTransactionID, long mFromTerminalId,
-                        long mToTerminalId, byte mRank, String mTxtCont) {
+                        long mToTerminalId, RANK mRank, String mTxtCont) {
         super(mTransactionID, mFromTerminalId, mToTerminalId, IMMsgType.IM_TXT_MSG);
         this.mRank = mRank;
         this.mTxtCont = mTxtCont;
@@ -51,7 +56,7 @@ public class IMTxtMessage extends IMMessage {
             object.put("mFromTerminalId", mFromTerminalId);
             object.put("mToTerminalId", mToTerminalId);
             object.put("mImMsgType", mImMsgType.ordinal());
-            object.put("mRank", mRank);
+            object.put("mRank", mRank.ordinal());
             object.put("mTxtCont", mTxtCont);
 
             return object;

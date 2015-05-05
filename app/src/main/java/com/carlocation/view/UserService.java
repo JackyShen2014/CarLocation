@@ -134,7 +134,7 @@ public class UserService{
      * @param rank          Rank of Msg
      * @param content       Content of msg
      */
-    public void sendImTxtMsg(long toTerminal, byte rank, String content){
+    public void sendImTxtMsg(long toTerminal, IMTxtMessage.RANK rank, String content){
         IMTxtMessage txtMessage = new IMTxtMessage(getTransactionId(),
                 getTerminalId(),toTerminal, rank,content);
 

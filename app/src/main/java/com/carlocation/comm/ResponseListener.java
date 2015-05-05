@@ -9,7 +9,7 @@ import com.carlocation.comm.messaging.Notification;
  * <ul>
  * To get response message, you have to make sure use
  * {@link IMessageService#sendMessage(com.carlocation.comm.messaging.BaseMessage, ResponseListener)}
- * to send request. Otherwise you can't receive response.
+ * to send request. Otherwise you don't receive response for ever.
  * </ul>
  * 
  * @author 28851274
@@ -18,7 +18,7 @@ import com.carlocation.comm.messaging.Notification;
 public interface ResponseListener {
 
 	/**
-	 * Unsolicited message notification.<br>
+	 * Response message notification.<br>
 	 * Note: please make sure do not update UI in this function, because this
 	 * function doesn't run in UI thread.
 	 * 

@@ -1,6 +1,7 @@
 package com.carlocation.comm;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +41,7 @@ import com.rabbitmq.client.ExceptionHandler;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.QueueingConsumer.Delivery;
 import com.rabbitmq.client.ShutdownSignalException;
-import com.rabbitmq.client.TopologyRecoveryException;
+import com.rabbitmq.client.impl.DefaultExceptionHandler;
 
 /**
  * Communication service.<br>
@@ -64,10 +65,10 @@ import com.rabbitmq.client.TopologyRecoveryException;
  * Important: First time start service need to input parameters:<br>
  * {@link EXTRA_CONNECTION_SERVER_ADDR} : server address<br>
  * {@link EXTRA_CONNECTION_SERVER_PORT} : server port<br>
- * {@LINK EXTRA_MESSAGE_SERVER_AUTH_REQUIRED} : Use user name and
+ * {@link EXTRA_MESSAGE_SERVER_AUTH_REQUIRED} : Use user name and
  * password to pass message server authentication<br>
- * {@LINK EXTRA_SWITCH_SERVER_FLAG} : Switch server flag<br>
  * </ul>
+ * <ul>If need to switch new server:  start service with flag {@link EXTRA_SWITCH_SERVER_FLAG}</ul>
  * 
  * @see ConnectionState
  * @author 28851274
@@ -81,7 +82,6 @@ public class MessageService extends Service {
 	private static final String EXCHANGE_NAME_FANOUT = "carlocation.client.fanout";
 	private static final String EXCHANGE_NAME_TOPIC = "carlocation.client.topic";
 	private static final String EXCHANGE_NAME_CONTROLLER = "carlocation.reply.fanout";
-
 
 	public static final String BROADCAST_CATEGORY = "com.carlocation";
 	public static final String BROADCAST_ACTION_STATE_CHANGED = "com.carlocation.connection_state_changed";
@@ -132,10 +132,18 @@ public class MessageService extends Service {
 	private Connection mConnection;
 
 	private Channel mChannel;
+	
+	private ConsumerThread mConsumer;
+	
+	
+	/**
+	 * Use to save unsolicited message listeners
+	 */
+	private List<WeakReference<NotificationListener>> notificationListeners = new ArrayList<WeakReference<NotificationListener>>();
 
-
-	private List<NotificationListener> notificationListeners = new ArrayList<NotificationListener>();
-
+	/**
+	 * Use to save which messages are waiting for response
+	 */
 	private Map<BaseMessage, TimeStamp> mPendingResponse = new HashMap<BaseMessage, TimeStamp>();
 
 	/**
@@ -143,13 +151,12 @@ public class MessageService extends Service {
 	 */
 	private NativeService mService;
 
-	private ConsumerThread mConsumer;
 
 	/**
 	 * Current device data connection state
 	 */
 	private NetworkState mNS = NetworkState.NONE;
-	
+
 	/**
 	 * Current server connection state
 	 */
@@ -206,21 +213,19 @@ public class MessageService extends Service {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		Log.e(TAG, " service destoryed ");
-		mLocalHandlerThread.quit();
-		mLocalHandler = null;
-		
+		Log.i(TAG, "#############service destoryed#############");
 		clearAllPendingMessage();
-		
-		notificationListeners.clear();
-		dispose();
 
 
 		Intent i = new Intent(BROADCAST_ACTION_SERVICE_DOWN);
 		i.addCategory(BROADCAST_CATEGORY);
-		this.sendBroadcast(i);
-		this.unregisterReceiver(mConnectionReceiver);
-		
+		sendBroadcast(i);
+		unregisterReceiver(mConnectionReceiver);
+
+		notificationListeners.clear();
+		dispose();
+		mLocalHandlerThread.quit();
+		mLocalHandler = null;
 		mService = null;
 	}
 
@@ -301,12 +306,12 @@ public class MessageService extends Service {
 	 * Get receiver channel, if doesn't create channel yet, create one.
 	 * 
 	 * @return
-	 */ 
+	 */
 	private Channel getChannel() {
 		if (mChannel == null || !mChannel.isOpen()) {
 			mChannel = getChannel(mServer, mPort, mUserName, mPassword);
-		} 
-		
+		}
+
 		return mChannel;
 	}
 
@@ -319,8 +324,8 @@ public class MessageService extends Service {
 	 * @param password
 	 * @return
 	 */
-	private Channel getChannel(String server, int port,
-			String username, String password) {
+	private Channel getChannel(String server, int port, String username,
+			String password) {
 		if (mChannel != null && mChannel.isOpen()) {
 			return mChannel;
 		}
@@ -329,8 +334,7 @@ public class MessageService extends Service {
 		int count = 1;
 		while (count++ < 5) {
 			try {
-				mConnection = newConnection(server, port, username,
-						password);
+				mConnection = newConnection(server, port, username, password);
 			} catch (AuthenticationFailureException ae) {
 				Log.e(TAG, "Create receiver User name or password incorrect",
 						ae);
@@ -353,15 +357,14 @@ public class MessageService extends Service {
 
 		count = 1;
 		while (opened && count++ < 5) {
-			try { 
+			try {
 				mChannel = mConnection.createChannel();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			Log.i(TAG, "Try to open new channel for receiver : "
-					+ mChannel);
+			Log.i(TAG, "Try to open new channel for receiver : " + mChannel);
 			if (mChannel != null && mChannel.isOpen()) {
-				mSCS = ServerConnectionState.CONNECTED; 
+				mSCS = ServerConnectionState.CONNECTED;
 				break;
 			}
 			try {
@@ -375,30 +378,31 @@ public class MessageService extends Service {
 
 	}
 
-
-
-	
-
 	/**
-	 * Send message back to listener
-	 * 
+	 *  Send message back to listener
 	 * @param msg
+	 * @param res
+	 * @return true send response, false no listener to send
 	 */
 	private boolean fireBackMessage(BaseMessage msg, Notification.Result res) {
 		TimeStamp ts = mPendingResponse.remove(msg);
 		if (ts != null) {
 			ts.listener.onResponse(new Notification(msg,
 					Notification.NotificationType.RESPONSE, res));
+			// Remove time out handler
+			mLocalHandler.removeCallbacks(ts.timeoutRunnable);
 			return true;
 		} else {
 			return false;
 		}
 	}
 
+	
 	/**
-	 * Send message back to listener
-	 * 
+	 *  Send message back to listener
 	 * @param msg
+	 * @param res
+	 * @return true send response, false no listener to send
 	 */
 	private boolean fireBackMessage(ResponseMessage msg, Notification.Result res) {
 		TimeStamp ts = mPendingResponse.remove(msg.message);
@@ -406,6 +410,8 @@ public class MessageService extends Service {
 		if (ts != null) {
 			ts.listener.onResponse(new Notification(msg.message,
 					Notification.NotificationType.RESPONSE, res));
+			// Remove time out handler
+			mLocalHandler.removeCallbacks(ts.timeoutRunnable);
 			return true;
 		} else {
 			return false;
@@ -417,35 +423,32 @@ public class MessageService extends Service {
 	 * 
 	 * @param msg
 	 */
-	private void fireMessage(BaseMessage msg) {
-		TimeStamp ts = mPendingResponse.remove(msg);
-
-		if (ts != null) {
-			ts.listener.onResponse(new Notification(msg,
-					Notification.NotificationType.RESPONSE, Result.SUCCESS));
-			return;
-		}
-
+	private void fireUnsolicitedMessage(BaseMessage msg) {
 		Notification notif = new Notification(msg,
 				Notification.NotificationType.UNSOLICITED, Result.SUCCESS);
 
-		for (NotificationListener listener : notificationListeners) {
-			listener.onNotify(notif);
+		for (WeakReference<NotificationListener> ref : notificationListeners) {
+			if (ref.get() != null) {
+				ref.get().onNotify(notif);
+			}
 		}
 
 	}
-	
-	
+
 	private void clearAllPendingMessage() {
-		for (Entry<BaseMessage, TimeStamp> entry :mPendingResponse.entrySet()) {
+		for (Entry<BaseMessage, TimeStamp> entry : mPendingResponse.entrySet()) {
 			TimeStamp ts = entry.getValue();
 			if (ts != null) {
-				ts.listener.onResponse(new Notification(ts.message,
-						Notification.NotificationType.RESPONSE, Result.TIME_OUT));
+				ts.listener
+						.onResponse(new Notification(ts.message,
+								Notification.NotificationType.RESPONSE,
+								Result.FAILED));
 			}
-			
+			// Remove time out handler
+			mLocalHandler.removeCallbacks(ts.timeoutRunnable);
+
 		}
-		
+
 		mPendingResponse.clear();
 	}
 
@@ -454,53 +457,66 @@ public class MessageService extends Service {
 	 */
 	private void reconnect() {
 		dispose();
-		mSCS =  ServerConnectionState.CONNECTING;
-		connect();
-	}
-
-	/**
-	 * 
-	 */
-	private void connect() {
+		mSCS = ServerConnectionState.CONNECTING;
+		//Re-get channel instance
 		if (getChannel() != null) {
+			//re-start consumer thread
 			mConsumer = new ConsumerThread(getChannel());
 			mConsumer.start();
 		} else {
-			mSCS  = ServerConnectionState.NONE;
+			mSCS = ServerConnectionState.NONE;
 			Log.e(TAG, "Can not connect to new server:" + mServer + " port:"
 					+ mPort + " username:" + mUserName + " pwd:" + mPassword);
 			return;
 		}
 	}
 
+
+
 	private void broadcastConnectState(ConnectionState state) {
 		Intent i = new Intent(BROADCAST_ACTION_STATE_CHANGED);
 		i.addCategory(BROADCAST_CATEGORY);
 		i.putExtra(EXTRA_CONNECTION_STATE, state);
-		this.sendBroadcast(i);
+		sendBroadcast(i);
 		Log.e(TAG, "Send broadcast with state:" + state);
 	}
 
+	
+	/**
+	 * Dispose call connection 
+	 */
 	private void dispose() {
 
 		if (mConsumer != null) {
-			Log.i(TAG, "request consumer thread quit");
 			mConsumer.stopListener();
 		}
-
-
-
 		if (mChannel != null && mChannel.isOpen()) {
 			try {
-				mChannel.queueUnbind(mUserName, EXCHANGE_NAME_DIRECT,
-						mUserName);
-				mChannel.queueUnbind(mUserName, EXCHANGE_NAME_FANOUT,
-						mUserName);
-				mChannel.queueUnbind(mUserName, EXCHANGE_NAME_TOPIC,
-						mUserName);
+				mChannel.basicCancel(mUserName);
+			} catch (IOException e1) {
+				Log.e(TAG, "Cancel consumer :" + mUserName+" failed", e1);
+			}
+			try {
+				mChannel.queueUnbind(mUserName, EXCHANGE_NAME_DIRECT, mUserName);
+			} catch (IOException e1) {
+				Log.e(TAG, "Unbind queue:"+ EXCHANGE_NAME_DIRECT+" failed", e1);
+			}
 
-				mChannel.close();
+			try {
+				mChannel.queueUnbind(mUserName, EXCHANGE_NAME_FANOUT, mUserName);
+			} catch (IOException e1) {
+				Log.e(TAG,  "Unbind queue:"+ EXCHANGE_NAME_FANOUT+" failed", e1);
+			}
+
+			try {
+				mChannel.queueUnbind(mUserName, EXCHANGE_NAME_TOPIC, "*."+mUserName + ".*");
 			} catch (Exception e) {
+				Log.e(TAG,  "Unbind queue:"+ EXCHANGE_NAME_TOPIC+" failed", e);
+			}
+
+			try {
+				mChannel.close();
+			} catch (IOException e) {
 				Log.e(TAG, "Send Channel close failed", e);
 			}
 		}
@@ -512,64 +528,25 @@ public class MessageService extends Service {
 				Log.e(TAG, "Connection close failed", e);
 			}
 		}
- 
-//		connectionFactory = null;
+
+		// connectionFactory = null;
 
 		mChannel = null;
 		mConnection = null;
 		mConsumer = null;
+		// Update server connection state to none
+		mSCS = ServerConnectionState.NONE;
 
 	}
 
+	private ExceptionHandler mExceptionHandler = new DefaultExceptionHandler() {
 
-	private ExceptionHandler mExceptionHandler = new ExceptionHandler() {
-
-		@Override
-		public void handleBlockedListenerException(Connection conn, Throwable t) {
-			broadcastConnectState(ConnectionState.CONNECT_FAILED);
-
-		}
-
-		@Override
-		public void handleChannelRecoveryException(Channel ch, Throwable t) {
-			broadcastConnectState(ConnectionState.CONNECT_FAILED);
-		}
-
-		@Override
-		public void handleConfirmListenerException(Channel ch, Throwable t) {
-			broadcastConnectState(ConnectionState.CONNECT_FAILED);
-
-		}
-
-		@Override
-		public void handleConnectionRecoveryException(Connection conn,
-				Throwable t) {
-			broadcastConnectState(ConnectionState.CONNECT_FAILED);
-		}
 
 		@Override
 		public void handleConsumerException(Channel ch, Throwable t,
 				Consumer arg2, String arg3, String arg4) {
 			broadcastConnectState(ConnectionState.CONNECT_FAILED);
 
-		}
-
-		@Override
-		public void handleFlowListenerException(Channel ch, Throwable t) {
-			broadcastConnectState(ConnectionState.CONNECT_FAILED);
-
-		}
-
-		@Override
-		public void handleReturnListenerException(Channel ch, Throwable t) {
-			broadcastConnectState(ConnectionState.CONNECT_FAILED);
-
-		}
-
-		@Override
-		public void handleTopologyRecoveryException(Connection conn,
-				Channel ch, TopologyRecoveryException arg2) {
-			broadcastConnectState(ConnectionState.CONNECT_FAILED);
 		}
 
 		@Override
@@ -604,14 +581,13 @@ public class MessageService extends Service {
 
 			// If authed, means user already connected to server.
 			// But network connection changed, we have to re-connect to server
-			Log.e(TAG, " network [old:" +mNS+"  new:" +newNS+"] ");
+			Log.e(TAG, " network [old:" + mNS + "  new:" + newNS + "] ");
 			if (newNS == NetworkState.NONE) {
 				dispose();
-			} else if (newNS != mNS){
+			} else if (newNS != mNS) {
 				mLocalHandler.post(mReconnectRunnable);
 			}
 			mNS = newNS;
-			
 
 		}
 
@@ -626,9 +602,7 @@ public class MessageService extends Service {
 		}
 
 	};
-	
-	
-	
+
 	/**
 	 * Remote message listener thread
 	 * 
@@ -662,18 +636,14 @@ public class MessageService extends Service {
 				Log.i(TAG, "Bound fanout queue  to:" + blok);
 				blok = ch.queueBind(mUserName, EXCHANGE_NAME_FANOUT, "");
 				Log.i(TAG, "Bound topic queue  to:" + blok);
-				try {
-					ch.basicCancel(mUserName);
-				} catch (IOException e) {
-					
-				}
-				//ch.setDefaultConsumer(null);
+
 				ch.basicConsume(mUserName, true, mUserName, consumer);
 
 			} catch (IOException e) {
 				broadcastConnectState(ConnectionState.SERVER_REJECT);
 				Log.e(TAG, " bind queue error", e);
-				//Doesn't bind queue failed, release all connections
+				// Bind queue failed, or add consumer failed. release all
+				// connections
 				dispose();
 				return;
 			}
@@ -681,7 +651,6 @@ public class MessageService extends Service {
 			while (isLooping) {
 				try {
 					Delivery d = consumer.nextDelivery();
-					consumer.handleConsumeOk("");
 					if (d == null) {
 						continue;
 					}
@@ -693,23 +662,35 @@ public class MessageService extends Service {
 					}
 					if (header.type == MessageHeader.HeaderType.REQUEST
 							.ordinal()) {
-						fireMessage(MessageFactory
-								.parseRequestFromJSON(header.body));
+						BaseMessage bm = MessageFactory
+								.parseRequestFromJSON(header.body);
+						// If send back message success, means caller waiting
+						// for this response.
+						// Others no caller waiting for this response, it's
+						// unsolicited message.
+						if (!fireBackMessage(bm, Notification.Result.SUCCESS)) {
+							fireUnsolicitedMessage(bm);
+						}
 					} else {
 						fireBackMessage(
 								MessageFactory
 										.parseResponseFromJSON(header.body),
 								Notification.Result.SUCCESS);
 					}
+					//Send acknowledge
+					getChannel().basicAck(d.getEnvelope().getDeliveryTag(), false);
 				} catch (ShutdownSignalException e) {
-					e.printStackTrace();
-					if (mNS != NetworkState.NONE && mSCS == ServerConnectionState.CONNECTED) {
+					Log.e(TAG, " Shutdown signal exception", e);
+					//TODO really need to re-connect?
+					if (mNS != NetworkState.NONE
+							&& mSCS == ServerConnectionState.CONNECTED) {
 						mLocalHandler.postDelayed(mReconnectRunnable, 1000);
 					}
 					break;
 				} catch (ConsumerCancelledException e) {
-					e.printStackTrace();
-				} catch (InterruptedException e) {
+					Log.e(TAG, " Consumer is cancelled ", e);
+					break;
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
@@ -719,17 +700,18 @@ public class MessageService extends Service {
 		}
 
 		public void stopListener() {
+			Log.i(TAG, "request consumer thread quit");
 			isLooping = false;
 			this.interrupt();
 		}
 
 	}
 
-	
 	/**
 	 * Used to send message to server
+	 * 
 	 * @author jiangzhen
-	 *
+	 * 
 	 */
 	class SendMessageRunnable implements Runnable {
 
@@ -741,16 +723,17 @@ public class MessageService extends Service {
 
 		@Override
 		public void run() {
-			if (mSCS  != ServerConnectionState.CONNECTED) {
+			if (mSCS != ServerConnectionState.CONNECTED) {
 				fireBackMessage(message, Notification.Result.NO_CONNECTION);
 			} else {
 				try {
 					// FIXME add send P2P message
-                    //Print out the json format of sending msg
-                    Log.d(TAG,"JSON format: "+MessageFactory.addHeader(message));
-					getChannel().basicPublish(EXCHANGE_NAME_CONTROLLER,
-							"", null,
-							MessageFactory.addHeader(message).getBytes());
+					// Print out the json format of sending msg
+					// TODO send broadcast message
+					Log.d(TAG,
+							"JSON format: " + MessageFactory.addHeader(message));
+					getChannel().basicPublish(EXCHANGE_NAME_CONTROLLER, "",
+							null, MessageFactory.addHeader(message).getBytes());
 				} catch (IOException e) {
 					e.printStackTrace();
 					fireBackMessage(message, Notification.Result.FAILED);
@@ -762,8 +745,9 @@ public class MessageService extends Service {
 
 	/**
 	 * Used to send response message to server
+	 * 
 	 * @author jiangzhen
-	 *
+	 * 
 	 */
 	class SendResponseRunnable implements Runnable {
 
@@ -776,10 +760,8 @@ public class MessageService extends Service {
 		@Override
 		public void run() {
 			try {
-                //Print out the json format of sending rsp msg
-                Log.d(TAG,"JSON format of RSP: "+MessageFactory.addHeader(response));
-				getChannel().basicPublish(EXCHANGE_NAME_CONTROLLER, "",
-						null, MessageFactory.addHeader(response).getBytes());
+				getChannel().basicPublish(EXCHANGE_NAME_CONTROLLER, "", null,
+						MessageFactory.addHeader(response).getBytes());
 			} catch (IOException e) {
 				e.printStackTrace();
 				fireBackMessage(response, Notification.Result.FAILED);
@@ -787,13 +769,33 @@ public class MessageService extends Service {
 		}
 
 	};
-	
-	
 
 	/**
-	 * Use to authenticate with server  
+	 * Time out runnable handler.
+	 * 
+	 * @author 28851274
+	 * 
+	 */
+	class TimeoutRunnable implements Runnable {
+
+		private BaseMessage message;
+
+		public TimeoutRunnable(BaseMessage message) {
+			this.message = message;
+		}
+
+		@Override
+		public void run() {
+			fireBackMessage(message, Notification.Result.TIME_OUT);
+		}
+
+	}
+
+	/**
+	 * Use to authenticate with server
+	 * 
 	 * @author jiangzhen
-	 *
+	 * 
 	 */
 	class AuthRunnable implements Runnable {
 
@@ -810,12 +812,11 @@ public class MessageService extends Service {
 				Log.e(TAG, "No Available server :" + mServer + "  port:"
 						+ mPort);
 				fireBackMessage(message, Notification.Result.FAILED);
-				mSCS  = ServerConnectionState.NONE;
+				mSCS = ServerConnectionState.NONE;
 				return;
 			}
-			
-			getChannel(mServer, mPort,
-					message.mUserName, message.mPassword);
+
+			getChannel(mServer, mPort, message.mUserName, message.mPassword);
 			Notification.Result nt = Notification.Result.FAILED;
 			if (mChannel != null && mChannel.isOpen()) {
 				mUserName = message.mUserName;
@@ -824,7 +825,9 @@ public class MessageService extends Service {
 			}
 			fireBackMessage(message, nt);
 
-			if (mSCS  == ServerConnectionState.CONNECTED && (mConsumer == null || !mConsumer.isAlive())) {
+			// Start consumer thread if we passed authentication
+			if (mSCS == ServerConnectionState.CONNECTED
+					&& (mConsumer == null || !mConsumer.isAlive())) {
 				mConsumer = new ConsumerThread(mChannel);
 				mConsumer.start();
 			}
@@ -833,27 +836,27 @@ public class MessageService extends Service {
 
 	};
 
-	
-	
 	class TimeStamp {
 		BaseMessage message;
 		long timestamp;
 		ResponseListener listener;
+		TimeoutRunnable timeoutRunnable;
 
 		public TimeStamp(BaseMessage message, ResponseListener listener) {
 			super();
 			this.message = message;
 			this.listener = listener;
 			this.timestamp = System.currentTimeMillis();
+			timeoutRunnable = new TimeoutRunnable(message);
 		}
 
 	}
 
-	
 	/**
 	 * Binder service. Use to for implement interface.
+	 * 
 	 * @author jiangzhen
-	 *
+	 * 
 	 */
 	class NativeService extends Binder implements IMessageService {
 
@@ -865,9 +868,17 @@ public class MessageService extends Service {
 				return;
 			}
 			if (message.getMessageType() == MessageType.AUTH_MESSAGE) {
-				mSCS =  ServerConnectionState.CONNECTING;
-				mLocalHandler.post(new AuthRunnable((AuthMessage) message));
+				if (mSCS == ServerConnectionState.NONE) {
+					mSCS = ServerConnectionState.CONNECTING;
+					mLocalHandler.post(new AuthRunnable((AuthMessage) message));
+				} else {
+					fireBackMessage(message, Notification.Result.SUCCESS);
+				}
 			} else {
+				if (mSCS != ServerConnectionState.CONNECTED) {
+					fireBackMessage(message, Notification.Result.NO_CONNECTION);
+					return;
+				}
 				mLocalHandler.post(new SendMessageRunnable(message));
 			}
 		}
@@ -875,7 +886,10 @@ public class MessageService extends Service {
 		@Override
 		public void sendMessage(BaseMessage message, ResponseListener listener) {
 			if (listener != null) {
-				mPendingResponse.put(message, new TimeStamp(message, listener));
+				TimeStamp ts = new TimeStamp(message, listener);
+				mPendingResponse.put(message, ts);
+				// Start timer for time out
+				mLocalHandler.postDelayed(ts.timeoutRunnable, TIME_OUT);
 			} else {
 				Log.w(TAG, message + "  response listener is null");
 			}
@@ -886,24 +900,33 @@ public class MessageService extends Service {
 		@Override
 		public void sendMessageResponse(ResponseMessage rm) {
 			Log.i(TAG, "send response:" + rm);
+			if (rm == null) {
+				throw new RuntimeException("ResponseMessage is null");
+			}
 			if (mLocalHandler == null) {
 				fireBackMessage(rm, Notification.Result.SERVICE_DOWN);
 				return;
 			}
-			if (rm == null) {
-				throw new RuntimeException("ResponseMessage is null");
+			if (mSCS != ServerConnectionState.CONNECTED) {
+				fireBackMessage(rm, Notification.Result.NO_CONNECTION);
+				return;
 			}
+
 			mLocalHandler.post(new SendResponseRunnable(rm));
 		}
 
 		@Override
 		public void cancelWaiting(BaseMessage message) {
-			mPendingResponse.remove(message);
+			TimeStamp ts = mPendingResponse.remove(message);
+			if (ts != null && ts.timeoutRunnable!= null) {
+				mLocalHandler.removeCallbacks(ts.timeoutRunnable);
+			}
 		}
 
 		@Override
 		public void registerNotificationListener(NotificationListener listener) {
-			notificationListeners.add(listener);
+			notificationListeners.add(new WeakReference<NotificationListener>(
+					listener));
 		}
 
 		@Override
@@ -916,8 +939,7 @@ public class MessageService extends Service {
 	enum NetworkState {
 		NONE, MOBILE, WIFI;
 	}
-	
-	
+
 	enum ServerConnectionState {
 		NONE, CONNECTING, CONNECTED
 	}

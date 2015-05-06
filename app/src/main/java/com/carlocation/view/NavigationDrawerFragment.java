@@ -1,33 +1,31 @@
 package com.carlocation.view;
 
-import com.carlocation.R;
-import com.carlocation.R.drawable;
-import com.carlocation.R.id;
-import com.carlocation.R.layout;
-import com.carlocation.R.menu;
-import com.carlocation.R.string;
-
-import android.support.v7.app.ActionBarActivity;
 import android.app.Activity;
-import android.support.v7.app.ActionBar;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import com.carlocation.R;
+import com.carlocation.comm.MessageService;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation
@@ -62,6 +60,8 @@ public class NavigationDrawerFragment extends Fragment {
 	private DrawerLayout mDrawerLayout;
 	private ListView mDrawerListView;
 	private View mFragmentContainerView;
+	private View mLogoutView;
+	private View mSettignView;
 
 	private int mCurrentSelectedPosition = 0;
 	private boolean mFromSavedInstanceState;
@@ -87,8 +87,6 @@ public class NavigationDrawerFragment extends Fragment {
 			mFromSavedInstanceState = true;
 		}
 
-		// Select either the default item (0) or the last selected item.
-		selectItem(mCurrentSelectedPosition);
 	}
 
 	@Override
@@ -102,14 +100,29 @@ public class NavigationDrawerFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		mDrawerListView = (ListView) inflater.inflate(
+		View root =  inflater.inflate(
 				R.layout.fragment_navigation_drawer, container, false);
+		
+		mSettignView = root.findViewById(R.id.nav_setting_text);
+		mSettignView.setOnClickListener(this.mSettingListener);
+		mLogoutView = root.findViewById(R.id.nav_setting_logout);
+		mLogoutView.setOnClickListener(mLogoutListener);
+		mDrawerListView = (ListView)root.findViewById(R.id.nav_list);
+		
 		mDrawerListView
 				.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 					@Override
 					public void onItemClick(AdapterView<?> parent, View view,
 							int position, long id) {
-						selectItem(position);
+						if (position == 0) {
+							Intent i = new Intent();
+							i.setClass(getActivity(), TaskActivity.class);
+							startActivity(i);
+						} else if (position == 1) {
+							Intent i = new Intent();
+							i.setClass(getActivity(), RecentChatListActivity.class);
+							startActivity(i);
+						}
 					}
 				});
 		mDrawerListView.setAdapter(new ArrayAdapter<String>(getActionBar()
@@ -119,7 +132,7 @@ public class NavigationDrawerFragment extends Fragment {
 						getString(R.string.title_section2),
 						getString(R.string.title_section3), }));
 		mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
-		return mDrawerListView;
+		return root;
 	}
 
 	public boolean isDrawerOpen() {
@@ -280,7 +293,12 @@ public class NavigationDrawerFragment extends Fragment {
 
 		if (item.getItemId() == R.id.action_example) {
 			Toast.makeText(getActivity(), "Example action.", Toast.LENGTH_SHORT)
-					.show();
+			.show();
+			Intent i = new Intent();
+			i.setClass(getActivity(), ChatActivity.class);
+			startActivity(i);
+			
+		
 			return true;
 		}
 
@@ -302,7 +320,35 @@ public class NavigationDrawerFragment extends Fragment {
 	private ActionBar getActionBar() {
 		return ((ActionBarActivity) getActivity()).getSupportActionBar();
 	}
+	
+	
+	private OnClickListener mLogoutListener = new OnClickListener() {
 
+		@Override
+		public void onClick(View v) {
+			// FIXME should put block to MainActivity
+			Intent serviceIntent = new Intent();
+			serviceIntent.setClass(getActivity(), MessageService.class);
+			getActivity().stopService(serviceIntent);
+			getActivity().finish();
+			
+		}
+		
+	};
+
+	private OnClickListener mSettingListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			Intent i = new Intent();
+			i.setClass(getActivity(), SettingsActivity.class);
+			startActivity(i);
+		}
+		
+	};
+
+	
+	
 	/**
 	 * Callbacks interface that all activities using this fragment must
 	 * implement.

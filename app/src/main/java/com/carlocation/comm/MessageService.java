@@ -24,6 +24,7 @@ import android.util.Log;
 
 import com.carlocation.comm.messaging.AuthMessage;
 import com.carlocation.comm.messaging.BaseMessage;
+import com.carlocation.comm.messaging.IMMessage;
 import com.carlocation.comm.messaging.MessageFactory;
 import com.carlocation.comm.messaging.MessageHeader;
 import com.carlocation.comm.messaging.MessageType;
@@ -65,10 +66,13 @@ import com.rabbitmq.client.impl.DefaultExceptionHandler;
  * Important: First time start service need to input parameters:<br>
  * {@link EXTRA_CONNECTION_SERVER_ADDR} : server address<br>
  * {@link EXTRA_CONNECTION_SERVER_PORT} : server port<br>
- * {@link EXTRA_MESSAGE_SERVER_AUTH_REQUIRED} : Use user name and
- * password to pass message server authentication<br>
+ * {@link EXTRA_MESSAGE_SERVER_AUTH_REQUIRED} : Use user name and password to
+ * pass message server authentication<br>
  * </ul>
- * <ul>If need to switch new server:  start service with flag {@link EXTRA_SWITCH_SERVER_FLAG}</ul>
+ * <ul>
+ * If need to switch new server: start service with flag
+ * {@link EXTRA_SWITCH_SERVER_FLAG}
+ * </ul>
  * 
  * @see ConnectionState
  * @author 28851274
@@ -132,10 +136,9 @@ public class MessageService extends Service {
 	private Connection mConnection;
 
 	private Channel mChannel;
-	
+
 	private ConsumerThread mConsumer;
-	
-	
+
 	/**
 	 * Use to save unsolicited message listeners
 	 */
@@ -151,7 +154,6 @@ public class MessageService extends Service {
 	 */
 	private NativeService mService;
 
-
 	/**
 	 * Current device data connection state
 	 */
@@ -160,7 +162,9 @@ public class MessageService extends Service {
 	/**
 	 * Current server connection state
 	 */
-	private ServerConnectionState mSCS = ServerConnectionState.NONE;
+	private ConnectionState mSCS = ConnectionState.NONE;
+
+	private ConnectivityManager connMgr;
 
 	/**
 	 * Local message handler, not in UI thread
@@ -194,6 +198,9 @@ public class MessageService extends Service {
 			stopSelf();
 		}
 
+		connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		mNS = getConnectivityState();
+
 		mService = new NativeService();
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -215,7 +222,6 @@ public class MessageService extends Service {
 		super.onDestroy();
 		Log.i(TAG, "#############service destoryed#############");
 		clearAllPendingMessage();
-
 
 		Intent i = new Intent(BROADCAST_ACTION_SERVICE_DOWN);
 		i.addCategory(BROADCAST_CATEGORY);
@@ -364,7 +370,6 @@ public class MessageService extends Service {
 			}
 			Log.i(TAG, "Try to open new channel for receiver : " + mChannel);
 			if (mChannel != null && mChannel.isOpen()) {
-				mSCS = ServerConnectionState.CONNECTED;
 				break;
 			}
 			try {
@@ -379,7 +384,8 @@ public class MessageService extends Service {
 	}
 
 	/**
-	 *  Send message back to listener
+	 * Send message back to listener
+	 * 
 	 * @param msg
 	 * @param res
 	 * @return true send response, false no listener to send
@@ -397,9 +403,9 @@ public class MessageService extends Service {
 		}
 	}
 
-	
 	/**
-	 *  Send message back to listener
+	 * Send message back to listener
+	 * 
 	 * @param msg
 	 * @param res
 	 * @return true send response, false no listener to send
@@ -439,10 +445,8 @@ public class MessageService extends Service {
 		for (Entry<BaseMessage, TimeStamp> entry : mPendingResponse.entrySet()) {
 			TimeStamp ts = entry.getValue();
 			if (ts != null) {
-				ts.listener
-						.onResponse(new Notification(ts.message,
-								Notification.NotificationType.RESPONSE,
-								Result.FAILED));
+				ts.listener.onResponse(new Notification(ts.message,
+						Notification.NotificationType.RESPONSE, Result.FAILED));
 			}
 			// Remove time out handler
 			mLocalHandler.removeCallbacks(ts.timeoutRunnable);
@@ -457,33 +461,35 @@ public class MessageService extends Service {
 	 */
 	private void reconnect() {
 		dispose();
-		mSCS = ServerConnectionState.CONNECTING;
-		//Re-get channel instance
+		updateServerConnectionState(ConnectionState.CONNECTING);
+		// Re-get channel instance
 		if (getChannel() != null) {
-			//re-start consumer thread
+			updateServerConnectionState(ConnectionState.CONNECTED);
+			// re-start consumer thread
 			mConsumer = new ConsumerThread(getChannel());
 			mConsumer.start();
 		} else {
-			mSCS = ServerConnectionState.NONE;
+			updateServerConnectionState(ConnectionState.CONNECT_FAILED);
 			Log.e(TAG, "Can not connect to new server:" + mServer + " port:"
 					+ mPort + " username:" + mUserName + " pwd:" + mPassword);
 			return;
 		}
 	}
 
+	private void updateServerConnectionState(ConnectionState newState) {
+		if (mSCS != newState) {
+			Intent i = new Intent(BROADCAST_ACTION_STATE_CHANGED);
+			i.addCategory(BROADCAST_CATEGORY);
+			i.putExtra(EXTRA_CONNECTION_STATE, newState);
+			sendBroadcast(i);
+			Log.e(TAG, "Send broadcast with state:" + newState);
 
-
-	private void broadcastConnectState(ConnectionState state) {
-		Intent i = new Intent(BROADCAST_ACTION_STATE_CHANGED);
-		i.addCategory(BROADCAST_CATEGORY);
-		i.putExtra(EXTRA_CONNECTION_STATE, state);
-		sendBroadcast(i);
-		Log.e(TAG, "Send broadcast with state:" + state);
+			mSCS = newState;
+		}
 	}
 
-	
 	/**
-	 * Dispose call connection 
+	 * Dispose call connection
 	 */
 	private void dispose() {
 
@@ -493,30 +499,33 @@ public class MessageService extends Service {
 		if (mChannel != null && mChannel.isOpen()) {
 			try {
 				mChannel.basicCancel(mUserName);
-			} catch (IOException e1) {
-				Log.e(TAG, "Cancel consumer :" + mUserName+" failed", e1);
+			} catch (Exception e1) {
+				Log.e(TAG, "Cancel consumer :" + mUserName + " failed", e1);
 			}
 			try {
 				mChannel.queueUnbind(mUserName, EXCHANGE_NAME_DIRECT, mUserName);
-			} catch (IOException e1) {
-				Log.e(TAG, "Unbind queue:"+ EXCHANGE_NAME_DIRECT+" failed", e1);
+			} catch (Exception e1) {
+				Log.e(TAG, "Unbind queue:" + EXCHANGE_NAME_DIRECT + " failed",
+						e1);
 			}
 
 			try {
 				mChannel.queueUnbind(mUserName, EXCHANGE_NAME_FANOUT, mUserName);
-			} catch (IOException e1) {
-				Log.e(TAG,  "Unbind queue:"+ EXCHANGE_NAME_FANOUT+" failed", e1);
+			} catch (Exception e1) {
+				Log.e(TAG, "Unbind queue:" + EXCHANGE_NAME_FANOUT + " failed",
+						e1);
 			}
 
 			try {
-				mChannel.queueUnbind(mUserName, EXCHANGE_NAME_TOPIC, "*."+mUserName + ".*");
+				mChannel.queueUnbind(mUserName, EXCHANGE_NAME_TOPIC, "*."
+						+ mUserName + ".*");
 			} catch (Exception e) {
-				Log.e(TAG,  "Unbind queue:"+ EXCHANGE_NAME_TOPIC+" failed", e);
+				Log.e(TAG, "Unbind queue:" + EXCHANGE_NAME_TOPIC + " failed", e);
 			}
 
 			try {
 				mChannel.close();
-			} catch (IOException e) {
+			} catch (Exception e) {
 				Log.e(TAG, "Send Channel close failed", e);
 			}
 		}
@@ -524,7 +533,7 @@ public class MessageService extends Service {
 		if (mConnection != null && mConnection.isOpen()) {
 			try {
 				mConnection.close();
-			} catch (IOException e) {
+			} catch (Exception e) {
 				Log.e(TAG, "Connection close failed", e);
 			}
 		}
@@ -535,24 +544,39 @@ public class MessageService extends Service {
 		mConnection = null;
 		mConsumer = null;
 		// Update server connection state to none
-		mSCS = ServerConnectionState.NONE;
+		updateServerConnectionState(ConnectionState.NONE);
 
+	}
+
+	private NetworkState getConnectivityState() {
+		android.net.NetworkInfo wifi = connMgr
+				.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+		NetworkState newNS = NetworkState.NONE;
+
+		android.net.NetworkInfo mobile = connMgr
+				.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+		if (mobile != null && mobile.isConnected()) {
+			newNS = NetworkState.MOBILE;
+		} else if (wifi != null && wifi.isConnected()) {
+			newNS = NetworkState.WIFI;
+		}
+
+		return newNS;
 	}
 
 	private ExceptionHandler mExceptionHandler = new DefaultExceptionHandler() {
 
-
 		@Override
 		public void handleConsumerException(Channel ch, Throwable t,
 				Consumer arg2, String arg3, String arg4) {
-			broadcastConnectState(ConnectionState.CONNECT_FAILED);
+			updateServerConnectionState(ConnectionState.CONNECT_FAILED);
 
 		}
 
 		@Override
 		public void handleUnexpectedConnectionDriverException(Connection ch,
 				Throwable t) {
-			broadcastConnectState(ConnectionState.CONNECT_FAILED);
+			updateServerConnectionState(ConnectionState.CONNECT_FAILED);
 		}
 
 	};
@@ -562,33 +586,33 @@ public class MessageService extends Service {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
-			NetworkState newNS = NetworkState.NONE;
 			if (ConnectivityManager.CONNECTIVITY_ACTION.equals(action)
 					|| WifiManager.WIFI_STATE_CHANGED_ACTION.equals(action)) {
-				ConnectivityManager connMgr = (ConnectivityManager) context
-						.getSystemService(Context.CONNECTIVITY_SERVICE);
-				android.net.NetworkInfo wifi = connMgr
-						.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
-				android.net.NetworkInfo mobile = connMgr
-						.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-				if (mobile != null && mobile.isConnected()) {
-					newNS = NetworkState.MOBILE;
-				} else if (wifi != null && wifi.isConnected()) {
-					newNS = NetworkState.WIFI;
+				NetworkState newNS = getConnectivityState();
+				
+				Log.e(TAG, " network state changed [old:" + mNS + "  new:"
+						+ newNS + "] ");
+				if (newNS != mNS) {
+					if (newNS == NetworkState.NONE) {
+						mLocalHandler.post(mDisposeRunnable);
+					} else {
+						mLocalHandler.post(mReconnectRunnable);
+					}
+					mNS = newNS;
 				}
 			}
 
-			// If authed, means user already connected to server.
-			// But network connection changed, we have to re-connect to server
-			Log.e(TAG, " network [old:" + mNS + "  new:" + newNS + "] ");
-			if (newNS == NetworkState.NONE) {
-				dispose();
-			} else if (newNS != mNS) {
-				mLocalHandler.post(mReconnectRunnable);
-			}
-			mNS = newNS;
+		}
 
+	};
+
+	private Runnable mDisposeRunnable = new Runnable() {
+
+		@Override
+		public void run() {
+			Log.e(TAG, " request to dispose!");
+			dispose();
 		}
 
 	};
@@ -632,7 +656,7 @@ public class MessageService extends Service {
 				AMQP.Queue.BindOk blok = ch.queueBind(mUserName,
 						EXCHANGE_NAME_DIRECT, mUserName);
 				Log.i(TAG, "Bound direct queue  to:" + blok);
-				blok = ch.queueBind(mUserName, EXCHANGE_NAME_TOPIC, "");
+				blok = ch.queueBind(mUserName, EXCHANGE_NAME_TOPIC, "*."+mUserName+".*");
 				Log.i(TAG, "Bound fanout queue  to:" + blok);
 				blok = ch.queueBind(mUserName, EXCHANGE_NAME_FANOUT, "");
 				Log.i(TAG, "Bound topic queue  to:" + blok);
@@ -640,7 +664,7 @@ public class MessageService extends Service {
 				ch.basicConsume(mUserName, true, mUserName, consumer);
 
 			} catch (IOException e) {
-				broadcastConnectState(ConnectionState.SERVER_REJECT);
+				updateServerConnectionState(ConnectionState.SERVER_REJECT);
 				Log.e(TAG, " bind queue error", e);
 				// Bind queue failed, or add consumer failed. release all
 				// connections
@@ -677,13 +701,14 @@ public class MessageService extends Service {
 										.parseResponseFromJSON(header.body),
 								Notification.Result.SUCCESS);
 					}
-					//Send acknowledge
-					getChannel().basicAck(d.getEnvelope().getDeliveryTag(), false);
+					// Send acknowledge
+					getChannel().basicAck(d.getEnvelope().getDeliveryTag(),
+							false);
 				} catch (ShutdownSignalException e) {
 					Log.e(TAG, " Shutdown signal exception", e);
-					//TODO really need to re-connect?
+					// TODO really need to re-connect?
 					if (mNS != NetworkState.NONE
-							&& mSCS == ServerConnectionState.CONNECTED) {
+							&& mSCS == ConnectionState.CONNECTED) {
 						mLocalHandler.postDelayed(mReconnectRunnable, 1000);
 					}
 					break;
@@ -723,17 +748,52 @@ public class MessageService extends Service {
 
 		@Override
 		public void run() {
-			if (mSCS != ServerConnectionState.CONNECTED) {
+			if (mSCS != ConnectionState.CONNECTED) {
 				fireBackMessage(message, Notification.Result.NO_CONNECTION);
 			} else {
 				try {
-					// FIXME add send P2P message
 					// Print out the json format of sending msg
-					// TODO send broadcast message
 					Log.d(TAG,
 							"JSON format: " + MessageFactory.addHeader(message));
-					getChannel().basicPublish(EXCHANGE_NAME_CONTROLLER, "",
-							null, MessageFactory.addHeader(message).getBytes());
+					byte[] contents = MessageFactory.addHeader(message).getBytes();
+					//FIXME how to send IM message to PC?
+					//FIXME terminal id is not username how to exchange
+					if (message.getMessageType() == MessageType.IM_MESSAGE) {
+						IMMessage im = (IMMessage)message;
+						//send broadcast 
+						if (im.mToTerminalId == null || im.mToTerminalId.size() == 0) {
+							getChannel().basicPublish(EXCHANGE_NAME_FANOUT, "",
+									null, contents);
+						//send direct message
+						} else if (im.mToTerminalId != null && im.mToTerminalId.size() == 1) {
+							getChannel().basicPublish(EXCHANGE_NAME_DIRECT, "",
+									null, contents);
+						} else {
+							StringBuilder routekey = new StringBuilder(250);
+							List<Long> ids = im.mToTerminalId;
+							for (Long id : ids) {
+								routekey.append(id).append(".");
+								//If routekey greater than 200 than send message
+								// because rabbitmq routekey of topic limit to 255
+								if (routekey.length() > 200) {
+									//Send multicast message
+									getChannel().basicPublish(EXCHANGE_NAME_TOPIC, routekey.toString(),
+											null, contents);
+									routekey = new StringBuilder(250);
+								}
+							}
+							
+							if (routekey.length() > 0) {
+								getChannel().basicPublish(EXCHANGE_NAME_TOPIC, routekey.toString(),
+										null, contents);
+							}
+							
+						}
+						
+					} else {
+						getChannel().basicPublish(EXCHANGE_NAME_CONTROLLER, "",
+							null, contents);
+					}
 				} catch (IOException e) {
 					e.printStackTrace();
 					fireBackMessage(message, Notification.Result.FAILED);
@@ -809,26 +869,28 @@ public class MessageService extends Service {
 
 		@Override
 		public void run() {
-
 			if (mServer == null || mPort <= 0) {
 				Log.e(TAG, "No Available server :" + mServer + "  port:"
 						+ mPort);
 				fireBackMessage(message, Notification.Result.FAILED);
-				mSCS = ServerConnectionState.NONE;
+				updateServerConnectionState(ConnectionState.NONE);
 				return;
 			}
-
+			updateServerConnectionState(ConnectionState.CONNECTING);
 			getChannel(mServer, mPort, message.mUserName, message.mPassword);
 			Notification.Result nt = Notification.Result.FAILED;
 			if (mChannel != null && mChannel.isOpen()) {
 				mUserName = message.mUserName;
 				mPassword = message.mPassword;
 				nt = Notification.Result.SUCCESS;
+				updateServerConnectionState(ConnectionState.CONNECTED);
+			} else {
+				updateServerConnectionState(ConnectionState.CONNECT_FAILED);
 			}
 			fireBackMessage(message, nt);
 
 			// Start consumer thread if we passed authentication
-			if (mSCS == ServerConnectionState.CONNECTED
+			if (mSCS == ConnectionState.CONNECTED
 					&& (mConsumer == null || !mConsumer.isAlive())) {
 				mConsumer = new ConsumerThread(mChannel);
 				mConsumer.start();
@@ -838,6 +900,26 @@ public class MessageService extends Service {
 
 	};
 
+	class CallbackRunnable implements Runnable {
+
+		private BaseMessage message;
+		private ResponseListener listener;
+
+		public CallbackRunnable(BaseMessage message, ResponseListener listener) {
+			this.message = message;
+			this.listener = listener;
+		}
+
+		@Override
+		public void run() {
+			TimeStamp ts = new TimeStamp(message, listener);
+			mPendingResponse.put(message, ts);
+			// Start timer for time out
+			mLocalHandler.postDelayed(ts.timeoutRunnable, TIME_OUT);
+		}
+
+	}
+
 	class TimeStamp {
 		BaseMessage message;
 		long timestamp;
@@ -845,7 +927,6 @@ public class MessageService extends Service {
 		TimeoutRunnable timeoutRunnable;
 
 		public TimeStamp(BaseMessage message, ResponseListener listener) {
-			super();
 			this.message = message;
 			this.listener = listener;
 			this.timestamp = System.currentTimeMillis();
@@ -870,14 +951,14 @@ public class MessageService extends Service {
 				return;
 			}
 			if (message.getMessageType() == MessageType.AUTH_MESSAGE) {
-				if (mSCS == ServerConnectionState.NONE) {
-					mSCS = ServerConnectionState.CONNECTING;
+				if (mSCS != ConnectionState.CONNECTING
+						&& mSCS != ConnectionState.CONNECTED) {
 					mLocalHandler.post(new AuthRunnable((AuthMessage) message));
 				} else {
 					fireBackMessage(message, Notification.Result.SUCCESS);
 				}
 			} else {
-				if (mSCS != ServerConnectionState.CONNECTED) {
+				if (mSCS != ConnectionState.CONNECTED) {
 					fireBackMessage(message, Notification.Result.NO_CONNECTION);
 					return;
 				}
@@ -888,6 +969,7 @@ public class MessageService extends Service {
 		@Override
 		public void sendMessage(BaseMessage message, ResponseListener listener) {
 			if (listener != null) {
+				// mLocalHandler.post(new CallbackRunnable(message, listener));
 				TimeStamp ts = new TimeStamp(message, listener);
 				mPendingResponse.put(message, ts);
 				// Start timer for time out
@@ -909,7 +991,7 @@ public class MessageService extends Service {
 				fireBackMessage(rm, Notification.Result.SERVICE_DOWN);
 				return;
 			}
-			if (mSCS != ServerConnectionState.CONNECTED) {
+			if (mSCS != ConnectionState.CONNECTED) {
 				fireBackMessage(rm, Notification.Result.NO_CONNECTION);
 				return;
 			}
@@ -920,7 +1002,7 @@ public class MessageService extends Service {
 		@Override
 		public void cancelWaiting(BaseMessage message) {
 			TimeStamp ts = mPendingResponse.remove(message);
-			if (ts != null && ts.timeoutRunnable!= null) {
+			if (ts != null && ts.timeoutRunnable != null) {
 				mLocalHandler.removeCallbacks(ts.timeoutRunnable);
 			}
 		}
@@ -940,10 +1022,6 @@ public class MessageService extends Service {
 
 	enum NetworkState {
 		NONE, MOBILE, WIFI;
-	}
-
-	enum ServerConnectionState {
-		NONE, CONNECTING, CONNECTED
 	}
 
 }

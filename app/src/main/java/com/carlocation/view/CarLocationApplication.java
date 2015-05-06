@@ -1,10 +1,6 @@
 package com.carlocation.view;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Properties;
 
 import android.app.Application;
@@ -13,8 +9,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -24,9 +18,6 @@ import android.widget.Toast;
 import com.carlocation.R;
 import com.carlocation.comm.IMessageService;
 import com.carlocation.comm.MessageService;
-
-import java.io.InputStream;
-import java.util.Properties;
 
 public class CarLocationApplication extends Application {
 
@@ -67,14 +58,12 @@ public class CarLocationApplication extends Application {
 
 		String serverAddr = null;
 		int port = -1;
-		String mapversion = "";
 		try {
 			InputStream in = this.getAssets().open("env.config");
 			Properties prop = new Properties();
 			prop.load(in);
 			serverAddr = prop.getProperty("server");
 			port = Integer.parseInt(prop.getProperty("port"));
-			mapversion = prop.getProperty("map_update");
 			in.close();
 		} catch (Exception e) {
 			e.printStackTrace();

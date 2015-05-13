@@ -64,14 +64,14 @@ import com.rabbitmq.client.impl.DefaultExceptionHandler;
  * 
  * <ul>
  * Important: First time start service need to input parameters:<br>
- * {@link EXTRA_CONNECTION_SERVER_ADDR} : server address<br>
- * {@link EXTRA_CONNECTION_SERVER_PORT} : server port<br>
- * {@link EXTRA_MESSAGE_SERVER_AUTH_REQUIRED} : Use user name and password to
+ * {@link MessageService#EXTRA_CONNECTION_SERVER_ADDR} : server address<br>
+ * {@link MessageService#EXTRA_CONNECTION_SERVER_PORT} : server port<br>
+ * {@link MessageService#EXTRA_MESSAGE_SERVER_AUTH_REQUIRED} : Use user name and password to
  * pass message server authentication<br>
  * </ul>
  * <ul>
  * If need to switch new server: start service with flag
- * {@link EXTRA_SWITCH_SERVER_FLAG}
+ * {@link MessageService#EXTRA_SWITCH_SERVER_FLAG}
  * </ul>
  * 
  * @see ConnectionState
@@ -472,7 +472,6 @@ public class MessageService extends Service {
 			updateServerConnectionState(ConnectionState.CONNECT_FAILED);
 			Log.e(TAG, "Can not connect to new server:" + mServer + " port:"
 					+ mPort + " username:" + mUserName + " pwd:" + mPassword);
-			return;
 		}
 	}
 
@@ -636,7 +635,7 @@ public class MessageService extends Service {
 	class ConsumerThread extends Thread {
 		private Channel ch;
 		private QueueingConsumer consumer;
-		private boolean isLooping = true;;
+		private boolean isLooping = true;
 
 		public ConsumerThread(Channel ch) {
 			super();
@@ -801,7 +800,7 @@ public class MessageService extends Service {
 			}
 		}
 
-	};
+	}
 
 	/**
 	 * Used to send response message to server
@@ -830,7 +829,7 @@ public class MessageService extends Service {
 			}
 		}
 
-	};
+	}
 
 	/**
 	 * Time out runnable handler.
@@ -898,7 +897,7 @@ public class MessageService extends Service {
 
 		}
 
-	};
+	}
 
 	class CallbackRunnable implements Runnable {
 
@@ -1021,7 +1020,7 @@ public class MessageService extends Service {
 	}
 
 	enum NetworkState {
-		NONE, MOBILE, WIFI;
+		NONE, MOBILE, WIFI
 	}
 
 }

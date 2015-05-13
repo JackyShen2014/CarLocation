@@ -21,8 +21,6 @@ import com.carlocation.comm.messaging.ActionType;
 import com.carlocation.comm.messaging.AuthMessage;
 import com.carlocation.comm.messaging.GlidingPathMessage;
 import com.carlocation.comm.messaging.IMMessage;
-import com.carlocation.comm.messaging.IMTxtMessage;
-import com.carlocation.comm.messaging.IMVoiceMessage;
 import com.carlocation.comm.messaging.Location;
 import com.carlocation.comm.messaging.MessageResponseStatus;
 import com.carlocation.comm.messaging.MessageType;
@@ -314,7 +312,6 @@ public class MainActivity extends ActionBarActivity implements
 
                     switch (noti.notiType.ordinal()) {
                         case NOTIFY_TYPE_REQUEST: {
-                            //TODO deal with all request notify
                             break;
                         }
                         case NOTIFY_TYPE_RESPONSE: {
@@ -356,7 +353,6 @@ public class MainActivity extends ActionBarActivity implements
                     //Deal with logout RSP
                     if (noti.result == Notification.Result.SUCCESS) {
                         Toast.makeText(MainActivity.this, R.string.notify_logout_success, Toast.LENGTH_SHORT).show();
-                        //TODO Start another activity to enter next action after logout
 
                     } else {
                         String notifyFail = getResources().getText(R.string.notify_logout_fail).toString();

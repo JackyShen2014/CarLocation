@@ -1,13 +1,5 @@
 package com.carlocation.comm;
 
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -43,6 +35,13 @@ import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.QueueingConsumer.Delivery;
 import com.rabbitmq.client.ShutdownSignalException;
 import com.rabbitmq.client.impl.DefaultExceptionHandler;
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Communication service.<br>
@@ -88,8 +87,8 @@ public class MessageService extends Service {
 	private static final String EXCHANGE_NAME_CONTROLLER = "carlocation.reply.fanout";
 
 	public static final String BROADCAST_CATEGORY = "com.carlocation";
-	public static final String BROADCAST_ACTION_STATE_CHANGED = "com.carlocation.connection_state_changed";
-	public static final String BROADCAST_ACTION_SERVICE_DOWN = "com.carlocation.MessageServiceDown";
+	public static final String BROADCAST_ACTION_STATE_CHANGED = "com.carlocation.action.StateChanged";
+	public static final String BROADCAST_ACTION_SERVICE_DOWN = "com.carlocation.action.MessageServiceDown";
 
 	/**
 	 * timer interval

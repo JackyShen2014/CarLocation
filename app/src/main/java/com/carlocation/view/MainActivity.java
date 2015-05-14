@@ -1,5 +1,9 @@
 package com.carlocation.view;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,7 +18,9 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.carlocation.R;
+import com.carlocation.comm.ConnectionState;
 import com.carlocation.comm.IMessageService;
+import com.carlocation.comm.MessageService;
 import com.carlocation.comm.NotificationListener;
 import com.carlocation.comm.ResponseListener;
 import com.carlocation.comm.messaging.ActionType;
@@ -51,6 +57,10 @@ public class MainActivity extends ActionBarActivity implements
      * User Service
      */
     private UserService mUserService;
+
+    private ConnectionState mConnState;
+
+
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the
@@ -105,6 +115,12 @@ public class MainActivity extends ActionBarActivity implements
             mUserService = new UserService(mNativeService, mListener);
         }
 
+        //"mConnStateReceiver" used to recv connection state notification
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(MessageService.BROADCAST_ACTION_STATE_CHANGED);
+        filter.addCategory(MessageService.BROADCAST_CATEGORY);
+        registerReceiver(mConnStateReceiver,filter);
+
 
         mNavigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.navigation_drawer);
@@ -155,6 +171,21 @@ public class MainActivity extends ActionBarActivity implements
 
         (((CarLocationApplication) getApplicationContext()).getService()).unRegisterNotificationListener(this.mListener);
     }
+
+    private BroadcastReceiver mConnStateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action  = intent.getAction();
+            if (MessageService.BROADCAST_ACTION_STATE_CHANGED.equals(action)) {
+                ConnectionState newState = (ConnectionState)intent.getSerializableExtra(MessageService.EXTRA_CONNECTION_STATE);
+
+
+                //TODO jude current connection state
+            }
+
+
+        }
+    };
 
     private class send extends AsyncTask<String, Void, Void> {
 

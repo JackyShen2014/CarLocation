@@ -59,4 +59,6 @@ public interface IMessageService {
 	 */
 	public void unRegisterNotificationListener(NotificationListener listener);
 
+	public ConnectionState getConnState();
+
 }

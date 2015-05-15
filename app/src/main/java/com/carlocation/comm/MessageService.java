@@ -1016,6 +1016,10 @@ public class MessageService extends Service {
 			notificationListeners.remove(listener);
 		}
 
+		@Override
+		public ConnectionState getConnState() {
+			return mSCS;
+		}
 	}
 
 	enum NetworkState {

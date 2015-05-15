@@ -58,7 +58,10 @@ public class MainActivity extends ActionBarActivity implements
      */
     private UserService mUserService;
 
-    private ConnectionState mConnState;
+    /**
+     * Record current connection state
+     */
+    private ConnectionState mConnState = ConnectionState.NONE;
 
 
 
@@ -115,6 +118,9 @@ public class MainActivity extends ActionBarActivity implements
             mUserService = new UserService(mNativeService, mListener);
         }
 
+        //Get current rabbitMq connection state
+        mConnState = mNativeService.getConnState();
+
         //"mConnStateReceiver" used to recv connection state notification
         IntentFilter filter = new IntentFilter();
         filter.addAction(MessageService.BROADCAST_ACTION_STATE_CHANGED);
@@ -143,8 +149,6 @@ public class MainActivity extends ActionBarActivity implements
         Message msg = Message.obtain(mHandler, REGISTER_NOTIFICATION);
         mHandler.sendMessageDelayed(msg, 500);
 
-        //FIXME asynTask used to test all APIs of logical service layer
-        new send().execute();
     }
 
     /**
@@ -156,7 +160,23 @@ public class MainActivity extends ActionBarActivity implements
     @Override
     protected void onResumeFragments() {
         super.onResumeFragments();
+    }
+
+    /**
+     * Dispatch onResume() to fragments.  Note that for better inter-operation
+     * with older versions of the platform, at the point of this call the
+     * fragments attached to the activity are <em>not</em> resumed.  This means
+     * that in some cases the previous state may still be saved, not allowing
+     * fragment transactions that modify the state.  To correctly interact
+     * with fragments in their proper state, you should instead override
+     * {@link #onResumeFragments()}.
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
         mResumed = true;
+        //FIXME asynTask used to test all APIs of logical service layer
+        new send().execute();
     }
 
     @Override
@@ -168,7 +188,7 @@ public class MainActivity extends ActionBarActivity implements
     protected void onDestroy() {
         super.onDestroy();
         mResumed = false;
-
+        unregisterReceiver(mConnStateReceiver);
         (((CarLocationApplication) getApplicationContext()).getService()).unRegisterNotificationListener(this.mListener);
     }
 
@@ -176,11 +196,14 @@ public class MainActivity extends ActionBarActivity implements
         @Override
         public void onReceive(Context context, Intent intent) {
             String action  = intent.getAction();
+            //Use 'if' for the purpose of further extending filter more actions.
             if (MessageService.BROADCAST_ACTION_STATE_CHANGED.equals(action)) {
                 ConnectionState newState = (ConnectionState)intent.getSerializableExtra(MessageService.EXTRA_CONNECTION_STATE);
-
-
-                //TODO jude current connection state
+                if (mConnState!= newState) {
+                    Log.d(LOG_TAG,"mConnStateReceiver(): Connection state changed [old:"
+                            +mConnState+" new:"+newState+"]");
+                    mConnState = newState;
+                }
             }
 
 
@@ -221,36 +244,36 @@ public class MainActivity extends ActionBarActivity implements
             array.add(new Location(321.123, 456.654));
             array.add(new Location(789.987, 890.098));
 
-            /**
-             * Print out  JSON format of request messages
-             */
-
-            mUserService.sendMyStatus(StatusMessage.StatusMsgType.STATUS_ONLINE);
-            mUserService.sendMyLocation();
-            mUserService.sendImTxtMsg(toArray, RankType.EMERGENCY,"IM txt msg");
-            mUserService.sendImVoiceMsg(toArray,bArray);
-            mUserService.startWorkMsg((short) 1);
-            mUserService.finishWorkMsg((short) 1);
-            mUserService.queryWorkById((short) 1);
-            mUserService.queryGlidePathById(1);
-            mUserService.queryWarnAreaById(1);
-
-            /**
-             * Print out  JSON format of response messages
-             */
-
-            GlidingPathMessage glideMsg = new GlidingPathMessage(123, ActionType.ACTION_QUERY, 456, "title", 7, array);
-            RestrictedAreaMessage warnMsg = new RestrictedAreaMessage(123,456,ActionType.ACTION_QUERY,12,array);
-            TaskAssignmentMessage taskMsg = new TaskAssignmentMessage(123,456,ActionType.ACTION_QUERY,(short)1,null);
-
-            MessageResponseStatus status = MessageResponseStatus.SUCCESS;
-            mUserService.responActionAssign(glideMsg,status);
-            mUserService.responActionAssign(warnMsg,status);
-            mUserService.responActionAssign(taskMsg,status);
 
 
+            if (mConnState == ConnectionState.CONNECTED) {
+                /**
+                 * Print out  JSON format of request messages
+                 */
+                mUserService.sendMyStatus(StatusMessage.StatusMsgType.STATUS_ONLINE);
+                mUserService.sendMyLocation();
+                mUserService.sendImTxtMsg(toArray, RankType.EMERGENCY,"IM txt msg");
+                mUserService.sendImVoiceMsg(toArray,bArray);
+                mUserService.startWorkMsg((short) 1);
+                mUserService.finishWorkMsg((short) 1);
+                mUserService.queryWorkById((short) 1);
+                mUserService.queryGlidePathById(1);
+                mUserService.queryWarnAreaById(1);
 
+                /**
+                 * Print out  JSON format of response messages
+                 */
 
+                GlidingPathMessage glideMsg = new GlidingPathMessage(123, ActionType.ACTION_QUERY, 456, "title", 7, array);
+                RestrictedAreaMessage warnMsg = new RestrictedAreaMessage(123,456,ActionType.ACTION_QUERY,12,array);
+                TaskAssignmentMessage taskMsg = new TaskAssignmentMessage(123,456,ActionType.ACTION_QUERY,(short)1,null);
+
+                MessageResponseStatus status = MessageResponseStatus.SUCCESS;
+                mUserService.responActionAssign(glideMsg,status);
+                mUserService.responActionAssign(warnMsg,status);
+                mUserService.responActionAssign(taskMsg,status);
+
+            }
             return null;
         }
     }

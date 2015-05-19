@@ -44,8 +44,7 @@ public class LoginActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.login);
-		//FIXME Temporary disable loading map.
-		//Message.obtain(localHandler, PREPARE_UPDATE_MAP).sendToTarget();
+		Message.obtain(localHandler, PREPARE_UPDATE_MAP).sendToTarget();
 
 		mListener = new LocalListener();
 

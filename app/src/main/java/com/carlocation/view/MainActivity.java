@@ -181,8 +181,8 @@ public class MainActivity extends ActionBarActivity implements
         new send().execute();
 
         //Start DemoActivity.
-        Intent intent = new Intent(MainActivity.this, DemoActivity.class);
-        startActivity(intent);
+        //Intent intent = new Intent(MainActivity.this, DemoActivity.class);
+        //startActivity(intent);
     }
 
     @Override

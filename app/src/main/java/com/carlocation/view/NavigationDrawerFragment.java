@@ -26,6 +26,7 @@ import android.widget.Toast;
 
 import com.carlocation.R;
 import com.carlocation.comm.MessageService;
+import com.carlocation.demo.DemoActivity;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation
@@ -121,6 +122,10 @@ public class NavigationDrawerFragment extends Fragment {
 						} else if (position == 1) {
 							Intent i = new Intent();
 							i.setClass(getActivity(), RecentChatListActivity.class);
+							startActivity(i);
+						} else if (position == 2){
+							Intent i = new Intent();
+							i.setClass(getActivity(), DemoActivity.class);
 							startActivity(i);
 						}
 					}

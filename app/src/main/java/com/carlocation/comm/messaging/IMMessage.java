@@ -23,7 +23,7 @@ public class IMMessage extends BaseMessage {
      * 1 element indicates one to one.
      * others indicates one to multiples.
      */
-    public List<Long> mToTerminalId;
+    public List<String> mToTerminalId;
 
 
 	public IMMsgType mImMsgType;
@@ -33,8 +33,8 @@ public class IMMessage extends BaseMessage {
 	}
 
 
-    public IMMessage(long mTransactionID,  long mSenderId,
-                     List<Long> mToTerminalId, IMMsgType mImMsgType) {
+    public IMMessage(long mTransactionID,  String mSenderId,
+                     List<String> mToTerminalId, IMMsgType mImMsgType) {
         super(mTransactionID, MessageType.IM_MESSAGE, mSenderId, TerminalType.TERMINAL_CAR);
 
         this.mToTerminalId = mToTerminalId;
@@ -66,7 +66,7 @@ public class IMMessage extends BaseMessage {
 
             if (mToTerminalId != null) {
                 JSONArray array = new JSONArray();
-                for (long terminalId : mToTerminalId) {
+                for (String terminalId : mToTerminalId) {
                     array.put(terminalId);
                 }
 

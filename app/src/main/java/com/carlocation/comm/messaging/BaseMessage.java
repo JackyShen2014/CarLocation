@@ -24,7 +24,7 @@ public abstract class BaseMessage implements Serializable{
 	 */
 	public long mTransactionID;
 	public MessageType mMessageType;
-    public long mSenderId;
+    public String mSenderId;
     public TerminalType mSenderType;
 
     public BaseMessage() {
@@ -41,7 +41,7 @@ public abstract class BaseMessage implements Serializable{
         this.mMessageType = mMessageType;
     }
 
-    public BaseMessage(long mTransactionID, MessageType mMessageType, long mSenderId,
+    public BaseMessage(long mTransactionID, MessageType mMessageType, String mSenderId,
                           TerminalType mSenderType) {
         this.mTransactionID = mTransactionID;
         this.mMessageType = mMessageType;

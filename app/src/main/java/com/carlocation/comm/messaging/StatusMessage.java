@@ -14,7 +14,7 @@ public class StatusMessage extends BaseMessage {
 
 	public StatusMsgType mStatus;
 
-    public StatusMessage(long mTransactionID,long mSenderId,StatusMsgType mStatus) {
+    public StatusMessage(long mTransactionID,String mSenderId,StatusMsgType mStatus) {
         super(mTransactionID, MessageType.STATUS_MESSAGE, mSenderId, TerminalType.TERMINAL_CAR);
         this.mStatus = mStatus;
     }

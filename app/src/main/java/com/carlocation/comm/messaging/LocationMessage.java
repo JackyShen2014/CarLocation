@@ -22,7 +22,7 @@ public class LocationMessage extends BaseMessage {
 
     public ArrayList<LocationCell> mLocationArray = new ArrayList<LocationCell>();
 
-    public LocationMessage(long mTransactionID,long mSenderId,ArrayList<LocationCell> mLocationArray) {
+    public LocationMessage(long mTransactionID,String mSenderId,ArrayList<LocationCell> mLocationArray) {
         super(mTransactionID, MessageType.LOCATION_MESSAGE, mSenderId, TerminalType.TERMINAL_CAR);
         this.mLocationArray = mLocationArray;
     }

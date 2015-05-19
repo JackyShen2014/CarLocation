@@ -28,7 +28,7 @@ public class AuthMessage extends BaseMessage {
         AUTH_LOGOUT_MSG,
     }
 
-    public AuthMessage(long mTransactionID,long mSenderId,String mUserName, String mPassword, AuthMsgType mAuthType) {
+    public AuthMessage(long mTransactionID,String mSenderId,String mUserName, String mPassword, AuthMsgType mAuthType) {
         super(mTransactionID, MessageType.AUTH_MESSAGE, mSenderId, TerminalType.TERMINAL_CAR);
         this.mUserName = mUserName;
         this.mPassword = mPassword;

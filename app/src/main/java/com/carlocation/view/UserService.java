@@ -136,7 +136,7 @@ public class UserService{
      * @param rank          Rank of Msg
      * @param content       Content of msg
      */
-    public void sendImTxtMsg(List<Long> toTerminal, RankType rank, String content){
+    public void sendImTxtMsg(List<String> toTerminal, RankType rank, String content){
         IMTxtMessage txtMessage = new IMTxtMessage(getTransactionId(),getTerminalId(),toTerminal,rank,content);
 
         // Invoke native service to send message
@@ -154,7 +154,7 @@ public class UserService{
      * @param toTerminal    Terminal ID of destination
      * @param voiceData     Context of voice data
      */
-    public void sendImVoiceMsg(List<Long> toTerminal, byte[] voiceData){
+    public void sendImVoiceMsg(List<String> toTerminal, byte[] voiceData){
         IMVoiceMessage voiceMessage = new IMVoiceMessage(getTransactionId(),
                 getTerminalId(),toTerminal,voiceData);
 
@@ -289,9 +289,8 @@ public class UserService{
      * Used to get terminal ID from property.
      * @return
      */
-    public long getTerminalId (){
-        //FIXME Get Terminal ID from property
-        return 1234567L;
+    public String getTerminalId (){
+        return GlobalHolder.getInstance().getTerminalId();
     }
 
     /**

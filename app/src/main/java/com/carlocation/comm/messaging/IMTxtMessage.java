@@ -20,7 +20,7 @@ public class IMTxtMessage extends IMMessage {
     public RankType mRank;
     public String mTxtCont;
 
-    public IMTxtMessage(long mTransactionID, long mSenderId, List<Long> mToTerminalId,
+    public IMTxtMessage(long mTransactionID, String mSenderId, List<String> mToTerminalId,
                         RankType mRank, String mTxtCont) {
         super(mTransactionID, mSenderId, mToTerminalId, IMMsgType.IM_TXT_MSG);
         this.mRank = mRank;
@@ -50,7 +50,7 @@ public class IMTxtMessage extends IMMessage {
 
             if (mToTerminalId != null) {
                 JSONArray array = new JSONArray();
-                for (long terminalId : mToTerminalId) {
+                for (String terminalId : mToTerminalId) {
                     array.put(terminalId);
                 }
 

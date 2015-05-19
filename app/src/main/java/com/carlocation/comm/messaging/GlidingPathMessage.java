@@ -22,7 +22,7 @@ public class GlidingPathMessage extends BaseMessage {
     public int mGlidePathId;
     public List<Location> mLocationArray;
 
-    public GlidingPathMessage(long mTransactionID, ActionType mActionType, long mSenderId,
+    public GlidingPathMessage(long mTransactionID, ActionType mActionType, String mSenderId,
                               String mTitle, int mGlidePathId, List<Location> mLocationArray) {
         super(mTransactionID, MessageType.GLIDE_MESSAGE, mSenderId, TerminalType.TERMINAL_CAR);
         this.mActionType = mActionType;

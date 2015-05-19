@@ -768,8 +768,8 @@ public class MessageService extends Service {
 									null, contents);
 						} else {
 							StringBuilder routekey = new StringBuilder(250);
-							List<Long> ids = im.mToTerminalId;
-							for (Long id : ids) {
+							List<String> ids = im.mToTerminalId;
+							for (String id : ids) {
 								routekey.append(id).append(".");
 								//If routekey greater than 200 than send message
 								// because rabbitmq routekey of topic limit to 255

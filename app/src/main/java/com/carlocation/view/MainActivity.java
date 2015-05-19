@@ -27,6 +27,7 @@ import com.carlocation.comm.messaging.ActionType;
 import com.carlocation.comm.messaging.AuthMessage;
 import com.carlocation.comm.messaging.GlidingPathMessage;
 import com.carlocation.comm.messaging.IMMessage;
+import com.carlocation.comm.messaging.IMTxtMessage;
 import com.carlocation.comm.messaging.Location;
 import com.carlocation.comm.messaging.MessageResponseStatus;
 import com.carlocation.comm.messaging.MessageType;
@@ -228,53 +229,73 @@ public class MainActivity extends ActionBarActivity implements
          */
         @Override
         protected Void doInBackground(String... params) {
-            //Retrieve Native Service and Send LogIn MSG to server to login.
+
+
+            //demoSendReq();
+            //demoSendRep();
+
+            return null;
+        }
+    }
+
+    //Demo used only
+    public void demoSendRep(){
+        List<Long> toArray  = new ArrayList<Long>();
+        toArray.add(567l);
+        toArray.add(789l);
+
+        byte[] bArray = {(byte) 1, (byte) 2, (byte) 3};
+
+        ArrayList<Location> array = new ArrayList<Location>();
+        array.add(new Location(321.123, 456.654));
+        array.add(new Location(789.987, 890.098));
+
+        if (mConnState == ConnectionState.CONNECTED) {
+
 
             /**
-             * Examples for how to use UserService to send MSG to Server
+             * Print out  JSON format of response messages
              */
 
-            List<Long> toArray  = new ArrayList<Long>();
-            toArray.add(567l);
-            toArray.add(789l);
+            String terminalId = GlobalHolder.getInstance().getTerminalId();
+            GlidingPathMessage glideMsg = new GlidingPathMessage(123, ActionType.ACTION_QUERY,terminalId, "title", 7, array);
+            RestrictedAreaMessage warnMsg = new RestrictedAreaMessage(123,terminalId,ActionType.ACTION_QUERY,12,array);
+            TaskAssignmentMessage taskMsg = new TaskAssignmentMessage(123,terminalId,ActionType.ACTION_QUERY,(short)1,null);
 
-            byte[] bArray = {(byte) 1, (byte) 2, (byte) 3};
+            MessageResponseStatus status = MessageResponseStatus.SUCCESS;
+            mUserService.responActionAssign(glideMsg,status);
+            mUserService.responActionAssign(warnMsg,status);
+            mUserService.responActionAssign(taskMsg,status);
 
-            ArrayList<Location> array = new ArrayList<Location>();
-            array.add(new Location(321.123, 456.654));
-            array.add(new Location(789.987, 890.098));
+        }
+    }
 
 
 
-            if (mConnState == ConnectionState.CONNECTED) {
-                /**
-                 * Print out  JSON format of request messages
-                 */
-                mUserService.sendMyStatus(StatusMessage.StatusMsgType.STATUS_ONLINE);
-                mUserService.sendMyLocation();
-                mUserService.sendImTxtMsg(toArray, RankType.EMERGENCY,"IM txt msg");
-                mUserService.sendImVoiceMsg(toArray,bArray);
-                mUserService.startWorkMsg((short) 1);
-                mUserService.finishWorkMsg((short) 1);
-                mUserService.queryWorkById((short) 1);
-                mUserService.queryGlidePathById(1);
-                mUserService.queryWarnAreaById(1);
+    //Demo used only
+    public void demoSendReq(){
 
-                /**
-                 * Print out  JSON format of response messages
-                 */
+        List<Long> toArray  = new ArrayList<Long>();
+        toArray.add(567l);
+        toArray.add(789l);
 
-                GlidingPathMessage glideMsg = new GlidingPathMessage(123, ActionType.ACTION_QUERY, 456, "title", 7, array);
-                RestrictedAreaMessage warnMsg = new RestrictedAreaMessage(123,456,ActionType.ACTION_QUERY,12,array);
-                TaskAssignmentMessage taskMsg = new TaskAssignmentMessage(123,456,ActionType.ACTION_QUERY,(short)1,null);
+        byte[] bArray = {(byte) 1, (byte) 2, (byte) 3};
 
-                MessageResponseStatus status = MessageResponseStatus.SUCCESS;
-                mUserService.responActionAssign(glideMsg,status);
-                mUserService.responActionAssign(warnMsg,status);
-                mUserService.responActionAssign(taskMsg,status);
+        List<String> toTerminalId = new ArrayList<>();
+        toTerminalId.add("T2");
 
-            }
-            return null;
+
+        if (mConnState == ConnectionState.CONNECTED){
+            mUserService.sendMyStatus(StatusMessage.StatusMsgType.STATUS_ONLINE);
+            mUserService.sendMyLocation();
+            mUserService.sendImTxtMsg(toTerminalId, RankType.EMERGENCY,"IM txt msg");
+            mUserService.sendImVoiceMsg(toTerminalId,bArray);
+            mUserService.startWorkMsg((short) 1);
+            mUserService.finishWorkMsg((short) 1);
+            mUserService.queryWorkById((short) 1);
+            mUserService.queryGlidePathById(1);
+            mUserService.queryWarnAreaById(1);
+
         }
     }
 
@@ -647,7 +668,10 @@ public class MainActivity extends ActionBarActivity implements
     private void handleImMsg(Notification noti){
         IMMessage imMsg = (IMMessage)noti.message;
         if (imMsg.mImMsgType == IMMessage.IMMsgType.IM_TXT_MSG){
-            //TODO Display txt to the user
+            //FIXME Display txt to the user
+            //Temporary to display toast content to user.
+            IMTxtMessage txtMsg = (IMTxtMessage)imMsg;
+            Toast.makeText(MainActivity.this,txtMsg.mTxtCont,Toast.LENGTH_SHORT).show();
 
         }else{
             //TODO Play voice to the user

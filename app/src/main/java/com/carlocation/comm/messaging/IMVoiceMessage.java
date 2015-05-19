@@ -18,7 +18,7 @@ public class IMVoiceMessage extends IMMessage {
 
     public byte[] mVoiceData;
 
-    public IMVoiceMessage(long mTransactionID, long mSenderId, List<Long> mToTerminalId,
+    public IMVoiceMessage(long mTransactionID, String mSenderId, List<String> mToTerminalId,
                           byte[] mVoiceData) {
         super(mTransactionID, mSenderId, mToTerminalId, IMMsgType.IM_VOICE_MSG);
         this.mVoiceData = mVoiceData;
@@ -47,7 +47,7 @@ public class IMVoiceMessage extends IMMessage {
 
             if (mToTerminalId != null) {
                 JSONArray array = new JSONArray();
-                for (long terminalId : mToTerminalId) {
+                for (String terminalId : mToTerminalId) {
                     array.put(terminalId);
                 }
 

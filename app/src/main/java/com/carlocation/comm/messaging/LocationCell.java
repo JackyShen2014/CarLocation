@@ -14,12 +14,12 @@ public class LocationCell {
     private static final long serialVersionUID = -1427264506745698504L;
     private final String LOG_TAG = "LocationMessage";
 
-    public long mTerminalId;
+    public String mTerminalId;
     public TerminalType mTerminalType;
     public Location mLocation;
     public float mSpeed;
 
-    public LocationCell(long mTerminalId, TerminalType mTerminalType,
+    public LocationCell(String mTerminalId, TerminalType mTerminalType,
                         Location mLocation, float mSpeed) {
         this.mTerminalId = mTerminalId;
         this.mTerminalType = mTerminalType;

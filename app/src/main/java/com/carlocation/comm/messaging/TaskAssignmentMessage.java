@@ -22,7 +22,7 @@ public class TaskAssignmentMessage extends BaseMessage {
 	public String mTaskContent;
     public RankType mRank;
 
-    public TaskAssignmentMessage(long mTransactionID,long mSenderId,ActionType mActionType,
+    public TaskAssignmentMessage(long mTransactionID,String mSenderId,ActionType mActionType,
                                  short mTaskId, String mTaskContent) {
         super(mTransactionID, MessageType.TASK_MESSAGE, mSenderId, TerminalType.TERMINAL_CAR);
         this.mActionType = mActionType;
@@ -30,7 +30,7 @@ public class TaskAssignmentMessage extends BaseMessage {
         this.mTaskContent = mTaskContent;
     }
 
-    public TaskAssignmentMessage(long mTransactionID,long mSenderId,ActionType mActionType,
+    public TaskAssignmentMessage(long mTransactionID,String mSenderId,ActionType mActionType,
                                  short mTaskId, String mTaskContent, RankType mRank) {
         super(mTransactionID, MessageType.TASK_MESSAGE, mSenderId, TerminalType.TERMINAL_CAR);
         this.mActionType = mActionType;

@@ -66,6 +66,10 @@ public class LoginActivity extends Activity {
 					field_pasWord.requestFocus();
 					return;
 				}
+
+				//Save Terminal ID to globalHolder single instance.
+				GlobalHolder.getInstance().setTerminalId(field_usrName.getText().toString());
+
 				if (mUserService == null) {
 					mUserService = new UserService(
 							((CarLocationApplication) getApplicationContext())

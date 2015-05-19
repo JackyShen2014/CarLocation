@@ -23,7 +23,7 @@ public class RestrictedAreaMessage extends BaseMessage {
 	public List<Location> mLocationArea;
 
 
-    public RestrictedAreaMessage(long mTransactionID, long mSenderId, ActionType mActionType,
+    public RestrictedAreaMessage(long mTransactionID, String mSenderId, ActionType mActionType,
                                  int mWarnAreaId, List<Location> mLocationArea) {
         super(mTransactionID, MessageType.WARN_MESSAGE, mSenderId, TerminalType.TERMINAL_CAR);
         this.mActionType = mActionType;

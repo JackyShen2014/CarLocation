@@ -37,6 +37,7 @@ import com.carlocation.comm.messaging.RestrictedAreaMessage;
 import com.carlocation.comm.messaging.StatusMessage;
 import com.carlocation.comm.messaging.TaskAssignmentMessage;
 import com.carlocation.comm.messaging.TerminalType;
+import com.carlocation.demo.DemoActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -178,6 +179,10 @@ public class MainActivity extends ActionBarActivity implements
         mResumed = true;
         //FIXME asynTask used to test all APIs of logical service layer
         new send().execute();
+
+        //Start DemoActivity.
+        Intent intent = new Intent(MainActivity.this, DemoActivity.class);
+        startActivity(intent);
     }
 
     @Override

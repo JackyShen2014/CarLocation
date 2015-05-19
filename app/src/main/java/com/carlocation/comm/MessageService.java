@@ -764,7 +764,7 @@ public class MessageService extends Service {
 									null, contents);
 						//send direct message
 						} else if (im.mToTerminalId != null && im.mToTerminalId.size() == 1) {
-							getChannel().basicPublish(EXCHANGE_NAME_DIRECT, "",
+							getChannel().basicPublish(EXCHANGE_NAME_DIRECT, im.mToTerminalId.toString(),
 									null, contents);
 						} else {
 							StringBuilder routekey = new StringBuilder(250);

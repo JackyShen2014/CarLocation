@@ -21,6 +21,7 @@ import com.carlocation.comm.messaging.StatusMessage;
 import com.carlocation.comm.messaging.TaskAssignmentMessage;
 import com.carlocation.comm.messaging.TerminalType;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -29,12 +30,13 @@ import java.util.Random;
  * Created by 28851620 on 4/21/2015.
  * @author Jacky Shen
  */
-public class UserService{
+public class UserService implements Serializable{
+    private static final long serialVersionUID = 8502706820090766507L;
 
     private final String LOG_TAG = "UserService";
 
     //Native Service
-    private IMessageService mNativeService;
+    public IMessageService mNativeService;
     public ResponseListener mRspListener;
 
     public UserService(IMessageService service, ResponseListener rspListener) {
@@ -45,6 +47,7 @@ public class UserService{
             Log.e(LOG_TAG,"UserService constructor service is null");
         }
     }
+
 
     /**
      * Used to send login MSG. The response result will be handled by mRspListener.
@@ -241,7 +244,7 @@ public class UserService{
         // Invoke native service to send message
         Log.d(LOG_TAG, "queryPathMsg(): Start invoke native service to query glide path by id msg.");
         if(mNativeService!= null){
-            mNativeService.sendMessage(queryPathMsg,mRspListener);
+            mNativeService.sendMessage(queryPathMsg, mRspListener);
         }else {
             Log.e(LOG_TAG,"queryPathMsg():It seems failed to bind service mNativeService = "+mNativeService);
         }

@@ -37,7 +37,6 @@ import com.carlocation.comm.messaging.RestrictedAreaMessage;
 import com.carlocation.comm.messaging.StatusMessage;
 import com.carlocation.comm.messaging.TaskAssignmentMessage;
 import com.carlocation.comm.messaging.TerminalType;
-import com.carlocation.demo.DemoActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -127,7 +126,7 @@ public class MainActivity extends ActionBarActivity implements
         IntentFilter filter = new IntentFilter();
         filter.addAction(MessageService.BROADCAST_ACTION_STATE_CHANGED);
         filter.addCategory(MessageService.BROADCAST_CATEGORY);
-        registerReceiver(mConnStateReceiver,filter);
+        registerReceiver(mConnStateReceiver, filter);
 
 
         mNavigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager()
@@ -141,6 +140,10 @@ public class MainActivity extends ActionBarActivity implements
 
 
         mTitle = getTitle();
+
+        //Bundle bundle = new Bundle();
+        //bundle.putSerializable("mUserService", mUserService);
+        //mNavigationDrawerFragment.setArguments(bundle);
 
         // Set up the drawer.
         mNavigationDrawerFragment.setUp(R.id.navigation_drawer,
@@ -215,6 +218,13 @@ public class MainActivity extends ActionBarActivity implements
 
         }
     };
+
+    public UserService getmUserService () {
+        if (mUserService != null) {
+            return mUserService;
+        }
+        return null;
+    }
 
     private class send extends AsyncTask<String, Void, Void> {
 

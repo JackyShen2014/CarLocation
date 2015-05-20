@@ -68,6 +68,8 @@ public class NavigationDrawerFragment extends Fragment {
 	private boolean mFromSavedInstanceState;
 	private boolean mUserLearnedDrawer;
 
+	private UserService mUserService;
+
 	public NavigationDrawerFragment() {
 	}
 
@@ -90,20 +92,13 @@ public class NavigationDrawerFragment extends Fragment {
 
 	}
 
-	@Override
-	public void onActivityCreated(Bundle savedInstanceState) {
-		super.onActivityCreated(savedInstanceState);
-		// Indicate that this fragment would like to influence the set of
-		// actions in the action bar.
-		setHasOptionsMenu(true);
-	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		View root =  inflater.inflate(
 				R.layout.fragment_navigation_drawer, container, false);
-		
+
 		mSettignView = root.findViewById(R.id.nav_setting_text);
 		mSettignView.setOnClickListener(this.mSettingListener);
 		mLogoutView = root.findViewById(R.id.nav_setting_logout);
@@ -125,6 +120,9 @@ public class NavigationDrawerFragment extends Fragment {
 							startActivity(i);
 						} else if (position == 2){
 							Intent i = new Intent();
+							Bundle bundle = new Bundle();
+							bundle.putSerializable("mUserService",mUserService);
+							i.putExtras(bundle);
 							i.setClass(getActivity(), DemoActivity.class);
 							startActivity(i);
 						}
@@ -138,6 +136,16 @@ public class NavigationDrawerFragment extends Fragment {
 						getString(R.string.title_section3), }));
 		mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
 		return root;
+	}
+
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		// Indicate that this fragment would like to influence the set of
+		// actions in the action bar.
+		setHasOptionsMenu(true);
+		mUserService = ((MainActivity)getActivity()).getmUserService();
+		int i = 0;
 	}
 
 	public boolean isDrawerOpen() {
@@ -171,13 +179,13 @@ public class NavigationDrawerFragment extends Fragment {
 		// ActionBarDrawerToggle ties together the the proper interactions
 		// between the navigation drawer and the action bar app icon.
 		mDrawerToggle = new ActionBarDrawerToggle(getActivity(), /* host Activity */
-		mDrawerLayout, /* DrawerLayout object */
-		R.drawable.ic_drawer, /* nav drawer image to replace 'Up' caret */
-		R.string.navigation_drawer_open, /*
+				mDrawerLayout, /* DrawerLayout object */
+				R.drawable.ic_drawer, /* nav drawer image to replace 'Up' caret */
+				R.string.navigation_drawer_open, /*
 										 * "open drawer" description for
 										 * accessibility
 										 */
-		R.string.navigation_drawer_close /*
+				R.string.navigation_drawer_close /*
 										 * "close drawer" description for
 										 * accessibility
 										 */
@@ -190,7 +198,7 @@ public class NavigationDrawerFragment extends Fragment {
 				}
 
 				getActivity().supportInvalidateOptionsMenu(); // calls
-																// onPrepareOptionsMenu()
+				// onPrepareOptionsMenu()
 			}
 
 			@Override
@@ -212,7 +220,7 @@ public class NavigationDrawerFragment extends Fragment {
 				}
 
 				getActivity().supportInvalidateOptionsMenu(); // calls
-																// onPrepareOptionsMenu()
+				// onPrepareOptionsMenu()
 			}
 		};
 

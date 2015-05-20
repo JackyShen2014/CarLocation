@@ -3,13 +3,15 @@ package com.carlocation.comm;
 import com.carlocation.comm.messaging.BaseMessage;
 import com.carlocation.comm.messaging.ResponseMessage;
 
+import java.io.Serializable;
+
 /**
  * Interface for message service.<br>
  * 
  * @author 28851274
  *
  */
-public interface IMessageService {
+public interface IMessageService extends Serializable{
 	
 	
 	/**

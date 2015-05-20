@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.carlocation.R;
 import com.carlocation.comm.messaging.RankType;
@@ -26,13 +27,15 @@ public class DemoActivity extends ListActivity {
 
     private static List<String> mItems;
     private ListView mList;
-    private Field mUserService;
+    private UserService mUserService;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.activity_demo);
+
+        mUserService = (UserService)getIntent().getExtras().getSerializable("mUserService");
+
         mList = getListView();
         mItems = new ArrayList<>();
 
@@ -47,15 +50,6 @@ public class DemoActivity extends ListActivity {
             e.printStackTrace();
         }
 
-        //Reflect mUserService
-        try {
-             mUserService = MainActivity.class.getDeclaredField("mUserService");
-
-        }catch(NoSuchFieldException e){
-            Log.e(LOG_TAG,"onCreate():NoSuchFieldException!");
-            e.printStackTrace();
-        }
-
         setListAdapter(new ArrayAdapter<>(DemoActivity.this,android.R.layout.simple_list_item_1,mItems));
 
         mList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -67,6 +61,7 @@ public class DemoActivity extends ListActivity {
                         break;
                     case 3:
                         //getTerminalId()
+                        Toast.makeText(DemoActivity.this,mUserService.getTerminalId(),Toast.LENGTH_SHORT).show();
 
                         break;
                     case 12:

@@ -2,6 +2,8 @@ package com.carlocation.comm;
 
 import com.carlocation.comm.messaging.Notification;
 
+import java.io.Serializable;
+
 /**
  * <ul>
  * Listener for notify response message.
@@ -15,7 +17,7 @@ import com.carlocation.comm.messaging.Notification;
  * @author 28851274
  * 
  */
-public interface ResponseListener {
+public interface ResponseListener extends Serializable{
 
 	/**
 	 * Response message notification.<br>

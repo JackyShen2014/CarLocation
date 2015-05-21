@@ -5,8 +5,6 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.nio.charset.Charset;
-
 /**
  * Used for authentication
  * 
@@ -23,7 +21,7 @@ public class AuthMessage extends BaseMessage {
     public String mPassword;
     public AuthMsgType mAuthType;
 
-    public static enum AuthMsgType {
+    public enum AuthMsgType {
         AUTH_LOGIN_MSG,
         AUTH_LOGOUT_MSG,
     }

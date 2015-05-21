@@ -27,7 +27,9 @@ import com.carlocation.comm.ResponseListener;
 import com.carlocation.comm.messaging.Notification;
 
 public class LoginActivity extends Activity {
+	private static final String LOG_TAG = "LoginActivity";
 
+	private static final String key_setting = "SETTING";
 	private static final int PREPARE_UPDATE_MAP = 1;
 	private static final int FINISH_UPDATE_MAP = 2;
 
@@ -44,6 +46,7 @@ public class LoginActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.login);
+
 		Message.obtain(localHandler, PREPARE_UPDATE_MAP).sendToTarget();
 
 		mListener = new LocalListener();
@@ -51,6 +54,8 @@ public class LoginActivity extends Activity {
 		field_usrName = (EditText) findViewById(R.id.userName);
 		field_pasWord = (EditText) findViewById(R.id.passWord);
 		button_logIn = (Button) findViewById(R.id.logIn);
+
+		restoreLogInfo();
 
 		button_logIn.setOnClickListener(new OnClickListener() {
 
@@ -91,11 +96,26 @@ public class LoginActivity extends Activity {
 	@Override
 	protected void onStop() {
 		super.onStop();
+		saveLogInfo();
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+	}
+
+	public void restoreLogInfo(){
+		SharedPreferences restore = getSharedPreferences(key_setting,MODE_PRIVATE);
+		field_usrName.setText(restore.getString("mUserName",""));
+		field_pasWord.setText(restore.getString("mPassWord",""));
+	}
+
+	public void saveLogInfo(){
+		SharedPreferences save = getSharedPreferences(key_setting,MODE_PRIVATE);
+		SharedPreferences.Editor editor = save.edit();
+		editor.putString("mUserName", field_usrName.getText().toString());
+		editor.putString("mPassWord",field_pasWord.getText().toString());
+		editor.commit();
 	}
 
 	private void updateMap() {

@@ -47,33 +47,37 @@ public class MessageFactory {
 	}
 
 	public static MessageHeader parserHeader(String json) {
+		if (json.startsWith("error")) {
+			//TODO Should check the validation of json format.
+			return null;
+		}
 		MessageHeader h = new MessageHeader();
 		JsonReader reader = new JsonReader(new StringReader(json));
 		try {
-		reader.beginObject();
-		while (reader.hasNext()) {
-			String name = reader.nextName();
-			if (name.equals("header")) {
-				String headerName = reader.nextName();
-				reader.beginObject();
-				while (reader.hasNext()) {
-					if (headerName.equals("type")) {
+			reader.beginObject();
+			while (reader.hasNext()) {
+				String name = reader.nextName();
+				if (name.equals("header")) {
+					String headerName = reader.nextName();
+					reader.beginObject();
+					while (reader.hasNext()) {
+						if (headerName.equals("type")) {
 							h.type = reader.nextInt();
-					} else if (headerName.equals("version")) {
+						} else if (headerName.equals("version")) {
 							h.version = reader.nextInt();
+						}
 					}
+					reader.endObject();
+
+				} else if (name.equals("body")) {
+					h.body = reader.nextString();
+				} else {
+					reader.skipValue();
 				}
-				reader.endObject();
-				
-			} else if (name.equals("body")) {
-				h.body = reader.nextString();
-			} else {
-				reader.skipValue();
 			}
-		}
-		reader.endObject();
+			reader.endObject();
 		} catch (Exception e) {
-			
+
 		} finally {
 			try {
 				reader.close();

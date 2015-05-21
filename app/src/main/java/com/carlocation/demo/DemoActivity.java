@@ -102,7 +102,15 @@ public class DemoActivity extends ListActivity implements NativeServInterface {
                         break;
                     case 12:
                         //Send ImTxtMsg
-
+                        List<String> toId = new ArrayList<>();
+                        String toTerminalId;
+                        if (mUserService.getTerminalId().equals("t1")) {
+                            toTerminalId = "t2";
+                        }else {
+                            toTerminalId = "t1";
+                        }
+                        toId.add(toTerminalId);
+                        mUserService.sendImTxtMsg(toId,RankType.NORMAL,"Hello!I'm "+mUserService.getTerminalId());
                         break;
                     default:break;
                 }
@@ -167,9 +175,9 @@ public class DemoActivity extends ListActivity implements NativeServInterface {
      */
     @Override
     public void regNotifictListenner() {
-        IMessageService nativeService = (((CarLocationApplication) getApplicationContext()).getService());
-        if (nativeService != null) {
-            nativeService.registerNotificationListener(mListener);
+
+        if (mNativeService != null) {
+            mNativeService.registerNotificationListener(mListener);
         } else {
             Message mesg = Message.obtain(mHandler, REGISTER_NOTIFICATION);
             mHandler.sendMessageDelayed(mesg, 500);

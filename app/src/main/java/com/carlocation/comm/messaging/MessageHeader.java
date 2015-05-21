@@ -1,5 +1,7 @@
 package com.carlocation.comm.messaging;
 
+import org.json.JSONObject;
+
 public class MessageHeader {
 	public int type;
 	public int version;
@@ -15,9 +17,13 @@ public class MessageHeader {
 		this.version = version;
 	}
 
-	
-	
-	
+	public MessageHeader(int type, int version, String body) {
+		super();
+		this.type = type;
+		this.version = version;
+		this.body = body;
+	}
+
 	public enum HeaderType {
 		REQUEST,
 		RESPONSE

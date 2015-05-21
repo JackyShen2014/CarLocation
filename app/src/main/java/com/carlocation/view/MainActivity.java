@@ -141,10 +141,6 @@ public class MainActivity extends ActionBarActivity implements
 
         mTitle = getTitle();
 
-        //Bundle bundle = new Bundle();
-        //bundle.putSerializable("mUserService", mUserService);
-        //mNavigationDrawerFragment.setArguments(bundle);
-
         // Set up the drawer.
         mNavigationDrawerFragment.setUp(R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
@@ -215,16 +211,9 @@ public class MainActivity extends ActionBarActivity implements
                 }
             }
 
-
         }
     };
 
-    public UserService getmUserService () {
-        if (mUserService != null) {
-            return mUserService;
-        }
-        return null;
-    }
 
     private class send extends AsyncTask<String, Void, Void> {
 

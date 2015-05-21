@@ -17,7 +17,7 @@ import java.io.Serializable;
  * @author 28851274
  * 
  */
-public interface ResponseListener extends Serializable{
+public interface ResponseListener {
 
 	/**
 	 * Response message notification.<br>

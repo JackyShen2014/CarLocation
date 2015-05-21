@@ -34,8 +34,6 @@ public class DemoActivity extends ListActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mUserService = (UserService)getIntent().getExtras().getSerializable("mUserService");
-
         mList = getListView();
         mItems = new ArrayList<>();
 
@@ -61,7 +59,6 @@ public class DemoActivity extends ListActivity {
                         break;
                     case 3:
                         //getTerminalId()
-                        Toast.makeText(DemoActivity.this,mUserService.getTerminalId(),Toast.LENGTH_SHORT).show();
 
                         break;
                     case 12:

@@ -11,7 +11,7 @@ import java.io.Serializable;
  * @author 28851274
  *
  */
-public interface IMessageService extends Serializable{
+public interface IMessageService {
 	
 	
 	/**

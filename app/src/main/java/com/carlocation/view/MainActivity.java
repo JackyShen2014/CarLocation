@@ -64,6 +64,11 @@ public class MainActivity extends ActionBarActivity implements
      */
     private ConnectionState mConnState = ConnectionState.NONE;
 
+    /**
+     * An indicator to indicate if this MainActivity still alive (not destroyed).
+     */
+    private boolean mResumed;
+
 
 
     /**
@@ -78,10 +83,6 @@ public class MainActivity extends ActionBarActivity implements
      */
     private CharSequence mTitle;
 
-    /**
-     * An indicator to indicate if this MainActivity still alive (not destroyed).
-     */
-    private boolean mResumed;
 
 
     private static final int REGISTER_NOTIFICATION = 0;
@@ -179,9 +180,6 @@ public class MainActivity extends ActionBarActivity implements
         //FIXME asynTask used to test all APIs of logical service layer
         new send().execute();
 
-        //Start DemoActivity.
-        //Intent intent = new Intent(MainActivity.this, DemoActivity.class);
-        //startActivity(intent);
     }
 
     @Override

@@ -6,7 +6,7 @@ public enum MessageResponseStatus {
 
 	private int code;
 
-	private MessageResponseStatus(int code) {
+	MessageResponseStatus(int code) {
 		this.code = code;
 	}
 
@@ -23,7 +23,7 @@ public enum MessageResponseStatus {
 		case -2:
 			return NOT_SUPPORTED;
 		default:
-			return NOT_SUPPORTED;
+			return UNKNOWN;
 
 		}
 	}

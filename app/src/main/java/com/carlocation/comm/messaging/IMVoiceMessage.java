@@ -39,21 +39,7 @@ public class IMVoiceMessage extends IMMessage {
     @Override
     public JSONObject translateJsonObject() {
         try {
-            JSONObject object = new JSONObject();
-            object.put("mTransactionID", IMVoiceMessage.this.mTransactionID);
-            object.put("mMessageType", IMVoiceMessage.this.mMessageType.ordinal());
-            object.put("mSenderId", IMVoiceMessage.this.mSenderId);
-            object.put("mSenderType", IMVoiceMessage.this.mSenderType.ordinal());
-
-            if (mToTerminalId != null) {
-                JSONArray array = new JSONArray();
-                for (String terminalId : mToTerminalId) {
-                    array.put(terminalId);
-                }
-
-                object.put("mToTerminalId", array);
-            }
-            object.put("mImMsgType", mImMsgType.ordinal());
+            JSONObject object = super.translateJsonObject();
 
             JSONArray array = new JSONArray();
             for (int i = 0; i < mVoiceData.length; i++) {

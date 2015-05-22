@@ -28,8 +28,8 @@ public class IMMessage extends BaseMessage {
 
 	public IMMsgType mImMsgType;
 
-	public static enum IMMsgType {
-		IM_TXT_MSG, IM_VOICE_MSG,
+	public enum IMMsgType {
+		IM_TXT_MSG, IM_VOICE_MSG
 	}
 
 
@@ -58,11 +58,7 @@ public class IMMessage extends BaseMessage {
 	public JSONObject translateJsonObject() {
 		// Define return result
 		try {
-			JSONObject object = new JSONObject();
-			object.put("mTransactionID", IMMessage.this.mTransactionID);
-			object.put("mMessageType", IMMessage.this.mMessageType.ordinal());
-            object.put("mSenderId", IMMessage.this.mSenderId);
-            object.put("mSenderType", IMMessage.this.mSenderType.ordinal());
+			JSONObject object = super.translateJsonObject();
 
             if (mToTerminalId != null) {
                 JSONArray array = new JSONArray();

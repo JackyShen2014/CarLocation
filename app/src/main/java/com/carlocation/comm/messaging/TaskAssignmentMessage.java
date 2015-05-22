@@ -54,11 +54,7 @@ public class TaskAssignmentMessage extends BaseMessage {
 	@Override
 	public JSONObject translateJsonObject() {
 		try {
-			JSONObject object = new JSONObject();
-			object.put("mTransactionID",TaskAssignmentMessage.this.mTransactionID);
-			object.put("mMessageType", TaskAssignmentMessage.this.mMessageType.ordinal());
-            object.put("mSenderId", TaskAssignmentMessage.this.mSenderId);
-            object.put("mSenderType", TaskAssignmentMessage.this.mSenderType.ordinal());
+            JSONObject object = super.translateJsonObject();
 
 			object.put("mActionType", mActionType.ordinal());
 			object.put("mTaskId", mTaskId);
@@ -77,7 +73,8 @@ public class TaskAssignmentMessage extends BaseMessage {
 		return null;
 	}
 
-	@Override
+
+    @Override
 	public String toString() {
 		return "TaskAssignmentMessage [" + super.toString()
                 + ", mActionType=" + mActionType

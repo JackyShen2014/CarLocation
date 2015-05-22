@@ -46,7 +46,14 @@ public class MessageFactory {
 		return object;
 	}
 
-	public static MessageHeader parserHeader(String json) {
+	//TODO JSON
+	public static MessageJsonFormat parser (String json){
+
+
+		return new MessageJsonFormat();
+	}
+
+	/*public static MessageHeader parserHeader(String json) {
 		if (json.startsWith("error")) {
 			//TODO Should check the validation of json format.
 			return null;
@@ -70,7 +77,7 @@ public class MessageFactory {
 					reader.endObject();
 
 				} else if (name.equals("body")) {
-					h.body = reader.nextString();
+					//h.body = reader.nextString();
 				} else {
 					reader.skipValue();
 				}
@@ -86,7 +93,7 @@ public class MessageFactory {
 			}
 		}
 		return h;
-	}
+	}*/
 
 	public static BaseMessage parseRequestFromJSON(String json) {
 		JsonReader reader = new JsonReader(new StringReader(json));

@@ -1,7 +1,12 @@
 package com.carlocation.comm.messaging;
 
-import java.io.Serializable;
+import android.util.JsonReader;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.io.StringReader;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 
 
@@ -49,6 +54,10 @@ public abstract class BaseMessage implements Serializable{
         this.mSenderType = mSenderType;
     }
 
+	public BaseMessage(JsonReader reader) {
+
+	}
+
     /**
 	 * Use to translate to network format
 	 * @return
@@ -60,9 +69,21 @@ public abstract class BaseMessage implements Serializable{
 	 * 
 	 * @return
 	 */
-	public abstract JSONObject translateJsonObject();
-	
-	
+	public JSONObject translateJsonObject() {
+		try{
+			JSONObject object = new JSONObject();
+			object.put("mTransactionID",this.mTransactionID);
+			object.put("mMessageType",this.mMessageType.ordinal());
+			object.put("mSenderId",this.mSenderId);
+			object.put("mSenderType",this.mSenderType.ordinal());
+
+			return object;
+
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 
 
 	public MessageType getMessageType() {

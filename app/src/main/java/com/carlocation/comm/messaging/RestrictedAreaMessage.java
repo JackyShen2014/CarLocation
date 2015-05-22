@@ -48,11 +48,7 @@ public class RestrictedAreaMessage extends BaseMessage {
 	public JSONObject translateJsonObject() {
 		// Define return result
 		try {
-			JSONObject object = new JSONObject();
-			object.put("mTransactionID",RestrictedAreaMessage.this.mTransactionID);
-			object.put("mMessageType", RestrictedAreaMessage.this.mMessageType.ordinal());
-            object.put("mSenderId", RestrictedAreaMessage.this.mSenderId);
-            object.put("mSenderType", RestrictedAreaMessage.this.mSenderType.ordinal());
+			JSONObject object = super.translateJsonObject();
 			object.put("mActionType", mActionType.ordinal());
 			object.put("mWarnAreaId", mWarnAreaId);
 

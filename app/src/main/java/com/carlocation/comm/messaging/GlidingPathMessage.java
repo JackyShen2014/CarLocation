@@ -1,11 +1,14 @@
 package com.carlocation.comm.messaging;
 
+import android.util.JsonReader;
 import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +25,10 @@ public class GlidingPathMessage extends BaseMessage {
     public int mGlidePathId;
     public List<Location> mLocationArray;
 
-    public GlidingPathMessage(long mTransactionID, ActionType mActionType, String mSenderId,
+	public GlidingPathMessage() {
+	}
+
+	public GlidingPathMessage(long mTransactionID, ActionType mActionType, String mSenderId,
                               String mTitle, int mGlidePathId, List<Location> mLocationArray) {
         super(mTransactionID, MessageType.GLIDE_MESSAGE, mSenderId, TerminalType.TERMINAL_CAR);
         this.mActionType = mActionType;
@@ -31,7 +37,7 @@ public class GlidingPathMessage extends BaseMessage {
         this.mLocationArray = mLocationArray;
     }
 
-    @Override
+	@Override
 	public String translate() {
 		// Define return result
 		String jSonResult = "";
@@ -47,11 +53,7 @@ public class GlidingPathMessage extends BaseMessage {
 	public JSONObject translateJsonObject() {
 		// Define return result
 		try {
-			JSONObject object = new JSONObject();
-			object.put("mTransactionID", GlidingPathMessage.this.mTransactionID);
-			object.put("mMessageType", GlidingPathMessage.this.mMessageType.ordinal());
-            object.put("mSenderId", GlidingPathMessage.this.mSenderId);
-            object.put("mSenderType", GlidingPathMessage.this.mSenderType.ordinal());
+			JSONObject object = super.translateJsonObject();
 
 			object.put("mActionType", mActionType.ordinal());
 			object.put("mTitle", mTitle);
@@ -79,6 +81,75 @@ public class GlidingPathMessage extends BaseMessage {
 		}
 		return null;
 	}
+
+	public static BaseMessage parseJsonObject(String json) {
+		JsonReader reader = new JsonReader(new StringReader(json));
+		GlidingPathMessage glideMsg = new GlidingPathMessage();
+		try{
+			reader.beginObject();
+			while (reader.hasNext()){
+				String tagName  = reader.nextName();
+				if (tagName.equals("mTransactionID")) {
+					glideMsg.mTransactionID = reader.nextLong();
+				}else if (tagName.equals("mMessageType")) {
+					glideMsg.mMessageType = MessageType.valueOf(reader.nextInt());
+				}else if (tagName.equals("mSenderId")) {
+					glideMsg.mSenderId = reader.nextString();
+				}else if (tagName.equals("mSenderType")) {
+					glideMsg.mSenderType = TerminalType.valueOf(reader.nextInt());
+				}else if (tagName.equals("mActionType")) {
+					glideMsg.mActionType = ActionType.valueOf(reader.nextInt());
+				}else if (tagName.equals("mTitle")) {
+					glideMsg.mTitle = reader.nextString();
+				}else if (tagName.equals("mGlidePathId")) {
+					glideMsg.mGlidePathId = reader.nextInt();
+				}else if (tagName.equals("mLocationArray")){
+					glideMsg.mLocationArray = readLocationArray(reader.nextString());
+				}else{
+					reader.skipValue();
+				}
+
+			}
+			reader.endObject();
+			return glideMsg;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}finally {
+			try {
+				reader.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return null;
+	}
+
+	public static List<Location> readLocationArray(String json){
+		List<Location> locationList = new ArrayList<>();
+		JsonReader reader = new JsonReader(new StringReader(json));
+		try {
+
+			reader.beginArray();
+			while (reader.hasNext()){
+				Location lc = Location.parseLocation(reader.nextString());
+				locationList.add(lc);
+			}
+			reader.endArray();
+			return locationList;
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}finally {
+			try {
+				reader.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+
 
 	@Override
 	public String toString() {

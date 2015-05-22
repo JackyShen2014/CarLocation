@@ -19,6 +19,7 @@ import com.carlocation.comm.messaging.BaseMessage;
 import com.carlocation.comm.messaging.IMMessage;
 import com.carlocation.comm.messaging.MessageFactory;
 import com.carlocation.comm.messaging.MessageHeader;
+import com.carlocation.comm.messaging.MessageJsonFormat;
 import com.carlocation.comm.messaging.MessageType;
 import com.carlocation.comm.messaging.Notification;
 import com.carlocation.comm.messaging.Notification.Result;
@@ -677,27 +678,23 @@ public class MessageService extends Service {
 						continue;
 					}
 					String mj = new String(d.getBody());
-					MessageHeader header = MessageFactory.parserHeader(mj);
+					//MessageHeader header = MessageFactory.parserHeader(mj);
+					MessageJsonFormat msg = MessageFactory.parser(mj);
 					Log.i(TAG, "Get message " + mj);
-					if (header.body == null) {
+					if (msg.mBody == null) {
 						continue;
 					}
-					if (header.type == MessageHeader.HeaderType.REQUEST
-							.ordinal()) {
-						BaseMessage bm = MessageFactory
-								.parseRequestFromJSON(header.body);
+					if (msg.mHead.type == MessageHeader.HeaderType.REQUEST.ordinal()) {
+						//BaseMessage bm = MessageFactory.parseRequestFromJSON(msg.mBody);
+
 						// If send back message success, means caller waiting
 						// for this response.
 						// Others no caller waiting for this response, it's
 						// unsolicited message.
-						if (!fireBackMessage(bm, Notification.Result.SUCCESS)) {
-							fireUnsolicitedMessage(bm);
-						}
+						fireUnsolicitedMessage(msg.mBody);
 					} else {
-						fireBackMessage(
-								MessageFactory
-										.parseResponseFromJSON(header.body),
-								Notification.Result.SUCCESS);
+						//fireBackMessage(MessageFactory.parseResponseFromJSON(header.body),
+						fireBackMessage(msg.mBody,Notification.Result.SUCCESS);
 					}
 					// Send acknowledge
 					getChannel().basicAck(d.getEnvelope().getDeliveryTag(),

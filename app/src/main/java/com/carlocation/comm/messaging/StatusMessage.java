@@ -50,11 +50,7 @@ public class StatusMessage extends BaseMessage {
 	@Override
 	public JSONObject translateJsonObject() {
 		try {
-			JSONObject object = new JSONObject();
-			object.put("mTransactionID", StatusMessage.this.mTransactionID);
-			object.put("mMessageType", StatusMessage.this.mMessageType.ordinal());
-            object.put("mSenderId", StatusMessage.this.mSenderId);
-            object.put("mSenderType", StatusMessage.this.mSenderType.ordinal());
+			JSONObject object = super.translateJsonObject();
 
 			object.put("mStatus", mStatus.ordinal());
 

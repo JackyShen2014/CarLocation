@@ -42,22 +42,7 @@ public class IMTxtMessage extends IMMessage {
     @Override
     public JSONObject translateJsonObject() {
         try {
-            JSONObject object = new JSONObject();
-            object.put("mTransactionID", IMTxtMessage.this.mTransactionID);
-            object.put("mMessageType", IMTxtMessage.this.mMessageType.ordinal());
-            object.put("mSenderId", IMTxtMessage.this.mSenderId);
-            object.put("mSenderType", IMTxtMessage.this.mSenderType.ordinal());
-
-            if (mToTerminalId != null) {
-                JSONArray array = new JSONArray();
-                for (String terminalId : mToTerminalId) {
-                    array.put(terminalId);
-                }
-
-                object.put("mToTerminalId", array);
-            }
-
-            object.put("mImMsgType", mImMsgType.ordinal());
+            JSONObject object = super.translateJsonObject();
 
             object.put("mRank", mRank.ordinal());
             object.put("mTxtCont", mTxtCont);

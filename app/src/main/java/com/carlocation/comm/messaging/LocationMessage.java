@@ -50,11 +50,7 @@ public class LocationMessage extends BaseMessage {
 	@Override
 	public JSONObject translateJsonObject() {
 		try {
-			JSONObject object = new JSONObject();
-			object.put("mTransactionID", LocationMessage.this.mTransactionID);
-			object.put("mMessageType", LocationMessage.this.mMessageType.ordinal());
-            object.put("mSenderId", LocationMessage.this.mSenderId);
-            object.put("mSenderType", LocationMessage.this.mSenderType.ordinal());
+			JSONObject object = super.translateJsonObject();
 
             if (mLocationArray != null) {
                 JSONArray array = new JSONArray();

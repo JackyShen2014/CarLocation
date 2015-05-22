@@ -48,11 +48,7 @@ public class AuthMessage extends BaseMessage {
 	@Override
 	public JSONObject translateJsonObject() {
 		try {
-			JSONObject object = new JSONObject();
-			object.put("mTransactionID", AuthMessage.this.mTransactionID);
-			object.put("mMessageType", AuthMessage.this.mMessageType.ordinal());
-			object.put("mSenderId", AuthMessage.this.mSenderId);
-            object.put("mSenderType", AuthMessage.this.mSenderType.ordinal());
+			JSONObject object = super.translateJsonObject();
 
 			object.put("mUserName", mUserName);
 			object.put("mPassword", mPassword);
@@ -66,6 +62,7 @@ public class AuthMessage extends BaseMessage {
 		}
 		return null;
 	}
+
 
     @Override
     public String toString() {

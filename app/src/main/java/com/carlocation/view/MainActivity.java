@@ -234,7 +234,7 @@ public class MainActivity extends ActionBarActivity implements
 
 
             //demoSendReq();
-            //demoSendRep();
+            demoSendRep();
 
             return null;
         }
@@ -261,13 +261,19 @@ public class MainActivity extends ActionBarActivity implements
 
             String terminalId = GlobalHolder.getInstance().getTerminalId();
             GlidingPathMessage glideMsg = new GlidingPathMessage(123, ActionType.ACTION_QUERY,terminalId, "title", 7, array);
-            RestrictedAreaMessage warnMsg = new RestrictedAreaMessage(123,terminalId,ActionType.ACTION_QUERY,12,array);
-            TaskAssignmentMessage taskMsg = new TaskAssignmentMessage(123,terminalId,ActionType.ACTION_QUERY,(short)1,null);
+            Log.e(LOG_TAG,"JSON format of GlideMsg is: "+glideMsg.translate());
 
-            MessageResponseStatus status = MessageResponseStatus.SUCCESS;
-            mUserService.responActionAssign(glideMsg,status);
-            mUserService.responActionAssign(warnMsg,status);
-            mUserService.responActionAssign(taskMsg,status);
+            String recvMsg = glideMsg.translate();
+            GlidingPathMessage recvGlide = (GlidingPathMessage)GlidingPathMessage.parseJsonObject(recvMsg);
+            Log.e(LOG_TAG,"Parse JSON format of GlideMsg is: "+recvGlide.translate());
+
+            //RestrictedAreaMessage warnMsg = new RestrictedAreaMessage(123,terminalId,ActionType.ACTION_QUERY,12,array);
+            //TaskAssignmentMessage taskMsg = new TaskAssignmentMessage(123,terminalId,ActionType.ACTION_QUERY,(short)1,null);
+
+            //MessageResponseStatus status = MessageResponseStatus.SUCCESS;
+            //mUserService.responActionAssign(glideMsg,status);
+            //mUserService.responActionAssign(warnMsg,status);
+            //mUserService.responActionAssign(taskMsg,status);
 
         }
     }

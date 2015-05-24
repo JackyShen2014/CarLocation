@@ -9,9 +9,13 @@ public class ResponseMessage {
 
 	public static final String KEY_RET = "ret";
 
+
+
 	public BaseMessage message;
 
 	public MessageResponseStatus status;
+
+
 
     public ResponseMessage() {
         super();
@@ -22,7 +26,7 @@ public class ResponseMessage {
         this.status = status;
     }
 
-    public JSONObject translate() {
+    public JSONObject translateJsonObject() {
 		JSONObject object = new JSONObject();
 		try {
 			object.put(KEY_RQ, message.translateJsonObject());

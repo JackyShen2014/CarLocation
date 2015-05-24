@@ -1,11 +1,14 @@
 package com.carlocation.comm.messaging;
 
+import android.util.JsonReader;
 import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +22,9 @@ public class IMTxtMessage extends IMMessage {
 
     public RankType mRank;
     public String mTxtCont;
+
+    public IMTxtMessage() {
+    }
 
     public IMTxtMessage(long mTransactionID, String mSenderId, List<String> mToTerminalId,
                         RankType mRank, String mTxtCont) {
@@ -51,6 +57,63 @@ public class IMTxtMessage extends IMMessage {
 
         } catch (JSONException e) {
             Log.e(LOG_TAG, "JSONException accured!");
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static BaseMessage parseJsonObject(String json){
+        JsonReader reader = new JsonReader(new StringReader(json));
+        IMTxtMessage txtMsg = new IMTxtMessage();
+
+        try {
+            reader.beginObject();
+            while (reader.hasNext()){
+                String tagName = reader.nextName();
+                if (tagName.equals("mTransactionID")) {
+                    txtMsg.mTransactionID = reader.nextLong();
+                }else if (tagName.equals("mMessageType")) {
+                    txtMsg.mMessageType = MessageType.valueOf(reader.nextInt());
+                }else if (tagName.equals("mSenderId")) {
+                    txtMsg.mSenderId = reader.nextString();
+                }else if (tagName.equals("mSenderType")) {
+                    txtMsg.mSenderType = TerminalType.valueOf(reader.nextInt());
+                }else if (tagName.equals("mImMsgType")) {
+                    txtMsg.mImMsgType = IMMsgType.valueOf(reader.nextInt());
+                }else if (tagName.equals("mToTerminalId")) {
+                    txtMsg.mToTerminalId = readListStr(reader);
+                }else if (tagName.equals("mRank")) {
+                    txtMsg.mRank = RankType.valueOf(reader.nextInt());
+                }else if (tagName.equals("mTxtCont")) {
+                    txtMsg.mTxtCont = reader.nextString();
+                }else {
+                    reader.skipValue();
+                }
+            }
+            reader.endObject();
+            return txtMsg;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    private static List<String> readListStr(JsonReader reader) {
+        try{
+            List<String> list = new ArrayList<>();
+            reader.beginArray();
+            while (reader.hasNext()){
+                list.add(reader.nextString());
+            }
+            reader.endArray();
+            return list;
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return null;

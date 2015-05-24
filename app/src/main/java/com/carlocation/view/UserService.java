@@ -283,7 +283,7 @@ public class UserService implements Serializable{
      * Used to produce transaction id for send msg.
      * @return
      */
-    public long getTransactionId(){
+    public static long getTransactionId(){
         //FIXME Get TransactionID
         return (new Random().nextLong());
     }
@@ -292,7 +292,7 @@ public class UserService implements Serializable{
      * Used to get terminal ID from property.
      * @return
      */
-    public String getTerminalId (){
+    public static String getTerminalId (){
         return GlobalHolder.getInstance().getTerminalId();
     }
 
@@ -300,7 +300,7 @@ public class UserService implements Serializable{
      * Used to get terminal type from property.
      * @return
      */
-    public TerminalType getTerminalType(){
+    public static TerminalType getTerminalType(){
         //FIXME Get terminal ID from property
         return TerminalType.TERMINAL_CAR;
     }
@@ -309,7 +309,7 @@ public class UserService implements Serializable{
      * Used to retrieve my location from BeiDou positioning system.
      * @return
      */
-    public ArrayList<LocationCell> getMyLocation(){
+    public static ArrayList<LocationCell> getMyLocation(){
         //FIXME Get Location from BeiDou positioning system
         ArrayList<LocationCell> myLocation  = new ArrayList<LocationCell>();
 
@@ -326,7 +326,7 @@ public class UserService implements Serializable{
      * Used to retrieve my speed from BeiDou positioning system.
      * @return
      */
-    public float getMySpeed(){
+    public static float getMySpeed(){
         //FIXME Get my speed from BeiDou positioning system
         float mySpeed = 12.23f;
         return mySpeed;

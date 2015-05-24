@@ -29,11 +29,27 @@ public class IMMessage extends BaseMessage {
 	public IMMsgType mImMsgType;
 
 	public enum IMMsgType {
-		IM_TXT_MSG, IM_VOICE_MSG
+		IM_TXT_MSG(0), IM_VOICE_MSG(1),UNKONWN(-1);
+		private int code;
+
+		IMMsgType(int code) {
+			this.code = code;
+		}
+
+		public static IMMsgType valueOf(int code){
+			switch (code){
+				case 0: return IM_TXT_MSG;
+				case 1: return IM_VOICE_MSG;
+				default:return UNKONWN;
+			}
+
+		}
 	}
 
+	public IMMessage() {
+	}
 
-    public IMMessage(long mTransactionID,  String mSenderId,
+	public IMMessage(long mTransactionID,  String mSenderId,
                      List<String> mToTerminalId, IMMsgType mImMsgType) {
         super(mTransactionID, MessageType.IM_MESSAGE, mSenderId, TerminalType.TERMINAL_CAR);
 

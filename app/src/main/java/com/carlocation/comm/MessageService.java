@@ -24,6 +24,7 @@ import com.carlocation.comm.messaging.MessageType;
 import com.carlocation.comm.messaging.Notification;
 import com.carlocation.comm.messaging.Notification.Result;
 import com.carlocation.comm.messaging.ResponseMessage;
+import com.carlocation.comm.messaging.RspMessageJsonFormat;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.AuthenticationFailureException;
 import com.rabbitmq.client.Channel;
@@ -678,23 +679,20 @@ public class MessageService extends Service {
 						continue;
 					}
 					String mj = new String(d.getBody());
-					//MessageHeader header = MessageFactory.parserHeader(mj);
-					MessageJsonFormat msg = MessageFactory.parser(mj);
+					MessageJsonFormat msg = MessageJsonFormat.parseJsonObject(mj);
 					Log.i(TAG, "Get message " + mj);
 					if (msg.mBody == null) {
 						continue;
 					}
-					if (msg.mHead.type == MessageHeader.HeaderType.REQUEST.ordinal()) {
-						//BaseMessage bm = MessageFactory.parseRequestFromJSON(msg.mBody);
-
+					if (msg.mHead.type == MessageHeader.HeaderType.REQUEST) {
 						// If send back message success, means caller waiting
 						// for this response.
 						// Others no caller waiting for this response, it's
 						// unsolicited message.
 						fireUnsolicitedMessage(msg.mBody);
 					} else {
-						//fireBackMessage(MessageFactory.parseResponseFromJSON(header.body),
-						fireBackMessage(msg.mBody,Notification.Result.SUCCESS);
+						RspMessageJsonFormat rspMsg = RspMessageJsonFormat.parseJsonObject(mj);
+						fireBackMessage(rspMsg.mBody,Notification.Result.SUCCESS);
 					}
 					// Send acknowledge
 					getChannel().basicAck(d.getEnvelope().getDeliveryTag(),

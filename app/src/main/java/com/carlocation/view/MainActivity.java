@@ -29,6 +29,7 @@ import com.carlocation.comm.messaging.GlidingPathMessage;
 import com.carlocation.comm.messaging.IMMessage;
 import com.carlocation.comm.messaging.IMTxtMessage;
 import com.carlocation.comm.messaging.Location;
+import com.carlocation.comm.messaging.LocationCell;
 import com.carlocation.comm.messaging.MessageResponseStatus;
 import com.carlocation.comm.messaging.MessageType;
 import com.carlocation.comm.messaging.Notification;
@@ -233,7 +234,7 @@ public class MainActivity extends ActionBarActivity implements
         protected Void doInBackground(String... params) {
 
 
-            //demoSendReq();
+            demoSendReq();
             demoSendRep();
 
             return null;
@@ -242,11 +243,17 @@ public class MainActivity extends ActionBarActivity implements
 
     //Demo used only
     public void demoSendRep(){
-        List<Long> toArray  = new ArrayList<Long>();
-        toArray.add(567l);
-        toArray.add(789l);
+        long transactionId = UserService.getTransactionId();
+        String terminalId = UserService.getTerminalId();
+        TerminalType terminalType = UserService.getTerminalType();
+        ArrayList<LocationCell> myLocation = UserService.getMyLocation();
+        float mySpeed = UserService.getMySpeed();
 
-        byte[] bArray = {(byte) 1, (byte) 2, (byte) 3};
+        List<String> toTerminalId = new ArrayList<>();
+        toTerminalId.add("t1");
+        toTerminalId.add("t2");
+
+
 
         ArrayList<Location> array = new ArrayList<Location>();
         array.add(new Location(321.123, 456.654));
@@ -259,16 +266,27 @@ public class MainActivity extends ActionBarActivity implements
              * Print out  JSON format of response messages
              */
 
-            String terminalId = GlobalHolder.getInstance().getTerminalId();
-            GlidingPathMessage glideMsg = new GlidingPathMessage(123, ActionType.ACTION_QUERY,terminalId, "title", 7, array);
-            Log.e(LOG_TAG,"JSON format of GlideMsg is: "+glideMsg.translate());
-
+            //GlidePathMessage
+            GlidingPathMessage glideMsg = new GlidingPathMessage(123, ActionType.ACTION_QUERY,
+                    terminalId, "title", 7, array);
+            Log.d(LOG_TAG,"JSON format of GlideMsg is:       "+glideMsg.translate());
             String recvMsg = glideMsg.translate();
             GlidingPathMessage recvGlide = (GlidingPathMessage)GlidingPathMessage.parseJsonObject(recvMsg);
-            Log.e(LOG_TAG,"Parse JSON format of GlideMsg is: "+recvGlide.translate());
+            Log.d(LOG_TAG,"Parse JSON format of GlideMsg is: "+recvGlide.translate());
+            if (recvGlide!=glideMsg) {
+                Log.e(LOG_TAG,"demoSendRep():Recv glide msg is not be parsed correctly!");
+            }
 
-            //RestrictedAreaMessage warnMsg = new RestrictedAreaMessage(123,terminalId,ActionType.ACTION_QUERY,12,array);
-            //TaskAssignmentMessage taskMsg = new TaskAssignmentMessage(123,terminalId,ActionType.ACTION_QUERY,(short)1,null);
+            //IMtxtMsg
+            IMTxtMessage txtMsg = new IMTxtMessage(transactionId,terminalId,toTerminalId,
+                    RankType.EMERGENCY,"Hello,I'm a txt MSG!");
+            Log.d(LOG_TAG,"JSON format of ImTxtMsg is:       "+txtMsg.translate());
+            String recvtxtMsg = txtMsg.translate();
+            IMTxtMessage recvTxt = (IMTxtMessage)IMTxtMessage.parseJsonObject(recvtxtMsg);
+            Log.d(LOG_TAG,"Parse JSON format of ImTxtMsg is: "+recvTxt.translate());
+            if (recvTxt!=txtMsg) {
+                Log.e(LOG_TAG,"demoSendRep():Recv txt msg is not be parsed correctly!");
+            }
 
             //MessageResponseStatus status = MessageResponseStatus.SUCCESS;
             //mUserService.responActionAssign(glideMsg,status);
@@ -283,26 +301,23 @@ public class MainActivity extends ActionBarActivity implements
     //Demo used only
     public void demoSendReq(){
 
-        List<Long> toArray  = new ArrayList<Long>();
-        toArray.add(567l);
-        toArray.add(789l);
-
         byte[] bArray = {(byte) 1, (byte) 2, (byte) 3};
 
         List<String> toTerminalId = new ArrayList<>();
-        toTerminalId.add("T2");
+        toTerminalId.add("t1");
+        toTerminalId.add("t2");
 
 
         if (mConnState == ConnectionState.CONNECTED){
-            mUserService.sendMyStatus(StatusMessage.StatusMsgType.STATUS_ONLINE);
-            mUserService.sendMyLocation();
+            //mUserService.sendMyStatus(StatusMessage.StatusMsgType.STATUS_ONLINE);
+            //mUserService.sendMyLocation();
             mUserService.sendImTxtMsg(toTerminalId, RankType.EMERGENCY,"IM txt msg");
-            mUserService.sendImVoiceMsg(toTerminalId,bArray);
-            mUserService.startWorkMsg((short) 1);
-            mUserService.finishWorkMsg((short) 1);
-            mUserService.queryWorkById((short) 1);
+            //mUserService.sendImVoiceMsg(toTerminalId,bArray);
+            //mUserService.startWorkMsg((short) 1);
+            //mUserService.finishWorkMsg((short) 1);
+            //mUserService.queryWorkById((short) 1);
             mUserService.queryGlidePathById(1);
-            mUserService.queryWarnAreaById(1);
+            //mUserService.queryWarnAreaById(1);
 
         }
     }

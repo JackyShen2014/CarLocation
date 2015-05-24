@@ -12,7 +12,7 @@ import java.io.StringReader;
 public class MessageHeader {
 	private final static String LOG_TAG = "MessageHeader";
 
-	public int type;
+	public HeaderType type;
 	public int version;
 
 
@@ -20,23 +20,39 @@ public class MessageHeader {
 		super();
 	}
 
-	public MessageHeader(int type, int version) {
-		super();
+	public MessageHeader(HeaderType type, int version) {
 		this.type = type;
 		this.version = version;
 	}
 
-
 	public enum HeaderType {
-		REQUEST,
-		RESPONSE
+		REQUEST(0),
+		RESPONSE(1),
+		UNKNOWN(-1);
+
+		private int code;
+
+		HeaderType(int code) {
+			this.code = code;
+		}
+
+		public static HeaderType valueOf(int code){
+			switch (code){
+				case 0:
+					return REQUEST;
+				case 1:
+					return RESPONSE;
+				default:return UNKNOWN;
+			}
+
+		}
 	}
 
 	public JSONObject translateJsonObject(){
 		try {
 			JSONObject object = new JSONObject();
 
-			object.put("type",this.type);
+			object.put("type",this.type.ordinal());
 			object.put("version",this.version);
 
 			return object;
@@ -56,7 +72,7 @@ public class MessageHeader {
 			while (reader.hasNext()){
 				String tagName = reader.nextName();
 				if (tagName.equals("type")) {
-					msgHeader.type = reader.nextInt();
+					msgHeader.type = HeaderType.valueOf(reader.nextInt());
 				}else if (tagName.equals("version")) {
 					msgHeader.version = reader.nextInt();
 				}

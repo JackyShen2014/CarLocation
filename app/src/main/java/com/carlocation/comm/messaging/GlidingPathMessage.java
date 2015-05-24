@@ -104,7 +104,7 @@ public class GlidingPathMessage extends BaseMessage {
 				}else if (tagName.equals("mGlidePathId")) {
 					glideMsg.mGlidePathId = reader.nextInt();
 				}else if (tagName.equals("mLocationArray")){
-					glideMsg.mLocationArray = readLocationArray(reader.nextString());
+					glideMsg.mLocationArray = readLocationArray(reader);
 				}else{
 					reader.skipValue();
 				}
@@ -125,14 +125,13 @@ public class GlidingPathMessage extends BaseMessage {
 		return null;
 	}
 
-	public static List<Location> readLocationArray(String json){
+	public static List<Location> readLocationArray(JsonReader reader){
 		List<Location> locationList = new ArrayList<>();
-		JsonReader reader = new JsonReader(new StringReader(json));
 		try {
 
 			reader.beginArray();
 			while (reader.hasNext()){
-				Location lc = Location.parseLocation(reader.nextString());
+				Location lc = Location.parseLocation(reader);
 				locationList.add(lc);
 			}
 			reader.endArray();
@@ -140,12 +139,6 @@ public class GlidingPathMessage extends BaseMessage {
 
 		} catch (IOException e) {
 			e.printStackTrace();
-		}finally {
-			try {
-				reader.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 		}
 		return null;
 	}

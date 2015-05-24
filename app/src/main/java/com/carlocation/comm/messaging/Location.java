@@ -32,9 +32,8 @@ public class Location {
                 + "]";
     }
 
-    public static Location parseLocation(String json){
+    public static Location parseLocation(JsonReader reader){
         Location lc =  new Location();
-        JsonReader reader = new JsonReader(new StringReader(json));
         try{
             reader.beginObject();
             while (reader.hasNext()){
@@ -51,12 +50,6 @@ public class Location {
             return lc;
         } catch (IOException e) {
             e.printStackTrace();
-        }finally {
-            try {
-                reader.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
         return null;
     }

@@ -7,6 +7,22 @@ package com.carlocation.comm.messaging;
  * @author Jacky Shen
  */
 public enum  RankType {
-    EMERGENCY,
-    NORMAL,
+    EMERGENCY(0),
+    NORMAL(1),
+    UNKNOWN(-1);
+
+    private int code;
+
+    RankType(int code) {
+        this.code = code;
+    }
+
+    public static RankType valueOf(int code){
+        switch (code){
+            case 0: return EMERGENCY;
+            case 1: return NORMAL;
+            default:return UNKNOWN;
+        }
+
+    }
 }

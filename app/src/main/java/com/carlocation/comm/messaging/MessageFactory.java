@@ -12,88 +12,19 @@ public class MessageFactory {
 
 
 	public static String addHeader(BaseMessage message) {
-		JSONObject object = new JSONObject();
-		conHeader(object, new MessageHeader(0, 1));
-		try {
-			object.put("body", message.translateJsonObject());
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		return object.toString();
 
+		MessageHeader msgHead = new MessageHeader(MessageHeader.HeaderType.REQUEST,1);
+		MessageJsonFormat msg = new MessageJsonFormat(msgHead,message);
+
+		return msg.translateJsonObject().toString();
 	}
 
 	public static String addHeader(ResponseMessage message) {
-		JSONObject object = new JSONObject();
-		conHeader(object, new MessageHeader(1, 1));
-		try {
-			object.put("body", message.translate());
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		return object.toString();
+		MessageHeader msgHead = new MessageHeader(MessageHeader.HeaderType.RESPONSE,1);
+		RspMessageJsonFormat msg = new RspMessageJsonFormat(msgHead,message);
+
+		return msg.translateJsonObject().toString();
 	}
-
-	private static JSONObject conHeader(JSONObject object, MessageHeader header) {
-		JSONObject h = new JSONObject();
-		try {
-			h.put("type", header.type);
-			h.put("version", header.version);
-			object.put("header", h);
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		return object;
-	}
-
-	//TODO JSON
-	public static MessageJsonFormat parser (String json){
-
-
-		return new MessageJsonFormat();
-	}
-
-	/*public static MessageHeader parserHeader(String json) {
-		if (json.startsWith("error")) {
-			//TODO Should check the validation of json format.
-			return null;
-		}
-		MessageHeader h = new MessageHeader();
-		JsonReader reader = new JsonReader(new StringReader(json));
-		try {
-			reader.beginObject();
-			while (reader.hasNext()) {
-				String name = reader.nextName();
-				if (name.equals("header")) {
-					String headerName = reader.nextName();
-					reader.beginObject();
-					while (reader.hasNext()) {
-						if (headerName.equals("type")) {
-							h.type = reader.nextInt();
-						} else if (headerName.equals("version")) {
-							h.version = reader.nextInt();
-						}
-					}
-					reader.endObject();
-
-				} else if (name.equals("body")) {
-					//h.body = reader.nextString();
-				} else {
-					reader.skipValue();
-				}
-			}
-			reader.endObject();
-		} catch (Exception e) {
-
-		} finally {
-			try {
-				reader.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		return h;
-	}*/
 
 	public static BaseMessage parseRequestFromJSON(String json) {
 		JsonReader reader = new JsonReader(new StringReader(json));

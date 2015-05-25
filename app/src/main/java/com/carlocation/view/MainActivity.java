@@ -12,6 +12,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.JsonReader;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,6 +31,8 @@ import com.carlocation.comm.messaging.IMMessage;
 import com.carlocation.comm.messaging.IMTxtMessage;
 import com.carlocation.comm.messaging.Location;
 import com.carlocation.comm.messaging.LocationCell;
+import com.carlocation.comm.messaging.MessageFactory;
+import com.carlocation.comm.messaging.MessageJsonFormat;
 import com.carlocation.comm.messaging.MessageResponseStatus;
 import com.carlocation.comm.messaging.MessageType;
 import com.carlocation.comm.messaging.Notification;
@@ -39,6 +42,8 @@ import com.carlocation.comm.messaging.StatusMessage;
 import com.carlocation.comm.messaging.TaskAssignmentMessage;
 import com.carlocation.comm.messaging.TerminalType;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -270,21 +275,32 @@ public class MainActivity extends ActionBarActivity implements
             GlidingPathMessage glideMsg = new GlidingPathMessage(123, ActionType.ACTION_QUERY,
                     terminalId, "title", 7, array);
             Log.d(LOG_TAG,"JSON format of GlideMsg is:       "+glideMsg.translate());
+
             String recvMsg = glideMsg.translate();
             GlidingPathMessage recvGlide = (GlidingPathMessage)GlidingPathMessage.parseJsonObject(recvMsg);
-            Log.d(LOG_TAG,"Parse JSON format of GlideMsg is: "+recvGlide.translate());
-            if (recvGlide!=glideMsg) {
+            Log.d(LOG_TAG, "Parse JSON format of GlideMsg is: " + recvGlide.translate());
+            if (!recvGlide.equals(glideMsg)) {
                 Log.e(LOG_TAG,"demoSendRep():Recv glide msg is not be parsed correctly!");
             }
+
+
+
+
+            //MessageJsonFormat
+            String sendGlide = MessageFactory.addHeader(glideMsg);
+            Log.e(LOG_TAG, "sendGlide()JSON: " + sendGlide);
+            //String recv = MessageJsonFormat.parseJsonObject(sendGlide).translateJsonObject().toString();
+            //Log.e(LOG_TAG,"recvGlide()JSON: "+recv);
+
 
             //IMtxtMsg
             IMTxtMessage txtMsg = new IMTxtMessage(transactionId,terminalId,toTerminalId,
                     RankType.EMERGENCY,"Hello,I'm a txt MSG!");
-            Log.d(LOG_TAG,"JSON format of ImTxtMsg is:       "+txtMsg.translate());
+            Log.d(LOG_TAG, "JSON format of ImTxtMsg is:       " + txtMsg.translate());
             String recvtxtMsg = txtMsg.translate();
             IMTxtMessage recvTxt = (IMTxtMessage)IMTxtMessage.parseJsonObject(recvtxtMsg);
-            Log.d(LOG_TAG,"Parse JSON format of ImTxtMsg is: "+recvTxt.translate());
-            if (recvTxt!=txtMsg) {
+            Log.d(LOG_TAG, "Parse JSON format of ImTxtMsg is: " + recvTxt.translate());
+            if (!recvTxt.equals(txtMsg)) {
                 Log.e(LOG_TAG,"demoSendRep():Recv txt msg is not be parsed correctly!");
             }
 
@@ -311,7 +327,7 @@ public class MainActivity extends ActionBarActivity implements
         if (mConnState == ConnectionState.CONNECTED){
             //mUserService.sendMyStatus(StatusMessage.StatusMsgType.STATUS_ONLINE);
             //mUserService.sendMyLocation();
-            mUserService.sendImTxtMsg(toTerminalId, RankType.EMERGENCY,"IM txt msg");
+            mUserService.sendImTxtMsg(toTerminalId, RankType.EMERGENCY, "IM txt msg");
             //mUserService.sendImVoiceMsg(toTerminalId,bArray);
             //mUserService.startWorkMsg((short) 1);
             //mUserService.finishWorkMsg((short) 1);

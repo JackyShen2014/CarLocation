@@ -64,8 +64,7 @@ public class MessageHeader {
 		return null;
 	}
 
-	public static MessageHeader paseJsonObject(String json){
-		JsonReader reader = new JsonReader(new StringReader(json));
+	public static MessageHeader paseJsonObject(JsonReader reader){
 		MessageHeader msgHeader = new MessageHeader();
 		try {
 			reader.beginObject();

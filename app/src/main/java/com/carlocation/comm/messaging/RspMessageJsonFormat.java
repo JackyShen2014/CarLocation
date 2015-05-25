@@ -51,7 +51,7 @@ public class RspMessageJsonFormat {
             while (reader.hasNext()){
                 String tagName = reader.nextName();
                 if(tagName.equals("mHead")){
-                    msg.mHead = MessageHeader.paseJsonObject(reader.toString());
+                    msg.mHead = MessageHeader.paseJsonObject(reader);
                 }else if (tagName.equals("mBody")){
                     msg.mBody = parseRspMessage(reader);
 

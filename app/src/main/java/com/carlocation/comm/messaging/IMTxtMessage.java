@@ -62,8 +62,7 @@ public class IMTxtMessage extends IMMessage {
         return null;
     }
 
-    public static BaseMessage parseJsonObject(String json){
-        JsonReader reader = new JsonReader(new StringReader(json));
+    public static BaseMessage parseJsonObject(JsonReader reader){
         IMTxtMessage txtMsg = new IMTxtMessage();
 
         try {
@@ -94,17 +93,11 @@ public class IMTxtMessage extends IMMessage {
             return txtMsg;
         } catch (IOException e) {
             e.printStackTrace();
-        }finally {
-            try {
-                reader.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
         return null;
     }
 
-    private static List<String> readListStr(JsonReader reader) {
+    public static List<String> readListStr(JsonReader reader) {
         try{
             List<String> list = new ArrayList<>();
             reader.beginArray();

@@ -91,29 +91,24 @@ public class DemoActivity extends ListActivity implements NativeServInterface {
         mList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                switch (position){
-                    case 0:
-                        break;
-                    case 3:
-                        //getTerminalId()
-                        String tId  = mUserService.getTerminalId();
-                        Toast.makeText(DemoActivity.this,tId,Toast.LENGTH_SHORT).show();
-                        break;
-                    case 12:
-                        //Send ImTxtMsg
-                        List<String> toId = new ArrayList<>();
-                        String toTerminalId;
-                        if (mUserService.getTerminalId().equals("t1")) {
-                            toTerminalId = "t2";
-                        }else {
-                            toTerminalId = "t1";
-                        }
-                        toId.add(toTerminalId);
-                        mUserService.sendImTxtMsg(toId,RankType.NORMAL,"Hello!I'm "+mUserService.getTerminalId());
-                        break;
-                    default:break;
+                String item = mItems.get(position);
+                if (item.equals("getTerminalId")){
+                    //getTerminalId()
+                    String tId  = mUserService.getTerminalId();
+                    Toast.makeText(DemoActivity.this,tId,Toast.LENGTH_SHORT).show();
+                }else if (item.equals("sendImTxtMsg")) {
+                    //Send ImTxtMsg
+                    List<String> toId = new ArrayList<>();
+                    String toTerminalId;
+                    if (mUserService.getTerminalId().equals("t1")) {
+                        toTerminalId = "t2";
+                    }else {
+                        toTerminalId = "t1";
+                    }
+                    toId.add(toTerminalId);
+                    mUserService.sendImTxtMsg(toId,RankType.NORMAL,"Hello!I'm "+mUserService.getTerminalId());
                 }
+
             }
         });
 
@@ -212,7 +207,7 @@ public class DemoActivity extends ListActivity implements NativeServInterface {
                 Message message = Message.obtain(mHandler, HANDLE_NOTIFICATION, notif);
                 mHandler.sendMessage(message);
             } else {
-                Log.e(LOG_TAG, "onResponse():MainActivity has been destroyed,no alive handler set to handle message!");
+                Log.e(LOG_TAG, "forward():DemoActivity has been destroyed,no alive handler set to handle message!");
                 //TODO Add more action to save pending msg and re-handle after activity restart.
             }
         }

@@ -62,8 +62,7 @@ public class MessageJsonFormat {
                 if(tagName.equals("mHead")){
                     msg.mHead = MessageHeader.paseJsonObject(reader);
                 }else if (tagName.equals("mBody")){
-                    msg.mBody = parseBaseMsg(reader);
-
+                    msg.mBody = parseBaseMsg(reader,json);
                 }else {
                     reader.skipValue();
                 }
@@ -86,62 +85,120 @@ public class MessageJsonFormat {
     /**
      * Check the msg_type and then parse and return the relative subclass of BaseMessage.
      * @param reader
+     * @param json
      * @return
      */
-    public static BaseMessage parseBaseMsg(JsonReader reader){
-        //FIXME JSON
-        JsonReader temp = reader;
+    public static BaseMessage parseBaseMsg(JsonReader reader, String json){
         try {
-            BaseMessage baseMsg = null;
-            temp.beginObject();
-            while (temp.hasNext()){
-                String tagName = temp.nextName();
+            reader.beginObject();
+            while (reader.hasNext()){
+                String tagName = reader.nextName();
                 if (tagName.equals("mMessageType")) {
-                    int msgType = temp.nextInt();
-                    baseMsg = parseBaseMsgByType(msgType,reader);
+                    int msgType = reader.nextInt();
+                    return parseBaseMsgByType(msgType,json);
                 }else {
-                    temp.skipValue();
+                    reader.skipValue();
                 }
             }
-            temp.endObject();
-            return baseMsg;
+            reader.endObject();
 
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
+        }
+
+        return null;
+    }
+
+    private static BaseMessage parseBaseMsgByType(int msgType, String json) {
+        JsonReader reader = new JsonReader(new StringReader(json));
+        try {
+            reader.beginObject();
+            while (reader.hasNext()){
+                String tagName = reader.nextName();
+                if(tagName.equals("mHead")){
+                    reader.skipValue();
+                }else if (tagName.equals("mBody")){
+                    switch (msgType) {
+                        case LOCATION_MESSAGE:
+
+                            break;
+                        case IM_MESSAGE:
+                            int imMsgType = getImTypeFromStr(json);
+                            if (imMsgType == IMMessage.IMMsgType.IM_TXT_MSG.ordinal()) {
+                                return IMTxtMessage.parseJsonObject(reader);
+                            }else if (imMsgType == IMMessage.IMMsgType.IM_VOICE_MSG.ordinal()) {
+                                return IMVoiceMessage.parseJsonObject(reader);
+                            }
+                            break;
+                        case TASK_MESSAGE:
+                            break;
+                        case GLIDE_MESSAGE:
+                            return GlidingPathMessage.parseJsonObject(reader);
+                        case WARN_MESSAGE:
+                            break;
+                        case STATUS_MESSAGE:
+                            break;
+                        default:
+                            break;
+                    }
+                }else {
+                    reader.skipValue();
+                }
+            }
+            reader.endObject();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
             try {
-                temp.close();
+                reader.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-
         return null;
     }
 
-    private static BaseMessage parseBaseMsgByType(int msgType, JsonReader reader) {
-
-        switch (msgType) {
-            case LOCATION_MESSAGE:
-
-                break;
-            case IM_MESSAGE:
-                break;
-            case TASK_MESSAGE:
-                break;
-            case GLIDE_MESSAGE:
-                GlidingPathMessage glideMsg = (GlidingPathMessage) GlidingPathMessage.parseJsonObject(reader.toString());
-                return glideMsg;
-            case WARN_MESSAGE:
-                break;
-            case STATUS_MESSAGE:
-                break;
-            default:
-                break;
+    private static int getImTypeFromStr(String json) {
+        JsonReader reader = new JsonReader(new StringReader(json));
+        try {
+            reader.beginObject();
+            while (reader.hasNext()){
+                String tagName = reader.nextName();
+                if (tagName.equals("mBody")){
+                    return parseImType(reader);
+                }else {
+                    reader.skipValue();
+                }
+            }
+            reader.endObject();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-
-        return null;
+        return -1;
     }
 
+    private static int parseImType(JsonReader reader) {
+        try {
+            reader.beginObject();
+            while (reader.hasNext()){
+                String tagName = reader.nextName();
+                if (tagName.equals("mImMsgType")) {
+                    return reader.nextInt();
+                } else {
+                    reader.skipValue();
+                }
+            }
+            reader.endObject();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
 
 }

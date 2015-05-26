@@ -29,6 +29,7 @@ import com.carlocation.comm.messaging.AuthMessage;
 import com.carlocation.comm.messaging.GlidingPathMessage;
 import com.carlocation.comm.messaging.IMMessage;
 import com.carlocation.comm.messaging.IMTxtMessage;
+import com.carlocation.comm.messaging.IMVoiceMessage;
 import com.carlocation.comm.messaging.Location;
 import com.carlocation.comm.messaging.LocationCell;
 import com.carlocation.comm.messaging.MessageFactory;
@@ -239,15 +240,15 @@ public class MainActivity extends ActionBarActivity implements
         protected Void doInBackground(String... params) {
 
 
-            demoSendReq();
-            demoSendRep();
+            //demoSendReq();
+            //demoSendResp();
 
             return null;
         }
     }
 
     //Demo used only
-    public void demoSendRep(){
+    public void demoSendResp(){
         long transactionId = UserService.getTransactionId();
         String terminalId = UserService.getTerminalId();
         TerminalType terminalType = UserService.getTerminalType();
@@ -257,6 +258,8 @@ public class MainActivity extends ActionBarActivity implements
         List<String> toTerminalId = new ArrayList<>();
         toTerminalId.add("t1");
         toTerminalId.add("t2");
+
+        byte[] voiceData = new byte[]{1,2,3,4};
 
 
 
@@ -275,34 +278,43 @@ public class MainActivity extends ActionBarActivity implements
             GlidingPathMessage glideMsg = new GlidingPathMessage(123, ActionType.ACTION_QUERY,
                     terminalId, "title", 7, array);
             Log.d(LOG_TAG,"JSON format of GlideMsg is:       "+glideMsg.translate());
-
-            String recvMsg = glideMsg.translate();
-            GlidingPathMessage recvGlide = (GlidingPathMessage)GlidingPathMessage.parseJsonObject(recvMsg);
-            Log.d(LOG_TAG, "Parse JSON format of GlideMsg is: " + recvGlide.translate());
-            if (!recvGlide.equals(glideMsg)) {
-                Log.e(LOG_TAG,"demoSendRep():Recv glide msg is not be parsed correctly!");
-            }
-
-
-
-
-            //MessageJsonFormat
+            //GlidePathMessage MessageJsonFormat
             String sendGlide = MessageFactory.addHeader(glideMsg);
-            Log.e(LOG_TAG, "sendGlide()JSON: " + sendGlide);
-            //String recv = MessageJsonFormat.parseJsonObject(sendGlide).translateJsonObject().toString();
-            //Log.e(LOG_TAG,"recvGlide()JSON: "+recv);
+            Log.d(LOG_TAG, "sendGlide()JSON: " + sendGlide);
+            String recvGlide = MessageJsonFormat.parseJsonObject(sendGlide).translateJsonObject().toString();
+            Log.d(LOG_TAG, "recvGlide()JSON: "+recvGlide);
+            if (!recvGlide.equals(sendGlide)) {
+                Log.e(LOG_TAG,"demoSendResp(): glide msg parsed failed!");
+            }
 
 
             //IMtxtMsg
             IMTxtMessage txtMsg = new IMTxtMessage(transactionId,terminalId,toTerminalId,
                     RankType.EMERGENCY,"Hello,I'm a txt MSG!");
             Log.d(LOG_TAG, "JSON format of ImTxtMsg is:       " + txtMsg.translate());
-            String recvtxtMsg = txtMsg.translate();
-            IMTxtMessage recvTxt = (IMTxtMessage)IMTxtMessage.parseJsonObject(recvtxtMsg);
-            Log.d(LOG_TAG, "Parse JSON format of ImTxtMsg is: " + recvTxt.translate());
-            if (!recvTxt.equals(txtMsg)) {
-                Log.e(LOG_TAG,"demoSendRep():Recv txt msg is not be parsed correctly!");
+            //IMtxtMsg MessageJsonFormat
+            String sendTxt = MessageFactory.addHeader(txtMsg);
+            Log.d(LOG_TAG, "sendTxt()JSON: " + sendTxt);
+            String recvTxt = MessageJsonFormat.parseJsonObject(sendTxt).translateJsonObject().toString();
+            Log.d(LOG_TAG, "recvTxt()JSON: " + recvTxt);
+            if (!recvTxt.equals(sendTxt)) {
+                Log.e(LOG_TAG,"demoSendResp(): txt msg parsed failed!");
             }
+
+
+            //IMvoiceMsg
+            IMVoiceMessage voiceMsg =  new IMVoiceMessage(transactionId,terminalId,toTerminalId,voiceData);
+            Log.d(LOG_TAG, "JSON format of ImvoiceMsg is:       " + voiceMsg.translate());
+            //IMtxtMsg MessageJsonFormat
+            String sendVoice = MessageFactory.addHeader(voiceMsg);
+            Log.d(LOG_TAG, "sendVoice()JSON: " + sendVoice);
+            String recvVoice = MessageJsonFormat.parseJsonObject(sendVoice).translateJsonObject().toString();
+            Log.d(LOG_TAG, "recvVoice()JSON: " + recvVoice);
+            if (!recvVoice.equals(voiceMsg)) {
+                Log.e(LOG_TAG,"demoSendResp(): voice msg parsed failed!");
+            }
+
+
 
             //MessageResponseStatus status = MessageResponseStatus.SUCCESS;
             //mUserService.responActionAssign(glideMsg,status);

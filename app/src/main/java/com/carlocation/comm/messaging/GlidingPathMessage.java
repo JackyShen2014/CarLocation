@@ -82,8 +82,7 @@ public class GlidingPathMessage extends BaseMessage {
 		return null;
 	}
 
-	public static BaseMessage parseJsonObject(String json) {
-		JsonReader reader = new JsonReader(new StringReader(json));
+	public static BaseMessage parseJsonObject(JsonReader reader) {
 		GlidingPathMessage glideMsg = new GlidingPathMessage();
 		try{
 			reader.beginObject();
@@ -114,14 +113,7 @@ public class GlidingPathMessage extends BaseMessage {
 			return glideMsg;
 		} catch (IOException e) {
 			e.printStackTrace();
-		}finally {
-			try {
-				reader.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 		}
-
 		return null;
 	}
 

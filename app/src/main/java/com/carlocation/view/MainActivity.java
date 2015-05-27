@@ -32,6 +32,7 @@ import com.carlocation.comm.messaging.IMTxtMessage;
 import com.carlocation.comm.messaging.IMVoiceMessage;
 import com.carlocation.comm.messaging.Location;
 import com.carlocation.comm.messaging.LocationCell;
+import com.carlocation.comm.messaging.LocationMessage;
 import com.carlocation.comm.messaging.MessageFactory;
 import com.carlocation.comm.messaging.MessageJsonFormat;
 import com.carlocation.comm.messaging.MessageResponseStatus;
@@ -241,7 +242,7 @@ public class MainActivity extends ActionBarActivity implements
 
 
             //demoSendReq();
-            //demoSendResp();
+            demoSendResp();
 
             return null;
         }
@@ -263,9 +264,15 @@ public class MainActivity extends ActionBarActivity implements
 
 
 
-        ArrayList<Location> array = new ArrayList<Location>();
-        array.add(new Location(321.123, 456.654));
-        array.add(new Location(789.987, 890.098));
+        List<Location> locarray = new ArrayList<>();
+        locarray.add(new Location(321.123, 456.654));
+        locarray.add(new Location(789.987, 890.098));
+
+        List<LocationCell> locCellArray = new ArrayList<>();
+        LocationCell cell1 = new LocationCell(terminalId,TerminalType.TERMINAL_CAR,locarray.get(0),15.02f);
+        LocationCell cell2 = new LocationCell(terminalId,TerminalType.TERMINAL_PLANE, locarray.get(1),16.03f);
+        locCellArray.add(cell1);
+        locCellArray.add(cell2);
 
         if (mConnState == ConnectionState.CONNECTED) {
 
@@ -276,7 +283,7 @@ public class MainActivity extends ActionBarActivity implements
 
             //GlidePathMessage
             GlidingPathMessage glideMsg = new GlidingPathMessage(123, ActionType.ACTION_QUERY,
-                    terminalId, "title", 7, array);
+                    terminalId, "title", 7, locarray);
             Log.d(LOG_TAG,"JSON format of GlideMsg is:       "+glideMsg.translate());
             //GlidePathMessage MessageJsonFormat
             String sendGlide = MessageFactory.addHeader(glideMsg);
@@ -310,10 +317,59 @@ public class MainActivity extends ActionBarActivity implements
             Log.d(LOG_TAG, "sendVoice()JSON: " + sendVoice);
             String recvVoice = MessageJsonFormat.parseJsonObject(sendVoice).translateJsonObject().toString();
             Log.d(LOG_TAG, "recvVoice()JSON: " + recvVoice);
-            if (!recvVoice.equals(voiceMsg)) {
-                Log.e(LOG_TAG,"demoSendResp(): voice msg parsed failed!");
+            if (!recvVoice.equals(sendVoice)) {
+                Log.e(LOG_TAG,"demoSendResp(): Voice msg parsed failed!");
             }
 
+            //LocationMsg
+            LocationMessage locMsg = new LocationMessage(transactionId,terminalId,locCellArray);
+            Log.d(LOG_TAG, "JSON format of locationMsg is:       " + locMsg.translate());
+            //LocationMsg MessageJsonFormat
+            String sendLoc = MessageFactory.addHeader(locMsg);
+            Log.d(LOG_TAG, "sendLoc()JSON: " + sendLoc);
+            String recvLoc = MessageJsonFormat.parseJsonObject(sendLoc).translateJsonObject().toString();
+            Log.d(LOG_TAG, "recvLoc()JSON: " + recvLoc);
+            if (!recvLoc.equals(sendLoc)) {
+                Log.e(LOG_TAG,"demoSendResp(): location msg parsed failed!");
+            }
+
+            //RestrictedAreaMsg
+            RestrictedAreaMessage warnMsg = new RestrictedAreaMessage(transactionId,terminalId,
+                    ActionType.ACTION_QUERY,10,locarray);
+            Log.d(LOG_TAG, "JSON format of warnMsg is:       " + warnMsg.translate());
+            //RestrictedAreaMsg MessageJsonFormat
+            String sendWarn = MessageFactory.addHeader(warnMsg);
+            Log.d(LOG_TAG, "sendWarn()JSON: " + sendWarn);
+            String recvWarn = MessageJsonFormat.parseJsonObject(sendWarn).translateJsonObject().toString();
+            Log.d(LOG_TAG, "recvWarn()JSON: " + recvWarn);
+            if (!recvWarn.equals(sendWarn)) {
+                Log.e(LOG_TAG,"demoSendResp(): RestrictedAreaMsg msg parsed failed!");
+            }
+
+            //StatusMsg
+            StatusMessage statMsg = new StatusMessage(transactionId,terminalId, StatusMessage.StatusMsgType.STATUS_ONLINE);
+            Log.d(LOG_TAG, "JSON format of statMsg is:       " + statMsg.translate());
+            //StatusMsg MessageJsonFormat
+            String sendStatus = MessageFactory.addHeader(statMsg);
+            Log.d(LOG_TAG, "sendStatus()JSON: " + sendStatus);
+            String recvStatus = MessageJsonFormat.parseJsonObject(sendStatus).translateJsonObject().toString();
+            Log.d(LOG_TAG, "recvStatus()JSON: " + recvStatus);
+            if (!recvStatus.equals(sendStatus)) {
+                Log.e(LOG_TAG,"demoSendResp(): Status msg parsed failed!");
+            }
+
+            //TaskMsg
+            TaskAssignmentMessage taskMsg = new TaskAssignmentMessage(transactionId,terminalId,
+                    ActionType.ACTION_QUERY,(short)11,"This is task content!");
+            Log.d(LOG_TAG, "JSON format of taskMsg is:       " + taskMsg.translate());
+            //taskMsg MessageJsonFormat
+            String sendTask = MessageFactory.addHeader(taskMsg);
+            Log.d(LOG_TAG, "sendTask()JSON: " + sendTask);
+            String recvTask = MessageJsonFormat.parseJsonObject(sendTask).translateJsonObject().toString();
+            Log.d(LOG_TAG, "recvTask()JSON: " + recvTask);
+            if (!recvTask.equals(sendTask)) {
+                Log.e(LOG_TAG,"demoSendResp(): Task Assignment msg parsed failed!");
+            }
 
 
             //MessageResponseStatus status = MessageResponseStatus.SUCCESS;

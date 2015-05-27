@@ -1,9 +1,12 @@
 package com.carlocation.comm.messaging;
 
+import android.util.JsonReader;
 import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.IOException;
 
 /**
  * Created by 28851620 on 5/5/2015.
@@ -19,6 +22,10 @@ public class LocationCell {
     public Location mLocation;
     public float mSpeed;
 
+    public LocationCell() {
+
+    }
+
     public LocationCell(String mTerminalId, TerminalType mTerminalType,
                         Location mLocation, float mSpeed) {
         this.mTerminalId = mTerminalId;
@@ -26,6 +33,8 @@ public class LocationCell {
         this.mLocation = mLocation;
         this.mSpeed = mSpeed;
     }
+
+
 
     /**
      * Translate Class attributes to json format for network transmit.
@@ -67,6 +76,34 @@ public class LocationCell {
             Log.e(LOG_TAG, "JSONException accured!");
             e.printStackTrace();
         }
+        return null;
+    }
+
+    public static LocationCell parseJsonObject(JsonReader reader){
+        LocationCell locationCell = new LocationCell();
+
+        try {
+            reader.beginObject();
+            while (reader.hasNext()){
+                String tagName = reader.nextName();
+                if (tagName.equals("mTerminalId")) {
+                    locationCell.mTerminalId = reader.nextString();
+                }else if (tagName.equals("mTerminalType")) {
+                    locationCell.mTerminalType = TerminalType.valueOf(reader.nextInt());
+                }else if (tagName.equals("mLocation")) {
+                    locationCell.mLocation = Location.parseLocation(reader);
+                }else if (tagName.equals("mSpeed")) {
+                    locationCell.mSpeed = Float.parseFloat(reader.nextString());
+                }else {
+                    reader.skipValue();
+                }
+            }
+            reader.endObject();
+            return locationCell;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         return null;
     }
 

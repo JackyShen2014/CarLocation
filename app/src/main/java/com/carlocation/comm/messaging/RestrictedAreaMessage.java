@@ -1,11 +1,13 @@
 package com.carlocation.comm.messaging;
 
+import android.util.JsonReader;
 import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +24,9 @@ public class RestrictedAreaMessage extends BaseMessage {
 	public int mWarnAreaId;
 	public List<Location> mLocationArea;
 
+	public RestrictedAreaMessage() {
+
+	}
 
     public RestrictedAreaMessage(long mTransactionID, String mSenderId, ActionType mActionType,
                                  int mWarnAreaId, List<Location> mLocationArea) {
@@ -31,7 +36,9 @@ public class RestrictedAreaMessage extends BaseMessage {
         this.mLocationArea = mLocationArea;
     }
 
-    @Override
+
+
+	@Override
 	public String translate() {
 		// Define return result
 		String jSonResult = "";
@@ -69,6 +76,40 @@ public class RestrictedAreaMessage extends BaseMessage {
 			Log.e(LOG_TAG, "JSONException accured!");
 			e.printStackTrace();
 		}
+		return null;
+	}
+
+	public static BaseMessage parseJsonObject(JsonReader reader){
+		RestrictedAreaMessage warnMsg = new RestrictedAreaMessage();
+
+		try {
+			reader.beginObject();
+			while (reader.hasNext()){
+				String tagName = reader.nextName();
+				if (tagName.equals("mTransactionID")) {
+					warnMsg.mTransactionID = reader.nextLong();
+				} else if (tagName.equals("mMessageType")) {
+					warnMsg.mMessageType = MessageType.valueOf(reader.nextInt());
+				} else if (tagName.equals("mSenderId")) {
+					warnMsg.mSenderId = reader.nextString();
+				} else if (tagName.equals("mSenderType")) {
+					warnMsg.mSenderType = TerminalType.valueOf(reader.nextInt());
+				} else if (tagName.equals("mActionType")) {
+					warnMsg.mActionType = ActionType.valueOf(reader.nextInt());
+				} else if (tagName.equals("mWarnAreaId")) {
+					warnMsg.mWarnAreaId = reader.nextInt();
+				} else if (tagName.equals("mLocationArea")) {
+					warnMsg.mLocationArea = GlidingPathMessage.readLocationArray(reader);
+				} else {
+					reader.skipValue();
+				}
+			}
+			reader.endObject();
+			return warnMsg;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 		return null;
 	}
 

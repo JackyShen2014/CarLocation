@@ -1,12 +1,15 @@
 package com.carlocation.comm.messaging;
 
+import android.util.JsonReader;
 import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Location message.<br>
@@ -20,14 +23,20 @@ public class LocationMessage extends BaseMessage {
     private static final long serialVersionUID = -1427264506745698504L;
     private final String LOG_TAG = "LocationMessage";
 
-    public ArrayList<LocationCell> mLocationArray = new ArrayList<LocationCell>();
+    public List<LocationCell> mLocationArray = new ArrayList<>();
 
-    public LocationMessage(long mTransactionID,String mSenderId,ArrayList<LocationCell> mLocationArray) {
+	public LocationMessage() {
+
+	}
+
+	public LocationMessage(long mTransactionID,String mSenderId,List<LocationCell> mLocationArray) {
         super(mTransactionID, MessageType.LOCATION_MESSAGE, mSenderId, TerminalType.TERMINAL_CAR);
         this.mLocationArray = mLocationArray;
     }
 
-    /**
+
+
+	/**
 	 * Translate Class attributes to json format for network transmit.
 	 * 
 	 * @return
@@ -79,6 +88,53 @@ public class LocationMessage extends BaseMessage {
 			Log.e(LOG_TAG, "JSONException accured!");
 			e.printStackTrace();
 		}
+		return null;
+	}
+
+	public static BaseMessage parseJsonObject(JsonReader reader){
+		LocationMessage loctMsg = new LocationMessage();
+
+		try {
+			reader.beginObject();
+			while (reader.hasNext()){
+				String tagName = reader.nextName();
+				if (tagName.equals("mTransactionID")) {
+					loctMsg.mTransactionID = reader.nextLong();
+				} else if (tagName.equals("mMessageType")) {
+					loctMsg.mMessageType = MessageType.valueOf(reader.nextInt());
+				} else if (tagName.equals("mSenderId")) {
+					loctMsg.mSenderId = reader.nextString();
+				} else if (tagName.equals("mSenderType")) {
+					loctMsg.mSenderType = TerminalType.valueOf(reader.nextInt());
+				} else if (tagName.equals("mLocationArray")) {
+					loctMsg.mLocationArray = getLocCellArray(reader);
+				} else {
+					reader.skipValue();
+				}
+			}
+			reader.endObject();
+			return loctMsg;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
+	private static List<LocationCell> getLocCellArray(JsonReader reader) {
+		List<LocationCell> locCellArray = new ArrayList<>();
+
+		try {
+			reader.beginArray();
+			while (reader.hasNext()){
+				locCellArray.add(LocationCell.parseJsonObject(reader));
+			}
+			reader.endArray();
+			return locCellArray;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 		return null;
 	}
 

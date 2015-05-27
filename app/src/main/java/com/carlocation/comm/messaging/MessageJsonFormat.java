@@ -120,8 +120,7 @@ public class MessageJsonFormat {
                 }else if (tagName.equals("mBody")){
                     switch (msgType) {
                         case LOCATION_MESSAGE:
-
-                            break;
+                            return LocationMessage.parseJsonObject(reader);
                         case IM_MESSAGE:
                             int imMsgType = getImTypeFromStr(json);
                             if (imMsgType == IMMessage.IMMsgType.IM_TXT_MSG.ordinal()) {
@@ -131,13 +130,13 @@ public class MessageJsonFormat {
                             }
                             break;
                         case TASK_MESSAGE:
-                            break;
+                            return TaskAssignmentMessage.parseJsonObject(reader);
                         case GLIDE_MESSAGE:
                             return GlidingPathMessage.parseJsonObject(reader);
                         case WARN_MESSAGE:
-                            break;
+                            return RestrictedAreaMessage.parseJsonObject(reader);
                         case STATUS_MESSAGE:
-                            break;
+                            return StatusMessage.parseJsonObject(reader);
                         default:
                             break;
                     }

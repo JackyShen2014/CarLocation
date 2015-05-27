@@ -1,9 +1,12 @@
 package com.carlocation.comm.messaging;
 
+import android.util.JsonReader;
 import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.IOException;
 
 /**
  * Created by 28851620 on 4/22/2015.
@@ -14,6 +17,10 @@ public class StatusMessage extends BaseMessage {
 
 	public StatusMsgType mStatus;
 
+    public StatusMessage() {
+
+    }
+
     public StatusMessage(long mTransactionID,String mSenderId,StatusMsgType mStatus) {
         super(mTransactionID, MessageType.STATUS_MESSAGE, mSenderId, TerminalType.TERMINAL_CAR);
         this.mStatus = mStatus;
@@ -23,10 +30,26 @@ public class StatusMessage extends BaseMessage {
     /**
      * Used for indicate current status
      */
-    public static enum StatusMsgType {
-        STATUS_ONLINE,
-        STATUS_OFFLINE,
-        STATUS_LEAVE,
+    public enum StatusMsgType {
+        STATUS_ONLINE(0),
+        STATUS_OFFLINE(1),
+        STATUS_LEAVE(2),
+        STATUS_UNKNOWN(-1);
+
+        private int code;
+
+        StatusMsgType(int code) {
+            this.code = code;
+        }
+
+        public static StatusMsgType valueOf(int code){
+            switch (code){
+                case 0: return STATUS_ONLINE;
+                case 1: return STATUS_OFFLINE;
+                case 2: return STATUS_LEAVE;
+                default:return STATUS_UNKNOWN;
+            }
+        }
     }
 
 	/**
@@ -61,6 +84,35 @@ public class StatusMessage extends BaseMessage {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public static BaseMessage parseJsonObject(JsonReader reader){
+        StatusMessage statusMsg = new StatusMessage();
+
+        try {
+            reader.beginObject();
+            while (reader.hasNext()){
+                String tagName = reader.nextName();
+                if (tagName.equals("mTransactionID")) {
+                    statusMsg.mTransactionID = reader.nextLong();
+                } else if (tagName.equals("mMessageType")) {
+                    statusMsg.mMessageType = MessageType.valueOf(reader.nextInt());
+                } else if (tagName.equals("mSenderId")) {
+                    statusMsg.mSenderId = reader.nextString();
+                } else if (tagName.equals("mSenderType")) {
+                    statusMsg.mSenderType = TerminalType.valueOf(reader.nextInt());
+                } else if (tagName.equals("mStatus")) {
+                    statusMsg.mStatus = StatusMsgType.valueOf(reader.nextInt());
+                } else {
+                    reader.skipValue();
+                }
+            }
+            reader.endObject();
+            return statusMsg;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
 	}
 
 	@Override

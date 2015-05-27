@@ -11,38 +11,22 @@ import java.io.StringReader;
 public class MessageFactory {
 
 
-	public static String addHeader(BaseMessage message) {
+	public static JSONObject makeJson(BaseMessage message) {
 
 		MessageHeader msgHead = new MessageHeader(MessageHeader.HeaderType.REQUEST,1);
 		MessageJsonFormat msg = new MessageJsonFormat(msgHead,message);
 
-		return msg.translateJsonObject().toString();
+		return msg.translateJsonObject();
 	}
 
-	public static String addHeader(ResponseMessage message) {
+	public static JSONObject makeJson(ResponseMessage message) {
 		MessageHeader msgHead = new MessageHeader(MessageHeader.HeaderType.RESPONSE,1);
 		RspMessageJsonFormat msg = new RspMessageJsonFormat(msgHead,message);
 
-		return msg.translateJsonObject().toString();
+		return msg.translateJsonObject();
 	}
 
-	public static BaseMessage parseRequestFromJSON(String json) {
-		JsonReader reader = new JsonReader(new StringReader(json));
-		try {
-			return parseRequestFromJSON(reader);
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				reader.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		return null;
-	}
-
-	public static BaseMessage parseRequestFromJSON(JsonReader reader) {
+    public static BaseMessage parseRequestFromJSON(JsonReader reader) {
 		return null;
 	}
 

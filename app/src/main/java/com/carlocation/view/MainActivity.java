@@ -26,6 +26,7 @@ import com.carlocation.comm.NotificationListener;
 import com.carlocation.comm.ResponseListener;
 import com.carlocation.comm.messaging.ActionType;
 import com.carlocation.comm.messaging.AuthMessage;
+import com.carlocation.comm.messaging.BaseMessage;
 import com.carlocation.comm.messaging.GlidingPathMessage;
 import com.carlocation.comm.messaging.IMMessage;
 import com.carlocation.comm.messaging.IMTxtMessage;
@@ -44,6 +45,9 @@ import com.carlocation.comm.messaging.StatusMessage;
 import com.carlocation.comm.messaging.TaskAssignmentMessage;
 import com.carlocation.comm.messaging.TerminalType;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -52,6 +56,7 @@ import java.util.List;
 public class MainActivity extends ActionBarActivity implements
         NavigationDrawerFragment.NavigationDrawerCallbacks {
     private static final String LOG_TAG = "MainActivity";
+    private static final boolean DBG = false;
 
 
     /**
@@ -286,7 +291,7 @@ public class MainActivity extends ActionBarActivity implements
                     terminalId, "title", 7, locarray);
             Log.d(LOG_TAG,"JSON format of GlideMsg is:       "+glideMsg.translate());
             //GlidePathMessage MessageJsonFormat
-            String sendGlide = MessageFactory.addHeader(glideMsg);
+            String sendGlide = MessageFactory.makeJson(glideMsg).toString();
             Log.d(LOG_TAG, "sendGlide()JSON: " + sendGlide);
             String recvGlide = MessageJsonFormat.parseJsonObject(sendGlide).translateJsonObject().toString();
             Log.d(LOG_TAG, "recvGlide()JSON: "+recvGlide);
@@ -300,7 +305,7 @@ public class MainActivity extends ActionBarActivity implements
                     RankType.EMERGENCY,"Hello,I'm a txt MSG!");
             Log.d(LOG_TAG, "JSON format of ImTxtMsg is:       " + txtMsg.translate());
             //IMtxtMsg MessageJsonFormat
-            String sendTxt = MessageFactory.addHeader(txtMsg);
+            String sendTxt = MessageFactory.makeJson(txtMsg).toString();
             Log.d(LOG_TAG, "sendTxt()JSON: " + sendTxt);
             String recvTxt = MessageJsonFormat.parseJsonObject(sendTxt).translateJsonObject().toString();
             Log.d(LOG_TAG, "recvTxt()JSON: " + recvTxt);
@@ -313,7 +318,7 @@ public class MainActivity extends ActionBarActivity implements
             IMVoiceMessage voiceMsg =  new IMVoiceMessage(transactionId,terminalId,toTerminalId,voiceData);
             Log.d(LOG_TAG, "JSON format of ImvoiceMsg is:       " + voiceMsg.translate());
             //IMtxtMsg MessageJsonFormat
-            String sendVoice = MessageFactory.addHeader(voiceMsg);
+            String sendVoice = MessageFactory.makeJson(voiceMsg).toString();
             Log.d(LOG_TAG, "sendVoice()JSON: " + sendVoice);
             String recvVoice = MessageJsonFormat.parseJsonObject(sendVoice).translateJsonObject().toString();
             Log.d(LOG_TAG, "recvVoice()JSON: " + recvVoice);
@@ -325,7 +330,7 @@ public class MainActivity extends ActionBarActivity implements
             LocationMessage locMsg = new LocationMessage(transactionId,terminalId,locCellArray);
             Log.d(LOG_TAG, "JSON format of locationMsg is:       " + locMsg.translate());
             //LocationMsg MessageJsonFormat
-            String sendLoc = MessageFactory.addHeader(locMsg);
+            String sendLoc = MessageFactory.makeJson(locMsg).toString();
             Log.d(LOG_TAG, "sendLoc()JSON: " + sendLoc);
             String recvLoc = MessageJsonFormat.parseJsonObject(sendLoc).translateJsonObject().toString();
             Log.d(LOG_TAG, "recvLoc()JSON: " + recvLoc);
@@ -338,7 +343,7 @@ public class MainActivity extends ActionBarActivity implements
                     ActionType.ACTION_QUERY,10,locarray);
             Log.d(LOG_TAG, "JSON format of warnMsg is:       " + warnMsg.translate());
             //RestrictedAreaMsg MessageJsonFormat
-            String sendWarn = MessageFactory.addHeader(warnMsg);
+            String sendWarn = MessageFactory.makeJson(warnMsg).toString();
             Log.d(LOG_TAG, "sendWarn()JSON: " + sendWarn);
             String recvWarn = MessageJsonFormat.parseJsonObject(sendWarn).translateJsonObject().toString();
             Log.d(LOG_TAG, "recvWarn()JSON: " + recvWarn);
@@ -350,7 +355,7 @@ public class MainActivity extends ActionBarActivity implements
             StatusMessage statMsg = new StatusMessage(transactionId,terminalId, StatusMessage.StatusMsgType.STATUS_ONLINE);
             Log.d(LOG_TAG, "JSON format of statMsg is:       " + statMsg.translate());
             //StatusMsg MessageJsonFormat
-            String sendStatus = MessageFactory.addHeader(statMsg);
+            String sendStatus = MessageFactory.makeJson(statMsg).toString();
             Log.d(LOG_TAG, "sendStatus()JSON: " + sendStatus);
             String recvStatus = MessageJsonFormat.parseJsonObject(sendStatus).translateJsonObject().toString();
             Log.d(LOG_TAG, "recvStatus()JSON: " + recvStatus);
@@ -363,7 +368,7 @@ public class MainActivity extends ActionBarActivity implements
                     ActionType.ACTION_QUERY,(short)11,"This is task content!");
             Log.d(LOG_TAG, "JSON format of taskMsg is:       " + taskMsg.translate());
             //taskMsg MessageJsonFormat
-            String sendTask = MessageFactory.addHeader(taskMsg);
+            String sendTask = MessageFactory.makeJson(taskMsg).toString();
             Log.d(LOG_TAG, "sendTask()JSON: " + sendTask);
             String recvTask = MessageJsonFormat.parseJsonObject(sendTask).translateJsonObject().toString();
             Log.d(LOG_TAG, "recvTask()JSON: " + recvTask);
@@ -379,7 +384,6 @@ public class MainActivity extends ActionBarActivity implements
 
         }
     }
-
 
 
     //Demo used only

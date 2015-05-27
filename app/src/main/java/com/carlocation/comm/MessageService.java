@@ -747,8 +747,8 @@ public class MessageService extends Service {
 				try {
 					// Print out the json format of sending msg
 					Log.d(TAG,
-							"JSON format: " + MessageFactory.addHeader(message));
-					byte[] contents = MessageFactory.addHeader(message).getBytes();
+                            "JSON format: " + MessageFactory.makeJson(message).toString());
+					byte[] contents = MessageFactory.makeJson(message).toString().getBytes();
 					//FIXME how to send IM message to PC?
 					//FIXME terminal id is not username how to exchange
 					if (message.getMessageType() == MessageType.IM_MESSAGE) {
@@ -818,9 +818,9 @@ public class MessageService extends Service {
 		public void run() {
 			try {
                 // Print out the json format of sending msg
-                Log.d(TAG,"JSON format of rsp: " + MessageFactory.addHeader(response));
+                Log.d(TAG,"JSON format of rsp: " + MessageFactory.makeJson(response).toString());
 				getChannel().basicPublish(EXCHANGE_NAME_CONTROLLER, "", null,
-						MessageFactory.addHeader(response).getBytes());
+						MessageFactory.makeJson(response).toString().getBytes());
 			} catch (IOException e) {
 				e.printStackTrace();
 				fireBackMessage(response, Notification.Result.FAILED);

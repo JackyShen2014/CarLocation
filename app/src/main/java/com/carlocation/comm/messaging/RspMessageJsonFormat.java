@@ -53,7 +53,7 @@ public class RspMessageJsonFormat {
                 if(tagName.equals("mHead")){
                     msg.mHead = MessageHeader.paseJsonObject(reader);
                 }else if (tagName.equals("mBody")){
-                    msg.mBody = parseRspMessage(reader);
+                    msg.mBody = ResponseMessage.parseJsonObject(reader,json);
 
                 }else {
                     reader.skipValue();
@@ -73,12 +73,5 @@ public class RspMessageJsonFormat {
         }
         return null;
     }
-
-    private static ResponseMessage parseRspMessage(JsonReader reader) {
-        //TODO JSON parse ResponseMessage
-
-        return null;
-    }
-
 
 }

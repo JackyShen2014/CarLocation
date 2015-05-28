@@ -12,7 +12,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.util.JsonReader;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,7 +25,6 @@ import com.carlocation.comm.NotificationListener;
 import com.carlocation.comm.ResponseListener;
 import com.carlocation.comm.messaging.ActionType;
 import com.carlocation.comm.messaging.AuthMessage;
-import com.carlocation.comm.messaging.BaseMessage;
 import com.carlocation.comm.messaging.GlidingPathMessage;
 import com.carlocation.comm.messaging.IMMessage;
 import com.carlocation.comm.messaging.IMTxtMessage;
@@ -40,16 +38,13 @@ import com.carlocation.comm.messaging.MessageResponseStatus;
 import com.carlocation.comm.messaging.MessageType;
 import com.carlocation.comm.messaging.Notification;
 import com.carlocation.comm.messaging.RankType;
+import com.carlocation.comm.messaging.ResponseMessage;
 import com.carlocation.comm.messaging.RestrictedAreaMessage;
+import com.carlocation.comm.messaging.RspMessageJsonFormat;
 import com.carlocation.comm.messaging.StatusMessage;
 import com.carlocation.comm.messaging.TaskAssignmentMessage;
 import com.carlocation.comm.messaging.TerminalType;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -376,13 +371,26 @@ public class MainActivity extends ActionBarActivity implements
                 Log.e(LOG_TAG,"demoSendResp(): Task Assignment msg parsed failed!");
             }
 
+            printRspGlideQuery(glideMsg);
 
-            //MessageResponseStatus status = MessageResponseStatus.SUCCESS;
-            //mUserService.responActionAssign(glideMsg,status);
-            //mUserService.responActionAssign(warnMsg,status);
-            //mUserService.responActionAssign(taskMsg,status);
+
 
         }
+    }
+
+    private void printRspGlideQuery(GlidingPathMessage glideMsg) {
+
+        ResponseMessage rspGlide = new ResponseMessage(glideMsg,MessageResponseStatus.SUCCESS);
+        Log.d(LOG_TAG,"JSON format of rspGlide is: "+rspGlide.translateJsonObject().toString());
+        //Send RspGlide JSON
+        String sendRspGlide = MessageFactory.makeJson(rspGlide).toString();
+        Log.d(LOG_TAG, "sendRspGlide()JSON: " + sendRspGlide);
+        String recvRspGlide = RspMessageJsonFormat.parseJsonObject(sendRspGlide).translateJsonObject().toString();
+        Log.d(LOG_TAG, "recvRspGlide()JSON: " + recvRspGlide);
+        if (!recvRspGlide.equals(sendRspGlide)) {
+            Log.e(LOG_TAG,"demoSendResp(): recvRspGlide msg parsed failed!");
+        }
+
     }
 
 

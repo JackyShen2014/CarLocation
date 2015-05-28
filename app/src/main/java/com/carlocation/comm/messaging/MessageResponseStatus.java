@@ -14,7 +14,7 @@ public enum MessageResponseStatus {
 		return this.code;
 	}
 
-	public static MessageResponseStatus fromCode(int code) {
+	public static MessageResponseStatus valueOf(int code) {
 		switch (code) {
 		case 0:
 			return SUCCESS;

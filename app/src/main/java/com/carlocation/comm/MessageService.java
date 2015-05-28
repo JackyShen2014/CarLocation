@@ -750,7 +750,6 @@ public class MessageService extends Service {
                             "JSON format: " + MessageFactory.makeJson(message).toString());
 					byte[] contents = MessageFactory.makeJson(message).toString().getBytes();
 					//FIXME how to send IM message to PC?
-					//FIXME terminal id is not username how to exchange
 					if (message.getMessageType() == MessageType.IM_MESSAGE) {
 						IMMessage im = (IMMessage)message;
 						//send broadcast 

@@ -104,7 +104,7 @@ public class UserService implements Serializable{
      * Used to send my current status(online, leave, offline) to server.
      * @param status
      */
-    void sendMyStatus(StatusMessage.StatusMsgType status){
+    public void sendMyStatus(StatusMessage.StatusMsgType status){
         StatusMessage statMsg = new StatusMessage(getTransactionId(),getTerminalId(),status);
 
         // Invoke native service to send message

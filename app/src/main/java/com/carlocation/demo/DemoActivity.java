@@ -28,9 +28,13 @@ import com.carlocation.comm.ResponseListener;
 import com.carlocation.comm.messaging.AuthMessage;
 import com.carlocation.comm.messaging.IMMessage;
 import com.carlocation.comm.messaging.IMTxtMessage;
+import com.carlocation.comm.messaging.IMVoiceMessage;
+import com.carlocation.comm.messaging.LocationMessage;
 import com.carlocation.comm.messaging.MessageType;
 import com.carlocation.comm.messaging.Notification;
 import com.carlocation.comm.messaging.RankType;
+import com.carlocation.comm.messaging.StatusMessage;
+import com.carlocation.comm.messaging.TaskAssignmentMessage;
 import com.carlocation.view.CarLocationApplication;
 import com.carlocation.view.MainActivity;
 import com.carlocation.view.UserService;
@@ -163,21 +167,37 @@ public class DemoActivity extends ListActivity implements NativeServInterface {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             String item = mItems.get(position);
             if (mConnState.equals(ConnectionState.CONNECTED)){
+                List<String> toId = new ArrayList<>();
+                String toTerminalId;
+                if (UserService.getTerminalId().equals("t1")) {
+                    toTerminalId = "t2";
+                }else {
+                    toTerminalId = "t1";
+                }
+                toId.add(toTerminalId);
+
                 if (item.equals("getTerminalId")){
                     //getTerminalId()
                     String tId  = UserService.getTerminalId();
                     Toast.makeText(DemoActivity.this,tId,Toast.LENGTH_SHORT).show();
                 }else if (item.equals("sendImTxtMsg")) {
                     //Send ImTxtMsg
-                    List<String> toId = new ArrayList<>();
-                    String toTerminalId;
-                    if (UserService.getTerminalId().equals("t1")) {
-                        toTerminalId = "t2";
-                    }else {
-                        toTerminalId = "t1";
-                    }
-                    toId.add(toTerminalId);
                     mUserService.sendImTxtMsg(toId,RankType.NORMAL,"Hello!I'm "+UserService.getTerminalId());
+                }else if (item.equals("sendImVoiceMsg")) {
+                    byte[] voiceData = new byte[]{1,2,3};
+                    mUserService.sendImVoiceMsg(toId,voiceData);
+                }else if (item.equals("sendMyLocation")) {
+                    //This msg should only be sent to schedule pc.
+                    /*mUserService.sendMyLocation();*/
+                }else if (item.equals("sendMyStatus")){
+                    //This msg should only be sent to schedule pc.
+                    /*mUserService.sendMyStatus(StatusMessage.StatusMsgType.STATUS_ONLINE);*/
+                }else if (item.equals("getMyLocation")){
+                    popUpToast(UserService.getMyLocation().toString());
+                }else if (item.equals("getMySpeed")) {
+                    popUpToast(String.valueOf(UserService.getMySpeed()));
+                }else if (item.equals("getTerminalType")) {
+                    popUpToast(UserService.getTerminalType().toString());
                 }
 
             }else {
@@ -385,20 +405,32 @@ public class DemoActivity extends ListActivity implements NativeServInterface {
     }
 
     public void handleLocations(Notification noti){
-
+        LocationMessage locMsg = (LocationMessage) noti.message;
+        popUpToast("LocationMsg:"+locMsg.mLocationArray.toString());
     }
     public void handleImMsg(Notification noti){
         IMMessage imMsg = (IMMessage)noti.message;
         if (imMsg.mImMsgType == IMMessage.IMMsgType.IM_TXT_MSG){
             //Temporary to display toast content to user.
             IMTxtMessage txtMsg = (IMTxtMessage)imMsg;
-            Toast.makeText(DemoActivity.this,txtMsg.mTxtCont,Toast.LENGTH_SHORT).show();
+            popUpToast("IMTxtMessage:"+txtMsg.mTxtCont);
 
-        }else{
-            //TODO Play voice to the user
+        }else if (imMsg.mImMsgType == IMMessage.IMMsgType.IM_VOICE_MSG){
+            IMVoiceMessage voiceMsg = (IMVoiceMessage)imMsg;
+            popUpToast("IMVoiceMessage:"+new String(voiceMsg.mVoiceData));
+
+        }else {
+            popUpToast("Wrong IMMsgType!");
         }
     }
+
+    private void popUpToast(String mTxtCont) {
+        Toast.makeText(DemoActivity.this,mTxtCont,Toast.LENGTH_SHORT).show();
+    }
+
     public void handleTaskMsg(Notification noti){
+        TaskAssignmentMessage taskMsg = (TaskAssignmentMessage)noti.message;
+        popUpToast("TaskAssign");
 
     }
     public void handleGlideMsg(Notification noti){
@@ -408,6 +440,9 @@ public class DemoActivity extends ListActivity implements NativeServInterface {
 
     }
     public void handleStatusMsg(Notification noti){
+        StatusMessage statMsg = (StatusMessage)noti.message;
+
+        popUpToast("StatusMsg:"+statMsg.mStatus);
 
     }
 

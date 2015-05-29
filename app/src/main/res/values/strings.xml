@@ -23,6 +23,7 @@
     <string name="title_activity_chat">ChatActivity</string>
      <string name="chat_fragment_button_text">发送</string>
     <string name="title_activity_demo">DemoActivity</string>
+    <string name="notify_disconnected">Rabbit mq connection has been disconnected!</string>
     
 
 </resources>

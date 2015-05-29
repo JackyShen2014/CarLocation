@@ -25,6 +25,7 @@ import com.carlocation.comm.NotificationListener;
 import com.carlocation.comm.ResponseListener;
 import com.carlocation.comm.messaging.ActionType;
 import com.carlocation.comm.messaging.AuthMessage;
+import com.carlocation.comm.messaging.BaseMessage;
 import com.carlocation.comm.messaging.GlidingPathMessage;
 import com.carlocation.comm.messaging.IMMessage;
 import com.carlocation.comm.messaging.IMTxtMessage;
@@ -44,6 +45,7 @@ import com.carlocation.comm.messaging.RspMessageJsonFormat;
 import com.carlocation.comm.messaging.StatusMessage;
 import com.carlocation.comm.messaging.TaskAssignmentMessage;
 import com.carlocation.comm.messaging.TerminalType;
+import com.carlocation.demo.DemoActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -156,8 +158,10 @@ public class MainActivity extends ActionBarActivity implements
 
         //RegisterNotificationListener
         //make sure service is not null
-        Message msg = Message.obtain(mHandler, REGISTER_NOTIFICATION);
-        mHandler.sendMessageDelayed(msg, 500);
+        //Temporary to disable receiving unsolicited and rsp msg function in MainActivity.
+
+        /*Message msg = Message.obtain(mHandler, REGISTER_NOTIFICATION);
+        mHandler.sendMessageDelayed(msg, 500);*/
 
     }
 
@@ -215,6 +219,10 @@ public class MainActivity extends ActionBarActivity implements
                             +mConnState+" new:"+newState+"]");
                     mConnState = newState;
                 }
+                if (!ConnectionState.CONNECTED.equals(newState)){
+                    String popMsg = getResources().getText(R.string.notify_disconnected).toString();
+                    Toast.makeText(MainActivity.this,popMsg+"[old:"+mConnState+" new:"+newState+"]",Toast.LENGTH_SHORT).show();
+               }
             }
 
         }
@@ -242,19 +250,16 @@ public class MainActivity extends ActionBarActivity implements
 
 
             //demoSendReq();
-            demoSendResp();
+            //demoPrintJSON();
 
             return null;
         }
     }
 
     //Demo used only
-    public void demoSendResp(){
+    public void demoPrintJSON(){
         long transactionId = UserService.getTransactionId();
         String terminalId = UserService.getTerminalId();
-        TerminalType terminalType = UserService.getTerminalType();
-        ArrayList<LocationCell> myLocation = UserService.getMyLocation();
-        float mySpeed = UserService.getMySpeed();
 
         List<String> toTerminalId = new ArrayList<>();
         toTerminalId.add("t1");
@@ -284,111 +289,84 @@ public class MainActivity extends ActionBarActivity implements
             //GlidePathMessage
             GlidingPathMessage glideMsg = new GlidingPathMessage(123, ActionType.ACTION_QUERY,
                     terminalId, "title", 7, locarray);
-            Log.d(LOG_TAG,"JSON format of GlideMsg is:       "+glideMsg.translate());
-            //GlidePathMessage MessageJsonFormat
-            String sendGlide = MessageFactory.makeJson(glideMsg).toString();
-            Log.d(LOG_TAG, "sendGlide()JSON: " + sendGlide);
-            String recvGlide = MessageJsonFormat.parseJsonObject(sendGlide).translateJsonObject().toString();
-            Log.d(LOG_TAG, "recvGlide()JSON: "+recvGlide);
-            if (!recvGlide.equals(sendGlide)) {
-                Log.e(LOG_TAG,"demoSendResp(): glide msg parsed failed!");
-            }
-
 
             //IMtxtMsg
             IMTxtMessage txtMsg = new IMTxtMessage(transactionId,terminalId,toTerminalId,
                     RankType.EMERGENCY,"Hello,I'm a txt MSG!");
-            Log.d(LOG_TAG, "JSON format of ImTxtMsg is:       " + txtMsg.translate());
-            //IMtxtMsg MessageJsonFormat
-            String sendTxt = MessageFactory.makeJson(txtMsg).toString();
-            Log.d(LOG_TAG, "sendTxt()JSON: " + sendTxt);
-            String recvTxt = MessageJsonFormat.parseJsonObject(sendTxt).translateJsonObject().toString();
-            Log.d(LOG_TAG, "recvTxt()JSON: " + recvTxt);
-            if (!recvTxt.equals(sendTxt)) {
-                Log.e(LOG_TAG,"demoSendResp(): txt msg parsed failed!");
-            }
-
 
             //IMvoiceMsg
             IMVoiceMessage voiceMsg =  new IMVoiceMessage(transactionId,terminalId,toTerminalId,voiceData);
-            Log.d(LOG_TAG, "JSON format of ImvoiceMsg is:       " + voiceMsg.translate());
-            //IMtxtMsg MessageJsonFormat
-            String sendVoice = MessageFactory.makeJson(voiceMsg).toString();
-            Log.d(LOG_TAG, "sendVoice()JSON: " + sendVoice);
-            String recvVoice = MessageJsonFormat.parseJsonObject(sendVoice).translateJsonObject().toString();
-            Log.d(LOG_TAG, "recvVoice()JSON: " + recvVoice);
-            if (!recvVoice.equals(sendVoice)) {
-                Log.e(LOG_TAG,"demoSendResp(): Voice msg parsed failed!");
-            }
+
 
             //LocationMsg
             LocationMessage locMsg = new LocationMessage(transactionId,terminalId,locCellArray);
-            Log.d(LOG_TAG, "JSON format of locationMsg is:       " + locMsg.translate());
-            //LocationMsg MessageJsonFormat
-            String sendLoc = MessageFactory.makeJson(locMsg).toString();
-            Log.d(LOG_TAG, "sendLoc()JSON: " + sendLoc);
-            String recvLoc = MessageJsonFormat.parseJsonObject(sendLoc).translateJsonObject().toString();
-            Log.d(LOG_TAG, "recvLoc()JSON: " + recvLoc);
-            if (!recvLoc.equals(sendLoc)) {
-                Log.e(LOG_TAG,"demoSendResp(): location msg parsed failed!");
-            }
+
 
             //RestrictedAreaMsg
             RestrictedAreaMessage warnMsg = new RestrictedAreaMessage(transactionId,terminalId,
                     ActionType.ACTION_QUERY,10,locarray);
-            Log.d(LOG_TAG, "JSON format of warnMsg is:       " + warnMsg.translate());
-            //RestrictedAreaMsg MessageJsonFormat
-            String sendWarn = MessageFactory.makeJson(warnMsg).toString();
-            Log.d(LOG_TAG, "sendWarn()JSON: " + sendWarn);
-            String recvWarn = MessageJsonFormat.parseJsonObject(sendWarn).translateJsonObject().toString();
-            Log.d(LOG_TAG, "recvWarn()JSON: " + recvWarn);
-            if (!recvWarn.equals(sendWarn)) {
-                Log.e(LOG_TAG,"demoSendResp(): RestrictedAreaMsg msg parsed failed!");
-            }
 
             //StatusMsg
-            StatusMessage statMsg = new StatusMessage(transactionId,terminalId, StatusMessage.StatusMsgType.STATUS_ONLINE);
-            Log.d(LOG_TAG, "JSON format of statMsg is:       " + statMsg.translate());
-            //StatusMsg MessageJsonFormat
-            String sendStatus = MessageFactory.makeJson(statMsg).toString();
-            Log.d(LOG_TAG, "sendStatus()JSON: " + sendStatus);
-            String recvStatus = MessageJsonFormat.parseJsonObject(sendStatus).translateJsonObject().toString();
-            Log.d(LOG_TAG, "recvStatus()JSON: " + recvStatus);
-            if (!recvStatus.equals(sendStatus)) {
-                Log.e(LOG_TAG,"demoSendResp(): Status msg parsed failed!");
-            }
+            StatusMessage statMsg = new StatusMessage(transactionId,terminalId,
+                    StatusMessage.StatusMsgType.STATUS_ONLINE);
 
             //TaskMsg
             TaskAssignmentMessage taskMsg = new TaskAssignmentMessage(transactionId,terminalId,
                     ActionType.ACTION_QUERY,(short)11,"This is task content!");
-            Log.d(LOG_TAG, "JSON format of taskMsg is:       " + taskMsg.translate());
-            //taskMsg MessageJsonFormat
-            String sendTask = MessageFactory.makeJson(taskMsg).toString();
-            Log.d(LOG_TAG, "sendTask()JSON: " + sendTask);
-            String recvTask = MessageJsonFormat.parseJsonObject(sendTask).translateJsonObject().toString();
-            Log.d(LOG_TAG, "recvTask()JSON: " + recvTask);
-            if (!recvTask.equals(sendTask)) {
-                Log.e(LOG_TAG,"demoSendResp(): Task Assignment msg parsed failed!");
-            }
-
-            printRspGlideQuery(glideMsg);
 
 
+
+            //Print out the solicited msg JSON format
+            List<BaseMessage> msgList = new ArrayList<>();
+            msgList.add(glideMsg);
+            msgList.add(txtMsg);
+            msgList.add(voiceMsg);
+            msgList.add(locMsg);
+            msgList.add(statMsg);
+            msgList.add(glideMsg);
+            msgList.add(warnMsg);
+            msgList.add(taskMsg);
+
+            printMsgJson(msgList);
+
+            //Print out the Rsp msg JSON format
+            List<BaseMessage> rmsgList = new ArrayList<>();
+            rmsgList.add(glideMsg);
+            rmsgList.add(warnMsg);
+            rmsgList.add(taskMsg);
+
+            printRspMsgJson(rmsgList);
 
         }
     }
 
-    private void printRspGlideQuery(GlidingPathMessage glideMsg) {
+    private void printMsgJson(List<BaseMessage> msgList) {
+        for (BaseMessage msg:msgList){
+            msg.translate();
+            //MessageJsonFormat
+            String sendMsg = MessageFactory.makeJson(msg).toString();
+            Log.d(LOG_TAG, "send MSG()JSON: " + sendMsg);
+            String recvMsg = MessageJsonFormat.parseJsonObject(sendMsg).translateJsonObject().toString();
+            Log.d(LOG_TAG, "recv MSG()JSON: "+recvMsg);
+            if (!recvMsg.equals(sendMsg)) {
+                Log.e(LOG_TAG,"printMsgJson(): msg parsed failed!");
+            }
 
-        ResponseMessage rspGlide = new ResponseMessage(glideMsg,MessageResponseStatus.SUCCESS);
-        Log.d(LOG_TAG,"JSON format of rspGlide is: "+rspGlide.translateJsonObject().toString());
-        //Send RspGlide JSON
-        String sendRspGlide = MessageFactory.makeJson(rspGlide).toString();
-        Log.d(LOG_TAG, "sendRspGlide()JSON: " + sendRspGlide);
-        String recvRspGlide = RspMessageJsonFormat.parseJsonObject(sendRspGlide).translateJsonObject().toString();
-        Log.d(LOG_TAG, "recvRspGlide()JSON: " + recvRspGlide);
-        if (!recvRspGlide.equals(sendRspGlide)) {
-            Log.e(LOG_TAG,"demoSendResp(): recvRspGlide msg parsed failed!");
+        }
+    }
+
+    private void printRspMsgJson(List<BaseMessage> rmsgList) {
+        for (BaseMessage msg:rmsgList){
+            ResponseMessage rspMsg = new ResponseMessage(msg,MessageResponseStatus.SUCCESS);
+            Log.d(LOG_TAG,"JSON format of rspMsg is: "+rspMsg.translateJsonObject().toString());
+            //Send rspMsg JSON
+            String sendRsp = MessageFactory.makeJson(rspMsg).toString();
+            Log.d(LOG_TAG, "sendRsp()JSON: " + sendRsp);
+            String recvRsp = RspMessageJsonFormat.parseJsonObject(sendRsp).translateJsonObject().toString();
+            Log.d(LOG_TAG, "recvRsp()JSON: " + recvRsp);
+            if (!recvRsp.equals(sendRsp)) {
+                Log.e(LOG_TAG,"printRspMsgJson(): recv Rsp msg parsed failed!");
+            }
         }
 
     }
@@ -400,20 +378,22 @@ public class MainActivity extends ActionBarActivity implements
         byte[] bArray = {(byte) 1, (byte) 2, (byte) 3};
 
         List<String> toTerminalId = new ArrayList<>();
-        toTerminalId.add("t1");
-        toTerminalId.add("t2");
+        if (mUserService.getTerminalId().equals("t1")) {
+            toTerminalId.add("t2");
+        }else {
+            toTerminalId.add("t1");
+        }
 
-
-        if (mConnState == ConnectionState.CONNECTED){
-            //mUserService.sendMyStatus(StatusMessage.StatusMsgType.STATUS_ONLINE);
-            //mUserService.sendMyLocation();
+        if (mConnState == ConnectionState.CONNECTED) {
+            mUserService.sendMyStatus(StatusMessage.StatusMsgType.STATUS_ONLINE);
+            mUserService.sendMyLocation();
             mUserService.sendImTxtMsg(toTerminalId, RankType.EMERGENCY, "IM txt msg");
-            //mUserService.sendImVoiceMsg(toTerminalId,bArray);
-            //mUserService.startWorkMsg((short) 1);
-            //mUserService.finishWorkMsg((short) 1);
-            //mUserService.queryWorkById((short) 1);
+            mUserService.sendImVoiceMsg(toTerminalId,bArray);
+            mUserService.startWorkMsg((short) 1);
+            mUserService.finishWorkMsg((short) 1);
+            mUserService.queryWorkById((short) 1);
             mUserService.queryGlidePathById(1);
-            //mUserService.queryWarnAreaById(1);
+            mUserService.queryWarnAreaById(1);
 
         }
     }

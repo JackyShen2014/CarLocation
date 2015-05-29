@@ -661,7 +661,7 @@ public class MessageService extends Service {
 				blok = ch.queueBind(mUserName, EXCHANGE_NAME_FANOUT, "");
 				Log.i(TAG, "Bound topic queue  to:" + blok);
 
-				ch.basicConsume(mUserName, true, mUserName, consumer);
+				ch.basicConsume(mUserName, false, mUserName, consumer);
 
 			} catch (IOException e) {
 				updateServerConnectionState(ConnectionState.SERVER_REJECT);

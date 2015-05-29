@@ -1,6 +1,10 @@
 package com.carlocation.demo;
 
 import android.app.ListActivity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
@@ -17,6 +21,7 @@ import android.widget.Toast;
 import com.carlocation.R;
 import com.carlocation.comm.ConnectionState;
 import com.carlocation.comm.IMessageService;
+import com.carlocation.comm.MessageService;
 import com.carlocation.comm.NativeServInterface;
 import com.carlocation.comm.NotificationListener;
 import com.carlocation.comm.ResponseListener;
@@ -72,6 +77,12 @@ public class DemoActivity extends ListActivity implements NativeServInterface {
         getUserService();
         regNotifictListenner();
 
+        //"mConnStateReceiver" used to recv connection state notification
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(MessageService.BROADCAST_ACTION_STATE_CHANGED);
+        filter.addCategory(MessageService.BROADCAST_CATEGORY);
+        registerReceiver(mConnStateReceiver, filter);
+
         mList = getListView();
         mItems = new ArrayList<>();
 
@@ -88,30 +99,7 @@ public class DemoActivity extends ListActivity implements NativeServInterface {
 
         setListAdapter(new ArrayAdapter<>(DemoActivity.this,android.R.layout.simple_list_item_1,mItems));
 
-        mList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String item = mItems.get(position);
-                if (item.equals("getTerminalId")){
-                    //getTerminalId()
-                    String tId  = mUserService.getTerminalId();
-                    Toast.makeText(DemoActivity.this,tId,Toast.LENGTH_SHORT).show();
-                }else if (item.equals("sendImTxtMsg")) {
-                    //Send ImTxtMsg
-                    List<String> toId = new ArrayList<>();
-                    String toTerminalId;
-                    if (mUserService.getTerminalId().equals("t1")) {
-                        toTerminalId = "t2";
-                    }else {
-                        toTerminalId = "t1";
-                    }
-                    toId.add(toTerminalId);
-                    mUserService.sendImTxtMsg(toId,RankType.NORMAL,"Hello!I'm "+mUserService.getTerminalId());
-                }
-
-            }
-        });
-
+        mList.setOnItemClickListener(onClickList);
 
     }
 
@@ -152,12 +140,80 @@ public class DemoActivity extends ListActivity implements NativeServInterface {
     protected void onDestroy() {
         super.onDestroy();
         mResumed = false;
+        unregisterReceiver(mConnStateReceiver);
+        (((CarLocationApplication) getApplicationContext()).getService()).unRegisterNotificationListener(this.mListener);
     }
+
+    protected AdapterView.OnItemClickListener onClickList = new AdapterView.OnItemClickListener(){
+
+        /**
+         * Callback method to be invoked when an item in this AdapterView has
+         * been clicked.
+         * <p/>
+         * Implementers can call getItemAtPosition(position) if they need
+         * to access the data associated with the selected item.
+         *
+         * @param parent   The AdapterView where the click happened.
+         * @param view     The view within the AdapterView that was clicked (this
+         *                 will be a view provided by the adapter)
+         * @param position The position of the view in the adapter.
+         * @param id       The row id of the item that was clicked.
+         */
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            String item = mItems.get(position);
+            if (mConnState.equals(ConnectionState.CONNECTED)){
+                if (item.equals("getTerminalId")){
+                    //getTerminalId()
+                    String tId  = UserService.getTerminalId();
+                    Toast.makeText(DemoActivity.this,tId,Toast.LENGTH_SHORT).show();
+                }else if (item.equals("sendImTxtMsg")) {
+                    //Send ImTxtMsg
+                    List<String> toId = new ArrayList<>();
+                    String toTerminalId;
+                    if (UserService.getTerminalId().equals("t1")) {
+                        toTerminalId = "t2";
+                    }else {
+                        toTerminalId = "t1";
+                    }
+                    toId.add(toTerminalId);
+                    mUserService.sendImTxtMsg(toId,RankType.NORMAL,"Hello!I'm "+UserService.getTerminalId());
+                }
+
+            }else {
+                Toast.makeText(DemoActivity.this,R.string.notify_disconnected,Toast.LENGTH_SHORT).show();
+            }
+
+
+        }
+    };
+
+    private BroadcastReceiver mConnStateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action  = intent.getAction();
+            //Use 'if' for the purpose of further extending filter more actions.
+            if (MessageService.BROADCAST_ACTION_STATE_CHANGED.equals(action)) {
+                ConnectionState newState = (ConnectionState)intent.getSerializableExtra(MessageService.EXTRA_CONNECTION_STATE);
+                if (mConnState!= newState) {
+                    Log.d(LOG_TAG,"mConnStateReceiver(): Connection state changed [old:"
+                            +mConnState+" new:"+newState+"]");
+                    mConnState = newState;
+                }
+                if (!ConnectionState.CONNECTED.equals(newState)){
+                    String popMsg = getResources().getText(R.string.notify_disconnected).toString();
+                    Toast.makeText(DemoActivity.this,popMsg+"[old:"+mConnState+" new:"+newState+"]",Toast.LENGTH_SHORT).show();
+                }
+            }
+
+        }
+    };
 
     @Override
     public void getUserService() {
         mListener = new LocalListener();
         mNativeService = ((CarLocationApplication) getApplicationContext()).getService();
+        mConnState = mNativeService.getConnState();
         if (mUserService == null) {
             mUserService = new UserService(mNativeService, mListener);
         }

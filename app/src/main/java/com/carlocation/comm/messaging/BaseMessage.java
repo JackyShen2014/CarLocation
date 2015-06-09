@@ -111,9 +111,8 @@ public abstract class BaseMessage implements Serializable{
 		if (getClass() != obj.getClass())
 			return false;
         BaseMessage other = (BaseMessage) obj;
-		if (mTransactionID != other.mTransactionID)
-			return false;
-		return true;
+        return mTransactionID == other.mTransactionID && mMessageType.equals(other.mMessageType)
+                && mSenderId.equals(other.mSenderId) && mSenderType.equals(other.mMessageType);
 	}
 
 
